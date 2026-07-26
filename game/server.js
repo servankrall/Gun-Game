@@ -1,22 +1,24 @@
 // Gun Game Arena — realtime room server. One instance runs per room shard
-// (<base>/ws/<roomId>). Clients simulate their own movement and hp (casual
-// trust model); this server owns the roster, scores, the gun-ladder
-// progression, the match clock, map rotation and match resets.
+// (<base>/ws/<roomId>). Clients simulate their own movement, hp, credits and
+// weapon; this server owns the roster, the kill scoreboard, win detection
+// (first to KILL_TARGET), the match clock, map rotation and match resets, and
+// relays fire/hit/ability events between clients.
 import { DurableObject } from "cloudflare:workers";
 
 const MAPS = ["dust", "neon", "frost"];
-const KILLS_PER_GUN = 3;
-const NWEAPONS = 5;
+const KILL_TARGET = 30;                       // deathmatch: first to this wins
+const NWEAPONS = 19;                          // arsenal size (weapon index bound)
 const MATCH_TIME = 360;                       // seconds
 const MAX_PLAYERS = 8;
 const RESET_DELAY = 8;                        // seconds from "over" to next match
 const GRACE_MS = 60000;                       // keep scores while a player reconnects
-const MAX_SHOT_DMG = [36, 19, 85, 30, 105];   // damage cap per trigger pull, by weapon
+const MAX_SHOT_DMG = 160;                     // per-trigger damage cap (Operator = 150)
+const AB_KINDS = new Set(["dash", "heal", "dismiss", "boom", "flash", "smoke"]);
 
 export class GameServer extends DurableObject {
   constructor(ctx, env) {
     super(ctx, env);
-    this.players = new Map();  // id -> {id,name,ws,alive,weapon,gunKills,kills,deaths,goneAt}
+    this.players = new Map();  // id -> {id,name,ws,alive,weapon,kills,deaths,goneAt}
     this.match = null;         // {map, left, over, started}
     this.timer = null;
     this.tickN = 0;
@@ -48,6 +50,14 @@ export class GameServer extends DurableObject {
     else if (m.t === "f") this.relay(p, { t: "f", id: p.id, w: p.weapon });
     else if (m.t === "hit") this.onHit(p, m);
     else if (m.t === "died") this.onDied(p, m);
+    else if (m.t === "ab") this.onAbility(p, m);
+  }
+
+  onAbility(p, m) {
+    if (!this.match || this.match.over || !p.alive || !AB_KINDS.has(m.kind)) return;
+    const x = +m.x, y = +m.y, z = +m.z;
+    if (![x, y, z].every(Number.isFinite)) return;
+    this.relay(p, { t: "ab", id: p.id, kind: m.kind, x, y, z });
   }
 
   onJoin(ws, conn, m) {
@@ -64,7 +74,7 @@ export class GameServer extends DurableObject {
         try { ws.close(); } catch (e) {}
         return;
       }
-      p = { id, name, ws, alive: true, weapon: 0, gunKills: 0, kills: 0, deaths: 0, goneAt: 0 };
+      p = { id, name, ws, alive: true, weapon: 0, kills: 0, deaths: 0, goneAt: 0 };
       this.players.set(id, p);
     }
     conn.id = id;
@@ -74,7 +84,7 @@ export class GameServer extends DurableObject {
       t: "welcome", you: id, map: this.match.map, left: Math.ceil(this.match.left),
       over: this.match.over, players: this.roster(),
     });
-    this.relay(p, { t: "join", id, name, weapon: p.weapon, gunKills: p.gunKills, kills: p.kills, deaths: p.deaths });
+    this.relay(p, { t: "join", id, name, weapon: p.weapon, kills: p.kills, deaths: p.deaths });
   }
 
   onSnap(p, m) {
@@ -82,6 +92,7 @@ export class GameServer extends DurableObject {
     const [x, y, z] = m.p.map(Number);
     if (![x, y, z].every(Number.isFinite) || Math.abs(x) > 40 || Math.abs(z) > 40 || y < -1 || y > 20) return;
     p.alive = !!m.a;
+    p.weapon = Math.max(0, Math.min(NWEAPONS, (m.w | 0)));   // client owns weapon choice (bought)
     this.relay(p, { t: "s", id: p.id, p: [x, y, z], y: +m.y || 0, pi: +m.pi || 0, w: p.weapon, a: m.a ? 1 : 0 });
   }
 
@@ -89,8 +100,7 @@ export class GameServer extends DurableObject {
     if (!this.match || this.match.over || !p.alive) return;
     const tgt = this.players.get(String(m.target || ""));
     if (!tgt || !tgt.ws || !tgt.alive || tgt === p) return;
-    const cap = MAX_SHOT_DMG[p.weapon] ?? 40;
-    const d = Math.min(Math.max(0, +m.d || 0), cap);
+    const d = Math.min(Math.max(0, +m.d || 0), MAX_SHOT_DMG);
     if (d <= 0) return;
     this.send(tgt.ws, { t: "hit", from: p.id, d });
   }
@@ -99,19 +109,9 @@ export class GameServer extends DurableObject {
     if (!this.match || this.match.over || !p.alive) return;
     p.alive = false; p.deaths++;
     const k = m.killer && m.killer !== p.id ? this.players.get(String(m.killer)) : null;
-    let final = false;
-    if (k && k.ws) {
-      k.kills++; k.gunKills++;
-      if (k.gunKills >= KILLS_PER_GUN) {
-        if (k.weapon >= NWEAPONS - 1) final = true;
-        else { k.weapon++; k.gunKills = 0; }
-      }
-    }
-    this.broadcast({
-      t: "kill", v: p.id, k: k && k.ws ? k.id : null,
-      kw: k?.weapon, kg: k?.gunKills, kk: k?.kills, vd: p.deaths,
-    });
-    if (final) this.endMatch(k);
+    if (k && k.ws) k.kills++;
+    this.broadcast({ t: "kill", v: p.id, k: k && k.ws ? k.id : null, kk: k?.kills, vd: p.deaths });
+    if (k && k.ws && k.kills >= KILL_TARGET) this.endMatch(k);
   }
 
   endMatch(winner) {
@@ -125,7 +125,7 @@ export class GameServer extends DurableObject {
     const pool = MAPS.filter(m => m !== prev);
     const map = pool[(Math.random() * pool.length) | 0] || MAPS[0];
     for (const p of this.players.values()) {
-      p.weapon = 0; p.gunKills = 0; p.kills = 0; p.deaths = 0; p.alive = !!p.ws;
+      p.weapon = 0; p.kills = 0; p.deaths = 0; p.alive = !!p.ws;
     }
     this.match = { map, left: MATCH_TIME, over: false, started: this.connected().length >= 2 };
     this.resetLeft = -1;
@@ -155,8 +155,7 @@ export class GameServer extends DurableObject {
     let best = null, bp = -1;
     for (const p of this.players.values()) {
       if (!p.ws) continue;
-      const prog = p.weapon * KILLS_PER_GUN + p.gunKills;
-      if (prog > bp || (prog === bp && best && p.kills > best.kills)) { best = p; bp = prog; }
+      if (p.kills > bp) { best = p; bp = p.kills; }
     }
     return best;
   }
@@ -171,7 +170,7 @@ export class GameServer extends DurableObject {
   connected() { return [...this.players.values()].filter(p => p.ws); }
   roster() {
     return this.connected().map(p => ({
-      id: p.id, name: p.name, weapon: p.weapon, gunKills: p.gunKills, kills: p.kills, deaths: p.deaths,
+      id: p.id, name: p.name, weapon: p.weapon, kills: p.kills, deaths: p.deaths,
     }));
   }
   send(ws, obj) { try { ws.send(JSON.stringify(obj)); } catch (e) {} }

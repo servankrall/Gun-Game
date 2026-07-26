@@ -9,7 +9,10 @@ const CFG = {
   dprCap: 1.5,
   fov: 75, zoomFov: 30,
   matchTime: 360,               // seconds
-  killsPerGun: 3,
+  killTarget: 30,               // deathmatch: first to this many kills wins
+  startCredits: 4000,           // per match; kept across respawns (buys a rifle turn one)
+  killReward: 200,              // credits per kill
+  maxCredits: 9000,
   bots: 6,
   player: { speed: 5.5, accel: 14, airAccel: 3.2, jumpV: 7.2, gravity: 20, radius: 0.42, eye: 1.62, hp: 100,
             regenDelay: 4, regenRate: 30, respawn: 3 },
@@ -18,13 +21,54 @@ const CFG = {
   arena: { size: 64, wallH: 4.5 },
 };
 
+// Full arsenal, grouped by category, priced like a buy menu. `mesh` picks the
+// procedural model shape (a handful reused across the family); `zoom` = ADS
+// scope; `melee` = no ammo/reload. Order is the canonical weapon index used
+// everywhere (viewmodels, third-person, netcode).
 const WEAPONS = [
-  { id: "pistol",  dmg: 34, interval: 0.20, spread: 1.3, mag: 12, reload: 1.2, auto: false, pellets: 1, range: 70, sfx: "pistol",  rate: 1.0 },
-  { id: "smg",     dmg: 18, interval: 0.08, spread: 2.4, mag: 30, reload: 1.6, auto: true,  pellets: 1, range: 55, sfx: "rifle",   rate: 1.25 },
-  { id: "shotgun", dmg: 9,  interval: 0.85, spread: 6.0, mag: 6,  reload: 2.0, auto: false, pellets: 9, range: 26, sfx: "shotgun", rate: 1.0 },
-  { id: "rifle",   dmg: 28, interval: 0.125,spread: 1.5, mag: 25, reload: 1.7, auto: true,  pellets: 1, range: 80, sfx: "rifle",   rate: 1.0 },
-  { id: "sniper",  dmg: 100,interval: 1.40, spread: 0.15,mag: 5,  reload: 2.2, auto: false, pellets: 1, range: 120,sfx: "rifle",   rate: 0.7 },
+  // sidearms
+  { id: "classic", cat: "sidearm", mesh: "pistol",  price: 0,    dmg: 26, interval: 0.18, spread: 1.2, mag: 12, reload: 1.0, auto: false, pellets: 1, range: 60, sfx: "pistol",  rate: 1.0 },
+  { id: "shorty",  cat: "sidearm", mesh: "shotgun", price: 300,  dmg: 12, interval: 0.50, spread: 7.0, mag: 2,  reload: 1.4, auto: false, pellets: 8, range: 18, sfx: "shotgun", rate: 1.1 },
+  { id: "frenzy",  cat: "sidearm", mesh: "pistol",  price: 450,  dmg: 20, interval: 0.09, spread: 2.2, mag: 13, reload: 1.2, auto: true,  pellets: 1, range: 45, sfx: "pistol",  rate: 1.2 },
+  { id: "ghost",   cat: "sidearm", mesh: "pistol",  price: 500,  dmg: 30, interval: 0.16, spread: 1.0, mag: 15, reload: 1.1, auto: false, pellets: 1, range: 65, sfx: "pistol",  rate: 0.9 },
+  { id: "sheriff", cat: "sidearm", mesh: "pistol",  price: 800,  dmg: 55, interval: 0.40, spread: 1.0, mag: 6,  reload: 1.5, auto: false, pellets: 1, range: 75, sfx: "rifle",   rate: 0.85 },
+  // smgs
+  { id: "stinger", cat: "smg",     mesh: "smg",     price: 950,  dmg: 18, interval: 0.07, spread: 2.6, mag: 20, reload: 1.5, auto: true,  pellets: 1, range: 40, sfx: "rifle",   rate: 1.35 },
+  { id: "spectre", cat: "smg",     mesh: "smg",     price: 1600, dmg: 22, interval: 0.09, spread: 2.0, mag: 30, reload: 1.6, auto: true,  pellets: 1, range: 50, sfx: "rifle",   rate: 1.2 },
+  // shotguns
+  { id: "bucky",   cat: "shotgun", mesh: "shotgun", price: 850,  dmg: 9,  interval: 0.80, spread: 6.0, mag: 5,  reload: 2.0, auto: false, pellets: 9, range: 24, sfx: "shotgun", rate: 1.0 },
+  { id: "judge",   cat: "shotgun", mesh: "shotgun", price: 1850, dmg: 8,  interval: 0.26, spread: 6.5, mag: 7,  reload: 2.2, auto: true,  pellets: 8, range: 22, sfx: "shotgun", rate: 1.1 },
+  // rifles
+  { id: "bulldog", cat: "rifle",   mesh: "rifle",   price: 2050, dmg: 26, interval: 0.12, spread: 1.6, mag: 24, reload: 1.7, auto: true,  pellets: 1, range: 70, sfx: "rifle",   rate: 1.0 },
+  { id: "guardian",cat: "rifle",   mesh: "rifle",   price: 2250, dmg: 55, interval: 0.28, spread: 0.8, mag: 12, reload: 1.9, auto: false, pellets: 1, range: 95, sfx: "rifle",   rate: 0.9 },
+  { id: "phantom", cat: "rifle",   mesh: "rifle",   price: 2900, dmg: 30, interval: 0.10, spread: 1.4, mag: 30, reload: 2.0, auto: true,  pellets: 1, range: 75, sfx: "rifle",   rate: 1.05 },
+  { id: "vandal",  cat: "rifle",   mesh: "rifle",   price: 2900, dmg: 40, interval: 0.105,spread: 1.5, mag: 25, reload: 2.0, auto: true,  pellets: 1, range: 90, sfx: "rifle",   rate: 1.0 },
+  // snipers
+  { id: "marshal", cat: "sniper",  mesh: "sniper",  price: 950,  dmg: 75, interval: 1.00, spread: 0.30, mag: 5, reload: 2.0, auto: false, pellets: 1, range: 110, sfx: "rifle",  rate: 0.8, zoom: true },
+  { id: "outlaw",  cat: "sniper",  mesh: "sniper",  price: 2400, dmg: 95, interval: 0.90, spread: 0.25, mag: 2, reload: 2.3, auto: false, pellets: 1, range: 115, sfx: "rifle",  rate: 0.72, zoom: true },
+  { id: "operator",cat: "sniper",  mesh: "sniper",  price: 4700, dmg: 150,interval: 1.40, spread: 0.12, mag: 5, reload: 3.0, auto: false, pellets: 1, range: 130, sfx: "rifle",  rate: 0.6, zoom: true },
+  // machine guns
+  { id: "ares",    cat: "lmg",     mesh: "rifle",   price: 1550, dmg: 28, interval: 0.10, spread: 2.0, mag: 50, reload: 3.0, auto: true,  pellets: 1, range: 80, sfx: "rifle",   rate: 1.0 },
+  { id: "odin",    cat: "lmg",     mesh: "rifle",   price: 3200, dmg: 32, interval: 0.08, spread: 2.2, mag: 100,reload: 4.0, auto: true,  pellets: 1, range: 85, sfx: "rifle",   rate: 1.05 },
+  // melee
+  { id: "knife",   cat: "melee",   mesh: "knife",   price: 0,    dmg: 65, interval: 0.55, spread: 0.0, mag: 999,reload: 0,   auto: false, pellets: 1, range: 3.2, sfx: "pistol", rate: 1.4, melee: true },
 ];
+const wIndex = id => WEAPONS.findIndex(w => w.id === id);
+
+// Agents: one signature ability each, Q to cast, cooldown-gated. Kinds split
+// into self buffs and enemy-affecting utility (see activateAbility).
+const AGENTS = [
+  { id: "jett",    color: 0x8fe3ff, ability: { kind: "dash",   cd: 8 } },
+  { id: "sage",    color: 0x6cf0c2, ability: { kind: "heal",   cd: 14, dur: 2.0 } },
+  { id: "reyna",   color: 0xc06cff, ability: { kind: "dismiss",cd: 12, dur: 2.2 } },
+  { id: "raze",    color: 0xffb03a, ability: { kind: "boom",   cd: 11, r: 5.5, dmg: 85, fuse: 0.7 } },
+  { id: "phoenix", color: 0xff6a3a, ability: { kind: "flash",  cd: 10, range: 22, dur: 1.7 } },
+  { id: "omen",    color: 0x7a86ff, ability: { kind: "smoke",  cd: 12, r: 4.2, dur: 9 } },
+];
+let chosenAgent = 0;
+const ABILITY = {}; AGENTS.forEach(a => ABILITY[a.ability.kind] = a.ability);   // lookup by kind
+const BOT_POOL = ["sheriff", "spectre", "stinger", "bulldog", "guardian", "phantom", "vandal", "marshal", "ares"]
+  .map(wIndex);
 
 // STYLE FORMULA palette roles: environment muted, gunmetal+amber for weapons,
 // signal orange for enemies/effects, cyan glow accents.
@@ -87,6 +131,7 @@ function mulberry32(a) {
 }
 let rng = mulberry32(1337);
 const rr = (a, b) => a + (b - a) * rng();
+const r2 = v => Math.round(v * 100) / 100;      // trim floats for the wire
 
 /* ---------------- audio ---------------- */
 const AudioMan = {
@@ -138,10 +183,16 @@ const BIND = { KeyW: "up", KeyS: "down", KeyA: "left", KeyD: "right", Space: "ju
                KeyR: "reload", ShiftLeft: "zoom", ShiftRight: "zoom",
                ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right" };
 const held = new Set();
-let mouseDown = false, lookDX = 0, lookDY = 0;
+let mouseDown = false, lookDX = 0, lookDY = 0, abilityReq = false, shopOpen = false;
+function toggleShop() { if (typeof shop !== "undefined") shop.toggle(); }
 // never capture game keys while the player is typing (callsign input: W/A/S/D/R…)
 const typing = e => e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA");
-addEventListener("keydown", e => { if (typing(e)) return; const c = BIND[e.code]; if (c) { held.add(c); e.preventDefault(); } });
+addEventListener("keydown", e => {
+  if (typing(e)) return;
+  if (e.code === "KeyB") { if (!inMenu && match && !match.over) toggleShop(); e.preventDefault(); return; }
+  if (e.code === "KeyQ") { abilityReq = true; e.preventDefault(); return; }
+  const c = BIND[e.code]; if (c) { held.add(c); e.preventDefault(); }
+});
 addEventListener("keyup", e => { if (typing(e)) return; const c = BIND[e.code]; if (c) held.delete(c); });
 addEventListener("mousedown", e => { if (e.button === 0) mouseDown = true; if (e.button === 2) held.add("zoom"); });
 addEventListener("mouseup", e => { if (e.button === 0) mouseDown = false; if (e.button === 2) held.delete("zoom"); });
@@ -200,6 +251,8 @@ function setupTouch() {
   btn("fireBtn", () => touchState.fire = true, () => touchState.fire = false);
   btn("jumpBtn", () => touchState.jump = true, () => touchState.jump = false);
   btn("reloadBtn", () => touchState.reload = true, () => touchState.reload = false);
+  btn("abilityBtn", () => abilityReq = true);
+  btn("shopBtn", () => { if (!inMenu && match && !match.over) toggleShop(); });
 }
 
 function padState() {
@@ -213,17 +266,21 @@ function padState() {
     if (gp.buttons[0]?.pressed) out.jump = true;      // A
     if (gp.buttons[2]?.pressed) out.reload = true;    // X
     if (gp.buttons[6]?.pressed) out.zoom = true;      // LT
+    if (gp.buttons[3]?.pressed) out.ability = true;   // Y
   }
   return out;
 }
 
+const NEUTRAL_CMDS = { mx: 0, my: 0, fire: false, jump: false, reload: false, zoom: false, ability: false, lookGX: 0, lookGY: 0 };
 function commands() {
+  if (shopOpen) return NEUTRAL_CMDS;                  // browsing the buy menu = no movement/fire
   const gp = padState();
+  const ability = abilityReq || touchState.ability || gp.ability; abilityReq = false;
   let mx = (held.has("right") ? 1 : 0) - (held.has("left") ? 1 : 0) + touchState.mx + gp.mx;
   let my = (held.has("down") ? 1 : 0) - (held.has("up") ? 1 : 0) + touchState.my + gp.my;
   const m = Math.hypot(mx, my); if (m > 1) { mx /= m; my /= m; }
   return {
-    mx, my,
+    mx, my, ability,
     fire: mouseDown || touchState.fire || gp.fire,
     jump: held.has("jump") || touchState.jump || gp.jump,
     reload: held.has("reload") || touchState.reload || gp.reload,
@@ -285,13 +342,13 @@ const boxGeo = new THREE.BoxGeometry(1, 1, 1);
 const mat = (c, opts = {}) => new THREE.MeshLambertMaterial({ color: c, ...opts });
 
 /* ---------------- character + gun models (procedural, per manifest) ---------------- */
-function makeGunMesh(id, world) {
+function makeGunMesh(shape, world) {
   const g = new THREE.Group();
   const gm = mat(COL.gunmetal), am = mat(COL.amber), wd = mat(0x7a5b3a);
   const add = (m, x, y, z, sx, sy, sz) => {
     const b = new THREE.Mesh(boxGeo, m); b.position.set(x, y, z); b.scale.set(sx, sy, sz); g.add(b); return b;
   };
-  switch (id) {
+  switch (shape) {
     case "pistol":
       add(gm, 0, 0, -0.12, 0.05, 0.07, 0.24); add(gm, 0, -0.08, 0.0, 0.045, 0.12, 0.07);
       add(am, 0, 0.045, -0.22, 0.015, 0.015, 0.03); break;
@@ -308,11 +365,16 @@ function makeGunMesh(id, world) {
       add(gm, 0, 0, -0.35, 0.05, 0.08, 0.95); add(gm, 0, -0.11, 0.05, 0.05, 0.14, 0.07);
       add(gm, 0, -0.04, 0.28, 0.05, 0.1, 0.18);
       add(mat(COL.cyan, { emissive: COL.cyan, emissiveIntensity: 0.7 }), 0, 0.08, -0.1, 0.035, 0.035, 0.14); break;
+    case "knife":
+      add(wd, 0, -0.05, 0.06, 0.03, 0.07, 0.12);                          // grip
+      add(mat(0xcdd3da), 0, 0.02, -0.16, 0.012, 0.055, 0.3);              // blade
+      add(am, 0, -0.02, 0.0, 0.02, 0.02, 0.04); break;                    // guard
   }
   if (world) g.scale.setScalar(1.15);
   // muzzle anchor
   const muzzle = new THREE.Object3D();
-  muzzle.position.set(0, 0.01, id === "sniper" ? -0.85 : id === "shotgun" ? -0.58 : id === "pistol" ? -0.26 : -0.6);
+  muzzle.position.set(0, 0.01, shape === "sniper" ? -0.85 : shape === "shotgun" ? -0.58
+    : shape === "pistol" ? -0.26 : shape === "knife" ? -0.3 : -0.6);
   g.add(muzzle); g.userData.muzzle = muzzle;
   return g;
 }
@@ -509,6 +571,7 @@ function hasLOS(a, b) {
   const bx = b.pos.x, by = b.pos.y + 1.2, bz = b.pos.z;
   const dx = bx - ax, dy = by - ay, dz = bz - az;
   const dist = Math.hypot(dx, dy, dz);
+  if (smokeBlocks(ax, ay, az, dx / dist, dy / dist, dz / dist, dist)) return false;  // smoke hides you
   return raySolids(ax, ay, az, dx / dist, dy / dist, dz / dist, dist) >= dist - 0.01;
 }
 
@@ -559,9 +622,11 @@ function makeEntity(name, isPlayer, accent) {
     name, isPlayer, accent,
     pos: { x: 0, y: 0, z: 0 }, vel: { x: 0, y: 0, z: 0 },
     yaw: 0, pitch: 0, hp: CFG.player.hp, alive: true,
-    weapon: 0, gunKills: 0, totalKills: 0, deaths: 0,
+    weapon: 0, totalKills: 0, deaths: 0, credits: 0, agent: 0,
     fireCd: 0, reloadT: 0, ammo: WEAPONS[0].mag,
     respawnT: 0, lastHurtT: -99, walkPhase: 0, moving: false, speed2d: 0,
+    // abilities
+    abilityCd: 0, healT: 0, speedT: 0, speedFactor: 1, invulnT: 0, flashedT: 0,
     // bot brain
     target: null, wp: null, repathT: 0, reactT: 0, strafeDir: 1, strafeT: 0,
     model: null, guns: null, muzzleSp: null,
@@ -569,7 +634,7 @@ function makeEntity(name, isPlayer, accent) {
   if (!isPlayer) {
     e.model = makeSoldier(accent);
     e.guns = WEAPONS.map(w => {
-      const g = makeGunMesh(w.id, true); g.visible = false;
+      const g = makeGunMesh(w.mesh, true); g.visible = false;
       e.model.gunHold.add(g); return g;
     });
     e.guns[0].visible = true;
@@ -583,8 +648,7 @@ function makeEntity(name, isPlayer, accent) {
   return e;
 }
 
-function progress(e) { return e.weapon * CFG.killsPerGun + e.gunKills; }
-function maxProgress() { return WEAPONS.length * CFG.killsPerGun; }
+function progress(e) { return e.totalKills; }        // deathmatch standing = kills
 
 function spawnEntity(e) {
   // farthest spawn from living enemies
@@ -601,13 +665,14 @@ function spawnEntity(e) {
   e.ammo = WEAPONS[e.weapon].mag; e.reloadT = 0; e.fireCd = 0.3;
   e.yaw = Math.atan2(-e.pos.x, -e.pos.z);
   e.target = null; e.wp = null; e.reactT = 0;
+  e.healT = e.speedT = e.invulnT = e.flashedT = 0; e.speedFactor = 1;   // clear buffs/debuffs on respawn
   if (e.model) e.model.group.visible = true;
 }
 
 /* ---------------- shooting ---------------- */
 function fireWeapon(sh) {
   const w = WEAPONS[sh.weapon];
-  sh.fireCd = w.interval; sh.ammo--;
+  sh.fireCd = w.interval; if (!w.melee) sh.ammo--;
   const eye = sh.pos.y + (sh.isPlayer ? CFG.player.eye : 1.55);
   const spreadBase = w.spread * (sh.isPlayer ? 1 : CFG.bot.spreadMul);
   const dist0 = sh.isPlayer ? 0.2 : 0.6;
@@ -668,46 +733,183 @@ function fireWeapon(sh) {
     const d = Math.hypot(sh.pos.x - player.pos.x, sh.pos.z - player.pos.z);
     AudioMan.at(w.sfx, d, { vol: 0.32, rate: w.rate });
   }
-  if (sh.ammo <= 0) startReload(sh);
+  if (!w.melee && sh.ammo <= 0) startReload(sh);
 }
 
 function startReload(e) {
-  if (e.reloadT > 0 || e.ammo === WEAPONS[e.weapon].mag) return;
-  e.reloadT = WEAPONS[e.weapon].reload;
+  const w = WEAPONS[e.weapon];
+  if (w.melee || e.reloadT > 0 || e.ammo === w.mag) return;
+  e.reloadT = w.reload;
   if (e.isPlayer) AudioMan.play("reload", { vol: 0.35 });
   else AudioMan.at("reload", Math.hypot(e.pos.x - player.pos.x, e.pos.z - player.pos.z), { vol: 0.3 });
 }
 
 function damage(victim, dmg, attacker) {
   if (!victim.alive || match.over) return;
+  if (victim.invulnT > 0) { if (attacker.isPlayer) hud.hitmark(); return; }   // Reyna dismiss
   victim.hp -= dmg; victim.lastHurtT = match.t;
   if (attacker.isPlayer) { hud.hitmark(); AudioMan.play("hit", { vol: 0.3 }); }
   if (victim.isPlayer) hud.hurt();
   if (victim.hp <= 0) kill(victim, attacker);
 }
 
+// solo/offline kill resolution (online kills are resolved by the server → applyKillMsg)
 function kill(victim, attacker) {
   victim.alive = false; victim.deaths++;
   victim.respawnT = victim.isPlayer ? CFG.player.respawn : CFG.bot.respawn;
   if (victim.model) victim.model.group.visible = false;
   spawnPuff(victim.pos.x, victim.pos.y + 1.1, victim.pos.z, true);
-  attacker.totalKills++; attacker.gunKills++;
-  hud.feed(STR.feed.killed.replace("{a}", attacker.name).replace("{b}", victim.name),
-           attacker.isPlayer || victim.isPlayer);
-  if (attacker.isPlayer) hud.killBanner(victim.name);
-  if (attacker.gunKills >= CFG.killsPerGun) {
-    if (attacker.weapon >= WEAPONS.length - 1) { endMatch(attacker); return; }
-    attacker.weapon++; attacker.gunKills = 0;
-    attacker.ammo = WEAPONS[attacker.weapon].mag; attacker.reloadT = 0;
-    if (!attacker.isPlayer) attacker.guns.forEach((g, i) => g.visible = i === attacker.weapon);
-    hud.feed(STR.feed.advanced.replace("{a}", attacker.name)
-      .replace("{gun}", STR.weapons[WEAPONS[attacker.weapon].id]), attacker.isPlayer);
-    if (attacker.isPlayer) {
-      vm.switchTo(attacker.weapon);
-      if (attacker.weapon === WEAPONS.length - 1) hud.center(STR.hud.finalGun, 2);
+  if (attacker && attacker !== victim) {
+    attacker.totalKills++;
+    attacker.credits = Math.min(CFG.maxCredits, attacker.credits + CFG.killReward);
+  }
+  hud.feed(STR.feed.killed.replace("{a}", attacker ? attacker.name : "—").replace("{b}", victim.name),
+           attacker?.isPlayer || victim.isPlayer);
+  if (attacker?.isPlayer) hud.killBanner(victim.name);
+  if (victim.isPlayer) hud.center(STR.hud.killedBy.replace("{name}", attacker ? attacker.name : "—"), 2);
+  if (attacker && attacker.totalKills >= CFG.killTarget) endMatch(attacker);
+}
+
+/* ---------------- weapon equip / buy ---------------- */
+function equipWeapon(e, idx) {
+  idx = Math.max(0, Math.min(WEAPONS.length - 1, idx | 0));
+  e.weapon = idx; e.ammo = WEAPONS[idx].mag; e.reloadT = 0; e.fireCd = 0.05;
+  if (e.isPlayer) vm.switchTo(idx);
+  else if (e.guns) e.guns.forEach((g, i) => g.visible = i === idx);
+}
+function buyWeapon(idx) {
+  const w = WEAPONS[idx];
+  if (!player || match?.over) return false;
+  if (idx === player.weapon) return false;
+  if (player.credits < w.price) { AudioMan.play("hit", { vol: 0.12, rate: 0.7 }); return false; }
+  player.credits -= w.price;
+  equipWeapon(player, idx);
+  AudioMan.play("reload", { vol: 0.3 });
+  shop.refresh();
+  return true;
+}
+
+/* ---------------- abilities (self buffs + enemy utility) ---------------- */
+const smokes = [];   // { mesh, ttl, x, y, z, r }
+const booms = [];    // { x, y, z, fuse, r, dmg, ownerEnt, ownerNid, online }
+
+// forward point where an aimed ability lands (stops at the first wall)
+function aimPoint(e, maxDist) {
+  const dx = -Math.sin(e.yaw) * Math.cos(e.pitch), dy = Math.sin(e.pitch), dz = -Math.cos(e.yaw) * Math.cos(e.pitch);
+  const eye = e.pos.y + CFG.player.eye;
+  const t = Math.min(raySolids(e.pos.x, eye, e.pos.z, dx, dy, dz, maxDist) - 0.3, maxDist);
+  return { x: e.pos.x + dx * t, y: Math.max(0.4, eye + dy * t), z: e.pos.z + dz * t };
+}
+
+function activateAbility(e) {
+  if (!e.alive || e.abilityCd > 0) return;
+  const ab = AGENTS[e.agent].ability;
+  e.abilityCd = ab.cd;
+  switch (ab.kind) {
+    case "dash": {
+      const dx = -Math.sin(e.yaw), dz = -Math.cos(e.yaw);
+      e.pos.x += dx * 6.5; e.pos.z += dz * 6.5; collide(e.pos, CFG.player.radius);
+      e.vel.x += dx * 4; e.vel.z += dz * 4;
+      spawnPuff(e.pos.x, e.pos.y + 1, e.pos.z, false);
+      break;
+    }
+    case "heal":    e.healT = ab.dur; break;
+    case "dismiss": e.invulnT = ab.dur; e.speedT = ab.dur; e.speedFactor = 1.35; break;
+    case "boom":    castBoom(e, ab); break;
+    case "flash":   castFlash(e, ab); break;
+    case "smoke":   castSmoke(e, ab); break;
+  }
+  if (e.isPlayer) { AudioMan.play("reload", { vol: 0.25, rate: 1.3 }); hud.abilityFx(); }
+}
+
+function castBoom(e, ab) {
+  const p = aimPoint(e, 24);
+  spawnBoom(p.x, p.y, p.z, ab, match.online ? e.nid : null, match.online ? null : e);
+  if (match.online) NET.send({ t: "ab", kind: "boom", x: r2(p.x), y: r2(p.y), z: r2(p.z) });
+}
+function spawnBoom(x, y, z, ab, ownerNid, ownerEnt) {
+  booms.push({ x, y, z, fuse: ab.fuse, r: ab.r, dmg: ab.dmg, ownerNid, ownerEnt, online: match.online });
+}
+function detonateBoom(b) {
+  spawnPuff(b.x, b.y, b.z, true); spawnPuff(b.x, b.y + 0.6, b.z, true);
+  if (b.online) {
+    if (player.alive && dist3(player.pos.x, player.pos.y + 1, player.pos.z, b.x, b.y, b.z) < b.r) {
+      const d = b.dmg * falloff(player, b);
+      if (player.invulnT <= 0) {
+        player.hp -= d; player.lastHurtT = match.t; hud.hurt();
+        if (player.hp <= 0) playerDie(b.ownerNid);
+      }
+    }
+  } else {
+    for (const e of ents) {
+      if (!e.alive) continue;
+      if (dist3(e.pos.x, e.pos.y + 1, e.pos.z, b.x, b.y, b.z) < b.r) damage(e, b.dmg * falloff(e, b), b.ownerEnt);
     }
   }
-  if (victim.isPlayer) hud.center(STR.hud.killedBy.replace("{name}", attacker.name), 2);
+}
+const dist3 = (ax, ay, az, bx, by, bz) => Math.hypot(ax - bx, ay - by, az - bz);
+const falloff = (e, b) => Math.max(0.35, 1 - dist3(e.pos.x, e.pos.y + 1, e.pos.z, b.x, b.y, b.z) / b.r);
+
+function castFlash(e, ab) {
+  const p = aimPoint(e, ab.range);
+  if (match.online) {
+    NET.send({ t: "ab", kind: "flash", x: r2(p.x), y: r2(p.y), z: r2(p.z) });
+  } else {
+    for (const o of ents) if (o !== e && o.alive) tryFlash(o, p, ab);
+  }
+}
+// blind o if it is looking toward the flash point, within range and has LOS
+function tryFlash(o, p, ab) {
+  const d = Math.hypot(o.pos.x - p.x, o.pos.z - p.z);
+  if (d > ab.range) return;
+  const vx = -Math.sin(o.yaw), vz = -Math.cos(o.yaw);
+  const tx = (p.x - o.pos.x) / (d || 1), tz = (p.z - o.pos.z) / (d || 1);
+  if (vx * tx + vz * tz < 0.15) return;                        // not facing it
+  const eye = o.pos.y + (o.isPlayer ? CFG.player.eye : 1.55);
+  const ddx = p.x - o.pos.x, ddy = p.y - eye, ddz = p.z - o.pos.z, dd = Math.hypot(ddx, ddy, ddz);
+  if (raySolids(o.pos.x, eye, o.pos.z, ddx / dd, ddy / dd, ddz / dd, dd) < dd - 0.2) return;   // wall blocks
+  o.flashedT = Math.max(o.flashedT, ab.dur);
+}
+
+function castSmoke(e, ab) {
+  const p = aimPoint(e, 26);
+  addSmoke(p.x, Math.max(1.4, p.y), p.z, ab);
+  if (match.online) NET.send({ t: "ab", kind: "smoke", x: r2(p.x), y: r2(Math.max(1.4, p.y)), z: r2(p.z) });
+}
+function addSmoke(x, y, z, ab) {
+  const geo = new THREE.SphereGeometry(ab.r, 12, 10);
+  const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: 0x20242c, transparent: true, opacity: 0.0, depthWrite: false }));
+  m.position.set(x, y, z); scene.add(m);
+  smokes.push({ mesh: m, ttl: ab.dur, life: ab.dur, x, y, z, r: ab.r });
+}
+// does a smoke sphere block the segment a→b? (used for bot vision only)
+function smokeBlocks(ax, ay, az, dx, dy, dz, maxT) {
+  for (const s of smokes) {
+    if (s.ttl < 0.4) continue;
+    const t = raySphere(ax, ay, az, dx, dy, dz, s.x, s.y, s.z, s.r);
+    if (t > 0 && t < maxT) return true;
+  }
+  return false;
+}
+
+function abilitiesUpdate(dt) {
+  for (const e of ents) {
+    if (e.abilityCd > 0) e.abilityCd = Math.max(0, e.abilityCd - dt);
+    if (e.flashedT > 0) e.flashedT = Math.max(0, e.flashedT - dt);
+    if (e.invulnT > 0) e.invulnT = Math.max(0, e.invulnT - dt);
+    if (e.speedT > 0) e.speedT = Math.max(0, e.speedT - dt);
+    if (e.healT > 0) { e.healT = Math.max(0, e.healT - dt); e.hp = Math.min(CFG.player.hp, e.hp + 45 * dt); }
+  }
+  for (let i = smokes.length - 1; i >= 0; i--) {
+    const s = smokes[i]; s.ttl -= dt;
+    const fade = Math.min(s.life - s.ttl, s.ttl, 1);       // ease in/out
+    s.mesh.material.opacity = 0.82 * Math.max(0, fade);
+    if (s.ttl <= 0) { scene.remove(s.mesh); s.mesh.geometry.dispose(); smokes.splice(i, 1); }
+  }
+  for (let i = booms.length - 1; i >= 0; i--) {
+    const b = booms[i]; b.fuse -= dt;
+    if (b.fuse <= 0) { detonateBoom(b); booms.splice(i, 1); }
+  }
 }
 
 /* ---------------- bot AI ---------------- */
@@ -723,6 +925,7 @@ function botThink(e, dt) {
   }
   if (best && e.target !== best) { e.target = best; e.reactT = rr(CFG.bot.reactMin, CFG.bot.reactMax); }
   if (!best) e.target = null;
+  if (e.flashedT > 0) e.target = null;              // blinded: can't fight, just drifts
 
   if (e.target) {
     // face target
@@ -804,10 +1007,11 @@ function playerUpdate(dt, cmds) {
 
   // velocity model: quick ramp, quick stop — tapping the opposite key
   // (counter-strafe) doubles the decel and snaps you accurate sooner
+  const pspeed = CFG.player.speed * (e.speedT > 0 ? e.speedFactor : 1);   // ability speed buff
   const grounded = e.pos.y <= 0.001;
   const k = 1 - Math.exp(-(grounded ? CFG.player.accel : CFG.player.airAccel) * dt);
-  e.vel.x += (wishX * CFG.player.speed - e.vel.x) * k;
-  e.vel.z += (wishZ * CFG.player.speed - e.vel.z) * k;
+  e.vel.x += (wishX * pspeed - e.vel.x) * k;
+  e.vel.z += (wishZ * pspeed - e.vel.z) * k;
   const oldX = e.pos.x, oldZ = e.pos.z;
   e.pos.x += e.vel.x * dt;
   e.pos.z += e.vel.z * dt;
@@ -842,8 +1046,11 @@ function playerUpdate(dt, cmds) {
   }
   e.prevFire = cmds.fire;
 
-  // sniper zoom
-  const zooming = cmds.zoom && w.id === "sniper";
+  // ability (Q / gamepad / touch)
+  if (cmds.ability) activateAbility(e);
+
+  // scoped-weapon zoom
+  const zooming = cmds.zoom && w.zoom;
   const want = zooming ? CFG.zoomFov : CFG.fov;
   if (Math.abs(camera.fov - want) > 0.5) { camera.fov += (want - camera.fov) * 0.25; camera.updateProjectionMatrix(); }
 }
@@ -855,7 +1062,7 @@ const vm = {
   init() {
     if (this.group) camera.remove(this.group);   // matches restart in place online
     this.group = new THREE.Group();
-    this.guns = WEAPONS.map(w => { const g = makeGunMesh(w.id, false); g.visible = false; return g; });
+    this.guns = WEAPONS.map(w => { const g = makeGunMesh(w.mesh, false); g.visible = false; return g; });
     this.guns.forEach(g => this.group.add(g));
     this.flashSp = new THREE.Sprite(new THREE.SpriteMaterial({ map: flashTex, transparent: true, depthWrite: false }));
     this.flashSp.scale.setScalar(0.35); this.flashSp.visible = false;
@@ -936,18 +1143,25 @@ const hud = {
   feedTimer: [],
   init() {
     $("youName").textContent = (match?.online ? NET.name : STR.you).toUpperCase();
-    const lad = $("ladder"); lad.innerHTML = "";
-    WEAPONS.forEach(() => { const d = document.createElement("div"); d.className = "lad"; lad.appendChild(d); });
+    const ab = AGENTS[player.agent];
+    $("abName").textContent = STR.agents[ab.id].name.toUpperCase();
+    $("abSkill").textContent = STR.agents[ab.id].skill;
+    $("abKey").textContent = isTouch ? "" : "Q";
+    $("abHud").style.setProperty("--acc", "#" + ab.color.toString(16).padStart(6, "0"));
+    $("ktarget").textContent = STR.hud.firstTo.replace("{n}", CFG.killTarget);
   },
   update() {
     const w = WEAPONS[player.weapon];
     $("hpFill").style.width = Math.max(0, player.hp) + "%";
-    $("wname").textContent = STR.weapons[w.id] + " " + player.gunKills + "/" + CFG.killsPerGun;
-    $("ammoN").textContent = player.ammo + " / " + w.mag;
-    $("ammoR").textContent = player.reloadT > 0 ? STR.hud.reloading : (player.ammo === 0 ? STR.hud.reload : "");
-    [...$("ladder").children].forEach((el, i) => {
-      el.className = "lad" + (i < player.weapon ? " done" : i === player.weapon ? " cur" : "");
-    });
+    $("wname").textContent = STR.weapons[w.id];
+    $("ammoN").textContent = w.melee ? "∞" : (player.ammo + " / " + w.mag);
+    $("ammoR").textContent = player.reloadT > 0 ? STR.hud.reloading : (!w.melee && player.ammo === 0 ? STR.hud.reload : "");
+    $("credits").textContent = "⛃ " + player.credits;
+    $("kills").textContent = player.totalKills + " / " + CFG.killTarget;
+    // ability meter
+    const abReady = player.abilityCd <= 0;
+    $("abHud").classList.toggle("ready", abReady);
+    $("abCd").textContent = abReady ? STR.hud.abReady : Math.ceil(player.abilityCd) + "s";
     const t = Math.max(0, match.timeLeft), m = (t / 60) | 0, s = (t % 60) | 0;
     $("timer").textContent = m + ":" + String(s).padStart(2, "0");
     let lead = player, lp = progress(player);
@@ -960,11 +1174,23 @@ const hud = {
     } else if (this.centerT > 0) {
       $("centerMsg").textContent = this.centerText;
     } else $("centerMsg").textContent = "";
+    // flash blind overlay
+    $("flash").style.opacity = Math.min(1, player.flashedT / 1.0).toFixed(2);
     // dynamic crosshair: blooms with speed, recoil and airtime
     const spd = Math.min(1, (player.speed2d ?? 0) / CFG.player.speed);
     const gap = 3 + spd * 8 + vm.recoil * 10 + (player.pos.y > 0.05 ? 6 : 0);
     this._g = (this._g ?? 3) + (gap - (this._g ?? 3)) * 0.25;
     $("xhair").style.setProperty("--g", this._g.toFixed(1) + "px");
+  },
+  abilityFx() {
+    const el = $("abHud"); el.classList.add("cast");
+    clearTimeout(this._af); this._af = setTimeout(() => el.classList.remove("cast"), 260);
+  },
+  mapBanner(mapId) {
+    const el = $("mapBanner");
+    el.innerHTML = `<span>${STR.hud.mapLabel}</span><b>${STR.maps[mapId].name}</b>`;
+    el.classList.remove("hidden"); el.classList.add("show");
+    clearTimeout(this._mb); this._mb = setTimeout(() => el.classList.remove("show"), 3200);
   },
   center(text, dur) { this.centerText = text; this.centerT = dur; },
   tick(dt) { if (this.centerT > 0) this.centerT -= dt; },
@@ -994,13 +1220,115 @@ const hud = {
   },
 };
 
+/* ---------------- buy menu (B) ---------------- */
+const SHOP_CATS = ["sidearm", "smg", "shotgun", "rifle", "sniper", "lmg", "melee"];
+const shop = {
+  built: false, open: false,
+  build() {
+    const grid = $("shopGrid"); grid.innerHTML = "";
+    const byCat = {};
+    WEAPONS.forEach((w, i) => (byCat[w.cat] ??= []).push(i));
+    for (const cat of SHOP_CATS) {
+      const col = document.createElement("div"); col.className = "shopCat";
+      const h = document.createElement("div"); h.className = "shopCatH"; h.textContent = STR.shopCats[cat];
+      col.appendChild(h);
+      for (const i of byCat[cat] || []) {
+        const w = WEAPONS[i];
+        const it = document.createElement("button"); it.className = "shopItem"; it.dataset.idx = i;
+        it.innerHTML = `<span class="wn">${STR.weapons[w.id]}</span><span class="wp">${w.price ? w.price : STR.shop.free}</span>`;
+        it.onclick = () => buyWeapon(i);
+        col.appendChild(it);
+      }
+      grid.appendChild(col);
+    }
+    $("shopTitle").textContent = STR.shop.title;
+    $("shopClose").textContent = STR.shop.close;
+    $("shopHint").textContent = STR.shop.hint;
+    $("shopClose").onclick = () => this.close();
+    this.built = true;
+  },
+  refresh() {
+    if (!this.built) return;
+    $("shopCredits").textContent = "⛃ " + (player ? player.credits : 0);
+    for (const it of $("shopGrid").querySelectorAll(".shopItem")) {
+      const i = +it.dataset.idx, w = WEAPONS[i];
+      it.classList.toggle("owned", !!player && i === player.weapon);
+      it.classList.toggle("cant", !!player && i !== player.weapon && player.credits < w.price);
+    }
+  },
+  toggle() { this.open ? this.close() : this.openShop(); },
+  openShop() {
+    if (!match || match.over) return;
+    if (!this.built) this.build();
+    this.open = true; shopOpen = true;
+    $("shop").classList.remove("hidden");
+    this.refresh();
+    document.exitPointerLock?.();
+  },
+  close(relock = true) {
+    this.open = false; shopOpen = false;
+    const el = $("shop"); if (el) el.classList.add("hidden");
+    if (relock && !isTouch && !inMenu && match && !match.over && running) canvas.requestPointerLock?.();
+  },
+};
+
+/* ---------------- pre-match screens: map reveal, then agent select ---------------- */
+const MAP_SW = { dust: "#c9a87a,#8d8d85", neon: "#3a4560,#4ad7e8", frost: "#e8eef4,#9aa8b5" };
+function showMapReveal(mapId, next) {
+  inMenu = true;
+  $("menu").classList.add("hidden"); $("end").classList.add("hidden");
+  const el = $("mapReveal");
+  el.innerHTML = `<div class="mrLabel">${STR.hud.mapLabel}</div>
+    <div class="mrSwatch" style="background:linear-gradient(135deg,${MAP_SW[mapId]})"></div>
+    <h1 class="mrName">${STR.maps[mapId].name}</h1>
+    <div class="mrDesc">${STR.maps[mapId].desc}</div>
+    <div class="mrGo">${STR.hud.tapContinue}</div>`;
+  el.classList.remove("hidden");
+  let done = false;
+  const go = () => { if (done) return; done = true; el.classList.add("hidden"); el.onclick = null; clearTimeout(tm); next(); };
+  const tm = setTimeout(go, 2600);
+  el.onclick = go;
+}
+let agentBuilt = false;
+function buildAgentSelect() {
+  const grid = $("agentGrid"); grid.innerHTML = "";
+  AGENTS.forEach((a, idx) => {
+    const s = STR.agents[a.id], hex = "#" + a.color.toString(16).padStart(6, "0");
+    const c = document.createElement("button");
+    c.className = "agentCard" + (idx === chosenAgent ? " sel" : "");
+    c.style.setProperty("--acc", hex);
+    c.innerHTML = `<div class="agPortrait" style="background:radial-gradient(circle at 50% 35%, ${hex}, #12151c 70%)">
+        <span class="agInit">${s.name[0]}</span></div>
+      <div class="agName">${s.name}</div>
+      <div class="agRole">${s.role}</div>
+      <div class="agSkill"><b>${s.skill}</b><span>${s.desc}</span></div>`;
+    c.onclick = () => {
+      chosenAgent = idx;
+      [...grid.children].forEach(x => x.classList.remove("sel"));
+      c.classList.add("sel");
+    };
+    grid.appendChild(c);
+  });
+  $("agentTitle").textContent = STR.agentSelect.title;
+  $("lockBtn").textContent = STR.agentSelect.lock;
+  agentBuilt = true;
+}
+function showAgentSelect(next) {
+  inMenu = true;
+  $("menu").classList.add("hidden");
+  if (!agentBuilt) buildAgentSelect();
+  else [...$("agentGrid").children].forEach((x, i) => x.classList.toggle("sel", i === chosenAgent));
+  const el = $("agentSelect"); el.classList.remove("hidden");
+  $("lockBtn").onclick = () => { el.classList.add("hidden"); next(); };
+}
+
 /* ---------------- online play (rooms on the realtime server) ---------------- */
 // Trust model: each client simulates its own movement and hp; the server owns
 // roster, scores, ladder progression, the clock and map rotation (server.js).
 const remotes = new Map();          // network id -> remote entity
 
 const NET = {
-  ws: null, active: false, joined: false, wantOnline: false,
+  ws: null, active: false, joined: false, wantOnline: false, entered: false,
   room: null, id: null, name: "", tries: 0, sendAcc: 0,
   ensureRoom() {
     const params = new URLSearchParams(location.search);
@@ -1035,7 +1363,7 @@ const NET = {
   },
   send(o) { if (this.ws && this.ws.readyState === 1) this.ws.send(JSON.stringify(o)); },
   stop() {
-    this.wantOnline = false; this.active = false; this.joined = false;
+    this.wantOnline = false; this.active = false; this.joined = false; this.entered = false;
     const ws = this.ws; this.ws = null;
     if (ws) { ws.onclose = null; try { ws.close(); } catch (e) {} }
   },
@@ -1049,7 +1377,7 @@ function addRemote(rp) {
   if (rp.id === NET.id || remotes.has(rp.id)) return null;
   const e = makeEntity(rp.name, false, accentFor(rp.id));
   e.remote = true; e.nid = rp.id;
-  e.weapon = rp.weapon || 0; e.gunKills = rp.gunKills || 0;
+  e.weapon = Math.max(0, Math.min(WEAPONS.length - 1, rp.weapon | 0));
   e.totalKills = rp.kills || 0; e.deaths = rp.deaths || 0;
   e.guns.forEach((g, i) => g.visible = i === e.weapon);
   e.snap = null;
@@ -1102,37 +1430,41 @@ function applyKillMsg(m) {
     }
   }
   if (killer) {
-    const newW = m.kw ?? killer.weapon, newG = m.kg ?? killer.gunKills;
-    const advanced = newW !== killer.weapon;
     killer.totalKills = m.kk ?? killer.totalKills;
-    killer.weapon = newW; killer.gunKills = newG;
     if (killer.isPlayer) {
       hud.killBanner(vName);
-      if (advanced) {
-        player.ammo = WEAPONS[newW].mag; player.reloadT = 0;
-        vm.switchTo(newW);
-        hud.feed(STR.feed.advanced.replace("{a}", killer.name).replace("{gun}", STR.weapons[WEAPONS[newW].id]), true);
-        if (newW === WEAPONS.length - 1) hud.center(STR.hud.finalGun, 2);
-      }
-    } else if (advanced) {
-      killer.guns.forEach((g, i) => g.visible = i === newW);
-      hud.feed(STR.feed.advanced.replace("{a}", kName).replace("{gun}", STR.weapons[WEAPONS[newW].id]), false);
+      player.credits = Math.min(CFG.maxCredits, player.credits + CFG.killReward);
     }
   }
   if (victim?.isPlayer) hud.center(STR.hud.killedBy.replace("{name}", kName), 2);
+}
+
+function netEnter(m) {
+  const go = () => {
+    startMatch(m.map, { online: true, timeLeft: m.left, players: m.players });
+    if (m.over) endOnline(null, "");
+    else if (!isTouch) canvas.requestPointerLock?.();
+  };
+  // first entry: reveal the map, then pick an agent; later matches keep the agent
+  if (!NET.entered) { NET.entered = true; showMapReveal(m.map, () => showAgentSelect(go)); }
+  else go();
+}
+
+function applyRemoteAbility(m) {
+  if (m.kind === "flash") tryFlash(player, { x: m.x, y: m.y, z: m.z }, ABILITY.flash);
+  else if (m.kind === "smoke") addSmoke(m.x, m.y, m.z, ABILITY.smoke);
+  else if (m.kind === "boom") spawnBoom(m.x, m.y, m.z, ABILITY.boom, m.id, null);
 }
 
 function netOnMessage(m) {
   switch (m.t) {
     case "welcome":
       NET.joined = true; NET.active = true;
-      startMatch(m.map, { online: true, timeLeft: m.left, players: m.players });
-      if (m.over) endOnline(null, "");
-      else if (!isTouch) canvas.requestPointerLock?.();
+      netEnter(m);
       break;
     case "start":
-      startMatch(m.map, { online: true, timeLeft: m.left, players: m.players });
-      if (!isTouch) canvas.requestPointerLock?.();
+      NET.joined = true; NET.active = true;
+      netEnter(m);
       break;
     case "join": {
       if (!NET.active || !match?.online) break;
@@ -1154,7 +1486,8 @@ function netOnMessage(m) {
       }
       e.alive = !!m.a;
       e.model.group.visible = e.alive;
-      if (m.w !== e.weapon) { e.weapon = m.w; e.guns.forEach((g, i) => g.visible = i === m.w); }
+      const nw = Math.max(0, Math.min(WEAPONS.length - 1, m.w | 0));
+      if (nw !== e.weapon) { e.weapon = nw; e.guns.forEach((g, i) => g.visible = i === nw); }
       break;
     }
     case "f": {
@@ -1169,6 +1502,7 @@ function netOnMessage(m) {
       if (player.hp <= 0) playerDie(m.from);
       break;
     case "kill": if (match?.online) applyKillMsg(m); break;
+    case "ab": if (match?.online) applyRemoteAbility(m); break;
     case "tick": if (match?.online) match.timeLeft = m.left; break;
     case "over": if (match?.online) endOnline(m.winner, m.name); break;
     case "error":
@@ -1228,9 +1562,8 @@ function netUpdate(dt) {
   NET.sendAcc += dt;
   if (NET.joined && NET.sendAcc >= 1 / 15) {
     NET.sendAcc = 0;
-    const r2 = v => Math.round(v * 100) / 100;
     NET.send({ t: "s", p: [r2(player.pos.x), r2(player.pos.y), r2(player.pos.z)],
-               y: r2(player.yaw), pi: r2(player.pitch), a: player.alive ? 1 : 0 });
+               y: r2(player.yaw), pi: r2(player.pitch), a: player.alive ? 1 : 0, w: player.weapon });
   }
 }
 
@@ -1245,11 +1578,18 @@ function startMatch(mapId, opts = {}) {
   camera.fov = CFG.fov; camera.updateProjectionMatrix();
   scene.add(camera);
   ents = []; remotes.clear();
-  player = makeEntity(online ? NET.name : STR.you, true, COL.cyan);
+  smokes.length = 0; booms.length = 0;
+  player = makeEntity(online ? NET.name : STR.you, true, AGENTS[chosenAgent].color);
   player.nid = online ? NET.id : null;
+  player.agent = chosenAgent; player.credits = CFG.startCredits; player.weapon = 0; player.abilityCd = 0;
   ents.push(player);
   if (online) for (const rp of opts.players || []) addRemote(rp);
-  else for (let i = 0; i < CFG.bots; i++) ents.push(makeEntity(STR.bots[i % STR.bots.length], false, ACCENTS[(i + 1) % ACCENTS.length]));
+  else for (let i = 0; i < CFG.bots; i++) {
+    const b = makeEntity(STR.bots[i % STR.bots.length], false, AGENTS[(i + 1) % AGENTS.length].color);
+    b.agent = (i + 1) % AGENTS.length;
+    equipWeapon(b, BOT_POOL[i % BOT_POOL.length]);
+    ents.push(b);
+  }
   match = { t: 0, timeLeft: online ? (opts.timeLeft ?? CFG.matchTime) : CFG.matchTime,
             over: false, winner: null, online };
   for (const e of ents) if (!e.remote) spawnEntity(e);
@@ -1263,11 +1603,18 @@ function startMatch(mapId, opts = {}) {
   $("roomBar").classList.toggle("hidden", !online);
   if (online) $("rbLink").value = location.href;
   running = true; inMenu = false;
+  shopOpen = false; shop.close();
   AudioMan.music();
-  hud.center(isTouch ? STR.help.touch : "", 4);
-  // read-only inspection hook for automated checks; only under ?dev
+  hud.mapBanner(mapId);                                 // "MAP — DUST YARD" at the start
+  // inspection + drive hooks for automated checks; only under ?dev
   if (new URLSearchParams(location.search).has("dev"))
-    window.__gg = { get ents() { return ents; }, get player() { return player; }, camera };
+    window.__gg = {
+      get ents() { return ents; }, get player() { return player; }, get match() { return match; },
+      get smokes() { return smokes; }, get booms() { return booms; }, camera, hud,
+      kill, damage, buyWeapon, equipWeapon, activateAbility, abilitiesUpdate, tryFlash, aimPoint,
+      AGENTS, WEAPONS, CFG, ABILITY,
+      setAgent: i => { chosenAgent = i; player.agent = i; },
+    };
 }
 
 function endMatch(winner) {
@@ -1306,6 +1653,7 @@ function update(dtMs) {
     else { endByTime(); return; }
   }
 
+  abilitiesUpdate(dt);
   const cmds = commands();
   for (const e of ents) {
     if (e.remote) continue;                 // remotes are driven by snapshots
@@ -1401,8 +1749,86 @@ function ensureOnlineDom() {
   $("hud").appendChild(bar);
 }
 
+// Build the buy-menu / agent-select / map-reveal / battle-HUD DOM + CSS in JS
+// so it exists on both fresh and edge-cached HTML shells. Idempotent.
+function ensureBattleDom() {
+  if (!document.getElementById("battleCss")) {
+    const st = document.createElement("style"); st.id = "battleCss";
+    st.textContent = `
+      #credits{position:absolute;left:18px;bottom:64px;font-size:20px;font-weight:800;color:#ffd479;text-shadow:0 1px 3px #000}
+      #scorebar{position:absolute;top:44px;left:50%;transform:translateX(-50%);text-align:center;text-shadow:0 1px 3px #000}
+      #scorebar #kills{color:#ffb03a;font-size:15px;font-weight:800}
+      #ktarget{opacity:.6;font-size:10px;letter-spacing:.14em}
+      #abHud{--acc:#8fe3ff;position:absolute;left:18px;bottom:98px;min-width:150px;padding:7px 12px;border-left:3px solid var(--acc);background:linear-gradient(90deg,#000000aa,#00000022);border-radius:4px;text-shadow:0 1px 2px #000;transition:transform .12s,box-shadow .2s}
+      #abHud .abName{font-size:10px;letter-spacing:.16em;color:var(--acc);font-weight:800}
+      #abHud .abSkill{font-size:14px;font-weight:700}
+      #abHud .abFoot{font-size:11px;color:#9aa4b2;display:flex;gap:6px;align-items:center;margin-top:1px}
+      #abHud .abKey:empty{display:none}
+      #abHud .abKey{border:1px solid #6b7688;border-radius:3px;padding:0 5px;font-weight:700;color:#e8e4da}
+      #abHud.ready{box-shadow:0 0 14px -3px var(--acc)} #abHud.ready .abCd{color:var(--acc);font-weight:700}
+      #abHud.cast{transform:scale(1.06)}
+      #flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;transition:opacity .1s}
+      #mapBanner{position:absolute;top:68px;left:50%;transform:translateX(-50%) translateY(-8px);opacity:0;transition:.4s;text-align:center;pointer-events:none}
+      #mapBanner.show{opacity:1;transform:translateX(-50%) translateY(0)}
+      #mapBanner span{display:block;font-size:11px;letter-spacing:.3em;color:#4ad7e8}
+      #mapBanner b{font-size:26px;letter-spacing:.14em}
+      #mapReveal{position:fixed;inset:0;z-index:34;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0d1016;cursor:pointer;text-align:center;padding:16px}
+      .mrLabel{font-size:13px;letter-spacing:.4em;color:#4ad7e8;margin-bottom:14px}
+      .mrSwatch{width:min(360px,72vw);height:120px;border-radius:12px;margin-bottom:18px;box-shadow:0 10px 40px #0009}
+      .mrName{font-size:clamp(30px,7vw,58px);letter-spacing:.12em;margin:0}
+      .mrDesc{opacity:.7;margin-top:6px} .mrGo{margin-top:28px;font-size:12px;letter-spacing:.2em;opacity:.5}
+      #agentSelect{position:fixed;inset:0;z-index:34;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(10,12,18,.96);padding:16px;text-align:center;overflow:auto}
+      #agentTitle{font-size:14px;letter-spacing:.3em;color:#9aa4b2;margin-bottom:16px}
+      #agentGrid{display:grid;grid-template-columns:repeat(3,minmax(110px,180px));gap:12px}
+      .agentCard{--acc:#8fe3ff;background:#161a22;border:2px solid #2a2f3a;border-radius:12px;padding:10px;cursor:pointer;color:#e8e4da;transition:.15s;font-family:inherit}
+      .agentCard:hover{transform:translateY(-2px)} .agentCard.sel{border-color:var(--acc);box-shadow:0 0 20px -4px var(--acc)}
+      .agPortrait{height:70px;border-radius:8px;position:relative;margin-bottom:8px;overflow:hidden}
+      .agInit{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;color:#ffffffcc}
+      .agName{font-weight:800;letter-spacing:.06em} .agRole{font-size:10px;letter-spacing:.16em;color:var(--acc);margin-bottom:6px}
+      .agSkill b{display:block;font-size:12px} .agSkill span{font-size:10px;opacity:.6;line-height:1.2;display:block;margin-top:2px}
+      #lockBtn{margin-top:20px}
+      #shop{position:fixed;inset:0;z-index:33;display:flex;flex-direction:column;align-items:center;padding:20px 12px;background:rgba(10,12,18,.92);overflow:auto}
+      #shopHead{display:flex;align-items:center;gap:20px;margin-bottom:14px;flex-wrap:wrap;justify-content:center}
+      #shopTitle{font-size:20px;letter-spacing:.2em;font-weight:800} #shopCredits{font-size:20px;font-weight:800;color:#ffd479}
+      #shopClose{background:#2a2f3a;color:#e8e4da;border:0;border-radius:6px;padding:8px 18px;cursor:pointer;font-weight:700;font-family:inherit}
+      #shopGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;max-width:920px;width:100%}
+      .shopCat{background:#12151c;border-radius:8px;padding:8px}
+      .shopCatH{font-size:10px;letter-spacing:.16em;color:#8aa0b8;margin-bottom:6px}
+      .shopItem{display:flex;justify-content:space-between;width:100%;background:#1b2029;border:1px solid #2a3038;color:#e8e4da;border-radius:6px;padding:8px 10px;margin-bottom:6px;cursor:pointer;font-size:13px;font-family:inherit;letter-spacing:.03em}
+      .shopItem:hover{border-color:#ff7a1a} .shopItem .wp{color:#ffd479;font-weight:700}
+      .shopItem.owned{border-color:#4ad7e8;box-shadow:inset 0 0 0 1px #4ad7e8} .shopItem.owned .wp{color:#4ad7e8}
+      .shopItem.cant{opacity:.45} .shopItem.cant .wp{color:#e06c75}
+      #shopHint{margin-top:14px;font-size:11px;opacity:.5;text-align:center}
+      #abilityBtn{right:150px;bottom:150px;width:56px;height:56px;font-size:12px;border-color:#8fe3ff88;color:#8fe3ff}
+      #shopBtn{right:34px;bottom:250px;width:50px;height:50px;font-size:18px}`;
+    document.head.appendChild(st);
+  }
+  const hud = $("hud");
+  const addTo = (parent, id, cls, html) => {
+    if ($(id) || !parent) return;
+    const d = document.createElement("div"); d.id = id; if (cls) d.className = cls; if (html != null) d.innerHTML = html;
+    parent.appendChild(d);
+  };
+  addTo(hud, "flash", "", "");
+  addTo(hud, "credits", "", "");
+  addTo(hud, "scorebar", "", `<span id="kills">0</span><div id="ktarget"></div>`);
+  addTo(hud, "abHud", "", `<div class="abName" id="abName"></div><div class="abSkill" id="abSkill"></div>` +
+    `<div class="abFoot"><span class="abKey" id="abKey"></span><span class="abCd" id="abCd"></span></div>`);
+  addTo(hud, "mapBanner", "hidden", "");
+  addTo(document.body, "mapReveal", "hidden", "");
+  addTo(document.body, "agentSelect", "hidden",
+    `<div id="agentTitle"></div><div id="agentGrid"></div><button class="btn" id="lockBtn"></button>`);
+  addTo(document.body, "shop", "hidden",
+    `<div id="shopHead"><div id="shopTitle"></div><div id="shopCredits"></div><button id="shopClose"></button></div>` +
+    `<div id="shopGrid"></div><div id="shopHint"></div>`);
+  const tui = $("touchUI");
+  if (tui && !$("abilityBtn")) { const b = document.createElement("div"); b.className = "tbtn"; b.id = "abilityBtn"; tui.appendChild(b); }
+  if (tui && !$("shopBtn")) { const b = document.createElement("div"); b.className = "tbtn"; b.id = "shopBtn"; b.textContent = "🛒"; tui.appendChild(b); }
+}
+
 function setupMenus() {
   ensureOnlineDom();
+  ensureBattleDom();
   $("mTitle").innerHTML = STR.title.replace("ARENA", '<span class="accent">ARENA</span>');
   $("mSub").textContent = STR.subtitle;
   $("startBtn").textContent = STR.start;
@@ -1416,6 +1842,7 @@ function setupMenus() {
   // arena is always random — no picker (drop the old selection UI from either shell)
   $("mChoose")?.remove();
   $("mapCards")?.remove();
+  if ($("abilityBtn")) $("abilityBtn").textContent = STR.touch.ability;
 
   // callsign
   const nameInp = $("nameInp");
@@ -1453,8 +1880,11 @@ function setupMenus() {
     await AudioMan.init(); AudioMan.resume();
     NET.stop();
     $("mStatus").textContent = "";
-    startMatch(randomMap());          // solo: fresh random arena every match
-    if (!isTouch) canvas.requestPointerLock?.();
+    const map = randomMap();          // solo: reveal a random arena, pick an agent, then play
+    showMapReveal(map, () => showAgentSelect(() => {
+      startMatch(map, {});
+      if (!isTouch) canvas.requestPointerLock?.();
+    }));
   };
   $("startBtn").onclick = begin;
   $("againBtn").onclick = begin;
@@ -1467,7 +1897,7 @@ function setupMenus() {
 
   // desktop: losing pointer lock mid-match = pause (solo) / hint (online — the world keeps moving)
   document.addEventListener("pointerlockchange", () => {
-    if (!document.pointerLockElement && !inMenu && !match?.over && !isTouch && running) {
+    if (!document.pointerLockElement && !inMenu && !match?.over && !isTouch && running && !shopOpen) {
       if (match.online) hud.center(STR.online.clickAim, 2);
       else { running = false; $("pause").classList.remove("hidden"); }
     }
@@ -1498,6 +1928,6 @@ function frame(now) {
   }
 }
 
-setupTouch();
-setupMenus();
+setupMenus();     // builds battle DOM (incl. touch buttons) first
+setupTouch();     // then wires touch controls onto them
 requestAnimationFrame(frame);
