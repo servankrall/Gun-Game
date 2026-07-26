@@ -1,0 +1,23 @@
+id,role,type,description,size/ratio,style_line_ref,source
+tex_sand_floor,floor texture for map Dust Yard,texture,cracked dry desert ground with fine sand and scattered small grey stones,1:1 1k,STYLE FORMULA v1,generate
+tex_concrete_wall,wall texture for Dust Yard and shared barriers,texture,weathered grey concrete wall surface with subtle cracks and stains,1:1 1k,STYLE FORMULA v1,generate
+tex_crate_wood,crate and cover prop surfaces on all maps,texture,worn wooden crate planks with faint scratches and pale stencil marks,1:1 1k,STYLE FORMULA v1,generate
+tex_asphalt_floor,floor texture for map Neon District,texture,dark cracked asphalt surface with fine gravel and faded road paint flecks,1:1 1k,STYLE FORMULA v1,generate
+tex_metal_panel,wall texture for Neon District and Frost Depot containers,texture,dark riveted industrial metal panels with brushed steel wear,1:1 1k,STYLE FORMULA v1,generate
+tex_snow_floor,floor texture for map Frost Depot,texture,packed snow ground with subtle wind-swept drifts and faint ice patches,1:1 1k,STYLE FORMULA v1,generate
+img_thumbnail,deploy cover / marketplace card,image,16:9 cover art of low-poly soldier firing rifle in arena with bold readable title GUN GAME ARENA,16:9,STYLE FORMULA v1,generate
+img_favicon,deploy favicon / catalog icon,image,1:1 square emblem of an orange crosshair over a gunmetal shield,1:1,STYLE FORMULA v1,generate
+sfx_shot_pistol,pistol fire sound,audio,single crisp 9mm pistol gunshot,1s,-,generate
+sfx_shot_rifle,rifle and SMG fire sound,audio,single sharp assault rifle gunshot with tight echo,1s,-,generate
+sfx_shot_shotgun,shotgun fire sound,audio,single powerful shotgun blast,1s,-,generate
+sfx_reload,weapon reload sound,audio,rifle magazine eject and reload click sequence,2s,-,generate
+sfx_hit,hitmarker / damage confirm,audio,short metallic hit marker tick,1s,-,generate
+music_combat,menu and match background loop,audio,energetic tense electronic combat track,30s loop,-,generate
+mdl_soldier,player and enemy third-person character,3d-procedural,low-poly boxy soldier built from Three.js primitives with procedural walk/run/aim animation,~1.8 units tall,STYLE FORMULA v1,code
+mdl_gun_pistol,viewmodel + world model,3d-procedural,low-poly gunmetal pistol with amber accents from Three.js primitives,~0.3 units,STYLE FORMULA v1,code
+mdl_gun_smg,viewmodel + world model,3d-procedural,low-poly gunmetal SMG with amber accents,~0.5 units,STYLE FORMULA v1,code
+mdl_gun_shotgun,viewmodel + world model,3d-procedural,low-poly gunmetal pump shotgun with wood pump,~0.7 units,STYLE FORMULA v1,code
+mdl_gun_rifle,viewmodel + world model,3d-procedural,low-poly gunmetal assault rifle with amber sight,~0.7 units,STYLE FORMULA v1,code
+mdl_gun_sniper,viewmodel + world model,3d-procedural,low-poly gunmetal sniper rifle with long barrel and cyan scope glint,~0.9 units,STYLE FORMULA v1,code
+fx_combat,muzzle flash / tracers / hit sparks / blood-free hit puffs,3d-procedural,additive sprite and line effects tinted signal orange and cyan per formula,-,STYLE FORMULA v1,code
+env_sky,per-map sky and fog,3d-procedural,gradient sky dome and fog colors derived from formula light block per map,-,STYLE FORMULA v1,code
