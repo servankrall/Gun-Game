@@ -4,7 +4,7 @@
   "url": "https://sweet-cloud-511.higgsfield.gg/",
   "mode": "rules",
   "deployed_at": "2026-07-26",
-  "source_game": "https://d2ol7oe51mr4n9.cloudfront.net/user_3H2TbHs4NAolF83PLXpaJkfJOyw/1b301c89-72dd-4231-8752-73efcd9aec8c.zip",
+  "source_game": "https://d2ol7oe51mr4n9.cloudfront.net/user_3H2TbHs4NAolF83PLXpaJkfJOyw/fdfe6a8e-d99d-4210-a55d-744637d7d75d.zip",
   "thumbnail": "https://d2ol7oe51mr4n9.cloudfront.net/user_3H2TbHs4NAolF83PLXpaJkfJOyw/741687d7-a814-4969-afe2-e28d18207e04.png",
   "favicon": "https://d2ol7oe51mr4n9.cloudfront.net/user_3H2TbHs4NAolF83PLXpaJkfJOyw/853a756b-acaf-4dac-aa88-8420794ec65b.png",
   "note": "To update this game, rebuild the zip with tools/assemble.sh, upload + confirm it, and call deploy_game passing back this exact game_id. Never redeploy without game_id."
