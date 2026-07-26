@@ -1,4 +1,5 @@
-// Gun Game Arena — solo FPS vs bots. Three.js, fixed-timestep sim, seeded RNG.
+// Gun Game Arena — FPS: solo vs bots, or online rooms via the realtime
+// server (server.js). Three.js, fixed-timestep sim, seeded RNG.
 import * as THREE from "./vendor/three.module.min.js";
 import { STR } from "./strings.js";
 
@@ -564,6 +565,7 @@ function fireWeapon(sh) {
     ? 1.7 * Math.min(1, (sh.speed2d ?? 0) / CFG.player.speed) + (sh.pos.y > 0.05 ? 1.5 : 0)
     : 0;
 
+  const hitAcc = sh.isPlayer && match.online ? new Map() : null;  // remote target -> dmg this trigger pull
   for (let p = 0; p < w.pellets; p++) {
     const sp = (spreadBase + moveErr) * Math.PI / 180;
     const ry = sh.yaw + rr(-sp, sp), rp = sh.pitch + rr(-sp, sp);
@@ -587,12 +589,18 @@ function fireWeapon(sh) {
         const falloff = Math.max(0.35, 1 - tHit / w.range);
         dmg *= falloff;
       }
-      damage(hitEnt, dmg, sh);
+      if (hitAcc && hitEnt.remote) hitAcc.set(hitEnt, (hitAcc.get(hitEnt) || 0) + dmg);
+      else damage(hitEnt, dmg, sh);
       spawnPuff(hx, hy, hz, false);
     } else if (tHit < w.range) {
       spawnPuff(hx, hy, hz, false);
     }
   }
+  if (hitAcc && hitAcc.size) {
+    for (const [tgt, dmg] of hitAcc) NET.send({ t: "hit", target: tgt.nid, d: Math.round(dmg) });
+    hud.hitmark(); AudioMan.play("hit", { vol: 0.3 });
+  }
+  if (sh.isPlayer && match.online) NET.send({ t: "f" });
 
   // muzzle flash + sound
   if (sh.isPlayer) {
@@ -793,6 +801,7 @@ const vm = {
   group: null, guns: null, flashSp: null, flashT: 0, recoil: 0, bob: 0,
   swayX: 0, swayY: 0, land: 0, idle: 0, dip: 0,
   init() {
+    if (this.group) camera.remove(this.group);   // matches restart in place online
     this.group = new THREE.Group();
     this.guns = WEAPONS.map(w => { const g = makeGunMesh(w.id, false); g.visible = false; return g; });
     this.guns.forEach(g => this.group.add(g));
@@ -874,7 +883,7 @@ const $ = id => document.getElementById(id);
 const hud = {
   feedTimer: [],
   init() {
-    $("youName").textContent = STR.you.toUpperCase();
+    $("youName").textContent = (match?.online ? NET.name : STR.you).toUpperCase();
     const lad = $("ladder"); lad.innerHTML = "";
     WEAPONS.forEach(() => { const d = document.createElement("div"); d.className = "lad"; lad.appendChild(d); });
   },
@@ -892,6 +901,7 @@ const hud = {
     let lead = player, lp = progress(player);
     for (const e of ents) if (progress(e) > lp) { lead = e; lp = progress(e); }
     $("lead").textContent = lead.isPlayer ? STR.hud.youLead : STR.hud.leader.replace("{name}", lead.name);
+    if (match.online) $("roomBar").classList.toggle("hidden", remotes.size > 0);
     if (!player.alive) {
       $("centerMsg").innerHTML = STR.hud.respawnIn.replace("{s}", Math.ceil(player.respawnT)) +
         (this._centerSub ? `<div class="small">${this._centerSub}</div>` : "");
@@ -932,26 +942,274 @@ const hud = {
   },
 };
 
+/* ---------------- online play (rooms on the realtime server) ---------------- */
+// Trust model: each client simulates its own movement and hp; the server owns
+// roster, scores, ladder progression, the clock and map rotation (server.js).
+const remotes = new Map();          // network id -> remote entity
+
+const NET = {
+  ws: null, active: false, joined: false, wantOnline: false,
+  room: null, id: null, name: "", tries: 0, sendAcc: 0,
+  ensureRoom() {
+    const params = new URLSearchParams(location.search);
+    let room = params.get("room");
+    if (!room) {
+      room = Math.random().toString(36).slice(2, 8);
+      params.set("room", room);
+      history.replaceState(null, "", location.pathname + "?" + params);
+    }
+    this.room = room;
+  },
+  identity() {
+    let id = sessionStorage.getItem("gga-id");   // sessionStorage: two tabs = two players
+    if (!id) { id = "p-" + Math.random().toString(36).slice(2, 10); sessionStorage.setItem("gga-id", id); }
+    this.id = id;
+  },
+  connect() {
+    this.wantOnline = true;
+    this.ensureRoom(); this.identity();
+    const base = location.pathname.replace(/\/+$/, "");
+    const url = (location.protocol === "https:" ? "wss://" : "ws://") + location.host + base + "/ws/" + this.room;
+    try { this.ws = new WebSocket(url); } catch (e) { netOnDisconnect(); return; }
+    this.ws.onopen = () => { this.tries = 0; this.send({ t: "join", id: this.id, name: this.name }); };
+    this.ws.onmessage = e => { let m; try { m = JSON.parse(e.data); } catch { return; } netOnMessage(m); };
+    this.ws.onclose = () => {
+      this.joined = false;
+      if (!this.wantOnline) return;
+      netOnDisconnect();
+      const delay = Math.min(5000, 800 * ++this.tries);
+      setTimeout(() => { if (this.wantOnline) this.connect(); }, delay);
+    };
+  },
+  send(o) { if (this.ws && this.ws.readyState === 1) this.ws.send(JSON.stringify(o)); },
+  stop() {
+    this.wantOnline = false; this.active = false; this.joined = false;
+    const ws = this.ws; this.ws = null;
+    if (ws) { ws.onclose = null; try { ws.close(); } catch (e) {} }
+  },
+};
+
+function entityByNid(nid) {
+  return nid === NET.id ? player : remotes.get(nid) || null;
+}
+
+function addRemote(rp) {
+  if (rp.id === NET.id || remotes.has(rp.id)) return null;
+  const e = makeEntity(rp.name, false, COL.orange);
+  e.remote = true; e.nid = rp.id;
+  e.weapon = rp.weapon || 0; e.gunKills = rp.gunKills || 0;
+  e.totalKills = rp.kills || 0; e.deaths = rp.deaths || 0;
+  e.guns.forEach((g, i) => g.visible = i === e.weapon);
+  e.snap = null;
+  e.model.group.visible = false;      // hidden until the first snapshot places them
+  ents.push(e); remotes.set(rp.id, e);
+  return e;
+}
+
+function removeRemote(nid) {
+  const e = remotes.get(nid);
+  if (!e) return;
+  scene.remove(e.model.group); scene.remove(e.muzzleSp);
+  ents = ents.filter(x => x !== e);
+  remotes.delete(nid);
+}
+
+function remoteFireFx(e) {
+  const w = WEAPONS[e.weapon];
+  const eye = e.pos.y + 1.55;
+  const dx = -Math.sin(e.yaw) * Math.cos(e.pitch), dy = Math.sin(e.pitch), dz = -Math.cos(e.yaw) * Math.cos(e.pitch);
+  const t = Math.min(raySolids(e.pos.x, eye, e.pos.z, dx, dy, dz, w.range), w.range);
+  spawnTracer(e.pos.x, eye - 0.12, e.pos.z, e.pos.x + dx * t, eye + dy * t, e.pos.z + dz * t);
+  const f = flashes.find(f => f.sp === e.muzzleSp);
+  if (f) {
+    const m = e.guns[e.weapon].userData.muzzle.getWorldPosition(new THREE.Vector3());
+    e.muzzleSp.position.copy(m); f.ttl = 0.05; e.muzzleSp.visible = true;
+  }
+  AudioMan.at(w.sfx, Math.hypot(e.pos.x - player.pos.x, e.pos.z - player.pos.z), { vol: 0.32, rate: w.rate });
+}
+
+function playerDie(killerNid) {
+  if (!player.alive) return;
+  NET.send({ t: "died", killer: killerNid });
+  player.alive = false;
+  player.respawnT = CFG.player.respawn;
+  spawnPuff(player.pos.x, player.pos.y + 1.1, player.pos.z, true);
+}
+
+function applyKillMsg(m) {
+  const victim = entityByNid(m.v), killer = m.k ? entityByNid(m.k) : null;
+  const vName = victim ? victim.name : "?", kName = killer ? killer.name : "?";
+  hud.feed(STR.feed.killed.replace("{a}", kName).replace("{b}", vName),
+           !!(killer?.isPlayer || victim?.isPlayer));
+  if (victim) {
+    victim.deaths = m.vd ?? victim.deaths;
+    if (victim.remote) {
+      victim.alive = false;
+      if (victim.model.group.visible) spawnPuff(victim.pos.x, victim.pos.y + 1.1, victim.pos.z, true);
+      victim.model.group.visible = false;
+    }
+  }
+  if (killer) {
+    const newW = m.kw ?? killer.weapon, newG = m.kg ?? killer.gunKills;
+    const advanced = newW !== killer.weapon;
+    killer.totalKills = m.kk ?? killer.totalKills;
+    killer.weapon = newW; killer.gunKills = newG;
+    if (killer.isPlayer) {
+      hud.killBanner(vName);
+      if (advanced) {
+        player.ammo = WEAPONS[newW].mag; player.reloadT = 0;
+        vm.switchTo(newW);
+        hud.feed(STR.feed.advanced.replace("{a}", killer.name).replace("{gun}", STR.weapons[WEAPONS[newW].id]), true);
+        if (newW === WEAPONS.length - 1) hud.center(STR.hud.finalGun, 2);
+      }
+    } else if (advanced) {
+      killer.guns.forEach((g, i) => g.visible = i === newW);
+      hud.feed(STR.feed.advanced.replace("{a}", kName).replace("{gun}", STR.weapons[WEAPONS[newW].id]), false);
+    }
+  }
+  if (victim?.isPlayer) hud.center(STR.hud.killedBy.replace("{name}", kName), 2);
+}
+
+function netOnMessage(m) {
+  switch (m.t) {
+    case "welcome":
+      NET.joined = true; NET.active = true;
+      startMatch(m.map, { online: true, timeLeft: m.left, players: m.players });
+      if (m.over) endOnline(null, "");
+      else if (!isTouch) canvas.requestPointerLock?.();
+      break;
+    case "start":
+      startMatch(m.map, { online: true, timeLeft: m.left, players: m.players });
+      if (!isTouch) canvas.requestPointerLock?.();
+      break;
+    case "join": {
+      if (!NET.active || !match?.online) break;
+      const e = addRemote(m);
+      if (e) hud.feed(STR.online.joined.replace("{name}", e.name), false);
+      break;
+    }
+    case "leave": {
+      const e = remotes.get(m.id);
+      if (e) { hud.feed(STR.online.left.replace("{name}", e.name), false); removeRemote(m.id); }
+      break;
+    }
+    case "s": {
+      const e = remotes.get(m.id);
+      if (!e) break;
+      e.snap = { x: m.p[0], y: m.p[1], z: m.p[2], yaw: m.y, pitch: m.pi };
+      if (!e.model.group.visible && m.a) {   // first sight / respawn: snap into place
+        e.pos.x = m.p[0]; e.pos.y = m.p[1]; e.pos.z = m.p[2]; e.yaw = m.y;
+      }
+      e.alive = !!m.a;
+      e.model.group.visible = e.alive;
+      if (m.w !== e.weapon) { e.weapon = m.w; e.guns.forEach((g, i) => g.visible = i === m.w); }
+      break;
+    }
+    case "f": {
+      const e = remotes.get(m.id);
+      if (e && e.alive) remoteFireFx(e);
+      break;
+    }
+    case "hit":
+      if (!match?.online || match.over || !player.alive) break;
+      player.hp -= m.d; player.lastHurtT = match.t;
+      hud.hurt();
+      if (player.hp <= 0) playerDie(m.from);
+      break;
+    case "kill": if (match?.online) applyKillMsg(m); break;
+    case "tick": if (match?.online) match.timeLeft = m.left; break;
+    case "over": if (match?.online) endOnline(m.winner, m.name); break;
+    case "error":
+      if (m.code === "full") { NET.stop(); backToMenu(STR.online.full); }
+      break;
+  }
+}
+
+function netOnDisconnect() {
+  if (match?.online && !inMenu) hud.center(STR.online.reconnecting, 3);
+  if (inMenu) $("mStatus").textContent = STR.online.reconnecting;
+}
+
+function backToMenu(statusText) {
+  running = false; inMenu = true;
+  $("hud").classList.add("hidden");
+  $("end").classList.add("hidden");
+  $("pause").classList.add("hidden");
+  $("menu").classList.remove("hidden");
+  $("mStatus").textContent = statusText || "";
+  document.exitPointerLock?.();
+}
+
+function endOnline(winnerNid, winnerName) {
+  match.over = true; running = false;
+  document.exitPointerLock?.();
+  const timed = match.timeLeft <= 1;
+  const win = winnerNid === NET.id;
+  $("eTitle").textContent = winnerNid == null ? STR.online.next : (win ? STR.end.win : STR.end.lose);
+  $("eTitle").style.color = win ? "#ffb03a" : "#ff4a3a";
+  $("eDesc").textContent = winnerNid == null ? "" :
+    (win ? (timed ? STR.end.timeWin : STR.end.winDesc)
+         : (timed ? STR.end.timeLose : STR.end.loseDesc).replace("{name}", winnerName || "?"))
+    + " " + STR.online.next;
+  $("hud").classList.add("hidden");
+  $("end").classList.remove("hidden");
+}
+
+function netUpdate(dt) {
+  // smooth remotes toward their latest snapshot
+  for (const e of remotes.values()) {
+    if (!e.snap) continue;
+    const k = 1 - Math.exp(-12 * dt);
+    const ox = e.pos.x, oz = e.pos.z;
+    e.pos.x += (e.snap.x - e.pos.x) * k;
+    e.pos.y += (e.snap.y - e.pos.y) * k;
+    e.pos.z += (e.snap.z - e.pos.z) * k;
+    let dy = e.snap.yaw - e.yaw;
+    while (dy > Math.PI) dy -= 2 * Math.PI; while (dy < -Math.PI) dy += 2 * Math.PI;
+    e.yaw += dy * k;
+    e.pitch += (e.snap.pitch - e.pitch) * k;
+    e.vel.x = (e.pos.x - ox) / dt; e.vel.z = (e.pos.z - oz) / dt;
+    e.moving = Math.hypot(e.vel.x, e.vel.z) > 0.3;
+    if (e.moving) e.walkPhase += dt * 9;
+  }
+  // send our snapshot ~15 Hz
+  NET.sendAcc += dt;
+  if (NET.joined && NET.sendAcc >= 1 / 15) {
+    NET.sendAcc = 0;
+    const r2 = v => Math.round(v * 100) / 100;
+    NET.send({ t: "s", p: [r2(player.pos.x), r2(player.pos.y), r2(player.pos.z)],
+               y: r2(player.yaw), pi: r2(player.pitch), a: player.alive ? 1 : 0 });
+  }
+}
+
 /* ---------------- match lifecycle ---------------- */
 let running = false, inMenu = true;
 
-function startMatch(mapId) {
+function startMatch(mapId, opts = {}) {
+  const online = !!opts.online;
   rng = mulberry32(0xC0FFEE ^ mapId.length * 7919 ^ [...mapId].reduce((a, c) => a + c.charCodeAt(0), 0));
   buildWorld(mapId);
   initFx();
   camera.fov = CFG.fov; camera.updateProjectionMatrix();
   scene.add(camera);
-  ents = [];
-  player = makeEntity(STR.you, true, COL.cyan);
+  ents = []; remotes.clear();
+  player = makeEntity(online ? NET.name : STR.you, true, COL.cyan);
+  player.nid = online ? NET.id : null;
   ents.push(player);
-  for (let i = 0; i < CFG.bots; i++) ents.push(makeEntity(STR.bots[i % STR.bots.length], false, COL.orange));
-  match = { t: 0, timeLeft: CFG.matchTime, over: false, winner: null };
-  for (const e of ents) spawnEntity(e);
+  if (online) for (const rp of opts.players || []) addRemote(rp);
+  else for (let i = 0; i < CFG.bots; i++) ents.push(makeEntity(STR.bots[i % STR.bots.length], false, COL.orange));
+  match = { t: 0, timeLeft: online ? (opts.timeLeft ?? CFG.matchTime) : CFG.matchTime,
+            over: false, winner: null, online };
+  for (const e of ents) if (!e.remote) spawnEntity(e);
   vm.init();
   hud.init();
   $("hud").classList.remove("hidden");
   $("menu").classList.add("hidden");
   $("end").classList.add("hidden");
+  $("pause").classList.add("hidden");
+  $("againBtn").classList.toggle("hidden", online);
+  $("roomBar").classList.toggle("hidden", !online);
+  if (online) $("rbLink").value = location.href;
   running = true; inMenu = false;
   AudioMan.music();
   hud.center(isTouch ? STR.help.touch : "", 4);
@@ -988,10 +1246,14 @@ function update(dtMs) {
   if (!running || match.over) return;
   match.t += dt; match.timeLeft -= dt;
   hud.tick(dt);
-  if (match.timeLeft <= 0) { endByTime(); return; }
+  if (match.timeLeft <= 0) {
+    if (match.online) match.timeLeft = 0;   // the server calls time via "over"
+    else { endByTime(); return; }
+  }
 
   const cmds = commands();
   for (const e of ents) {
+    if (e.remote) continue;                 // remotes are driven by snapshots
     if (!e.alive) {
       e.respawnT -= dt;
       if (e.respawnT <= 0) spawnEntity(e);
@@ -1004,6 +1266,7 @@ function update(dtMs) {
     }
   }
   playerUpdate(dt, cmds);
+  if (match.online) netUpdate(dt);
   fxUpdate(dt);
   hud.update();
 }
@@ -1032,8 +1295,9 @@ function render() {
     const sw = Math.sin(e.walkPhase) * 0.55 * spdR;
     e.model.legL.rotation.x = sw; e.model.legR.rotation.x = -sw;
     e.model.armL.rotation.x = -sw * 0.5;
-    // right arm aims with pitch
-    e.model.armR.rotation.x = -Math.PI / 2 + (e.target ? -e.pitch : 0.3) + (!e.target ? sw * 0.3 : 0);
+    // right arm aims with pitch (remotes always hold their aim)
+    const aiming = e.remote || !!e.target;
+    e.model.armR.rotation.x = -Math.PI / 2 + (aiming ? -e.pitch : 0.3) + (!aiming ? sw * 0.3 : 0);
     const blat = (e.vel.x * Math.cos(e.yaw) - e.vel.z * Math.sin(e.yaw)) / CFG.bot.speed;
     g.rotation.z = -blat * 0.1;
     e.model.blob.position.set(0, 0.02, 0);
@@ -1070,24 +1334,59 @@ function setupMenus() {
     cards.appendChild(c);
   }
 
+  // callsign
+  const nameInp = $("nameInp");
+  const defName = localStorage.getItem("gga-name") ||
+    STR.bots[(Math.random() * STR.bots.length) | 0] + ((Math.random() * 90 + 10) | 0);
+  nameInp.value = defName;
+  nameInp.placeholder = STR.online.name;
+  const saveName = () => {
+    const v = nameInp.value.replace(/[^\w .\-]/g, "").trim().slice(0, 14);
+    if (v) localStorage.setItem("gga-name", v);
+    return v || defName;
+  };
+
+  $("onlineBtn").textContent =
+    new URLSearchParams(location.search).get("room") ? STR.online.join : STR.online.play;
+  $("mRandom").textContent = STR.online.randomMap;
+  $("rbTxt").textContent = STR.online.waitShare;
+  $("rbCopy").textContent = STR.online.copy;
+  $("rbCopy").onclick = async () => {
+    try { await navigator.clipboard.writeText($("rbLink").value); $("rbCopy").textContent = STR.online.copied; }
+    catch { $("rbLink").select(); document.execCommand?.("copy"); }
+    setTimeout(() => $("rbCopy").textContent = STR.online.copy, 1200);
+  };
+
+  $("onlineBtn").onclick = async () => {
+    await AudioMan.init(); AudioMan.resume();
+    NET.stop();
+    NET.name = saveName();
+    $("mStatus").textContent = STR.online.connecting;
+    NET.tries = 0;
+    NET.connect();
+  };
+
   const begin = async () => {
     await AudioMan.init(); AudioMan.resume();
+    NET.stop();
+    $("mStatus").textContent = "";
     startMatch(selMap);
     if (!isTouch) canvas.requestPointerLock?.();
   };
   $("startBtn").onclick = begin;
   $("againBtn").onclick = begin;
-  $("eMenuBtn").onclick = () => { $("end").classList.add("hidden"); $("menu").classList.remove("hidden"); inMenu = true; };
-  $("pMenuBtn").onclick = () => { $("pause").classList.add("hidden"); $("hud").classList.add("hidden"); $("menu").classList.remove("hidden"); inMenu = true; running = false; };
+  $("eMenuBtn").onclick = () => { NET.stop(); backToMenu(""); };
+  $("pMenuBtn").onclick = () => { NET.stop(); backToMenu(""); };
   $("resumeBtn").onclick = () => {
     $("pause").classList.add("hidden"); running = true;
     if (!isTouch) canvas.requestPointerLock?.();
   };
 
-  // desktop: losing pointer lock mid-match = pause
+  // desktop: losing pointer lock mid-match = pause (solo) / hint (online — the world keeps moving)
   document.addEventListener("pointerlockchange", () => {
     if (!document.pointerLockElement && !inMenu && !match?.over && !isTouch && running) {
-      running = false; $("pause").classList.remove("hidden");
+      if (match.online) hud.center(STR.online.clickAim, 2);
+      else { running = false; $("pause").classList.remove("hidden"); }
     }
   });
   canvas.addEventListener("click", () => {

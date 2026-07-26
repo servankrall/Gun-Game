@@ -28,6 +28,18 @@
   .btn:hover{filter:brightness(1.1)}
   .btn.ghost{background:transparent;color:#e8e4da;border:2px solid #3a4150;margin-top:10px;font-size:14px;padding:10px 30px}
   .help{margin-top:22px;font-size:12px;opacity:.55;max-width:520px}
+  #nameInp{background:#1a1f29;border:2px solid #3a4150;color:#e8e4da;border-radius:8px;padding:10px 14px;
+    font-size:15px;text-align:center;letter-spacing:.08em;margin-bottom:16px;width:200px;outline:none}
+  #nameInp:focus{border-color:#ffb03a}
+  .menuRow{display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:center}
+  .menuRow .btn.ghost{margin-top:0}
+  #mRandom{font-size:11px;opacity:.5;margin-top:10px}
+  #mStatus{min-height:18px;color:#4ad7e8;font-size:13px;margin-top:8px}
+  #roomBar{position:absolute;top:64px;left:50%;transform:translateX(-50%);display:flex;gap:8px;align-items:center;
+    background:#000000aa;border:1px solid #3a4150;border-radius:8px;padding:8px 12px;pointer-events:auto;font-size:12px}
+  #roomBar input{width:min(210px,42vw);background:#1a1f29;border:1px solid #3a4150;color:#9aa4b2;border-radius:5px;
+    padding:4px 8px;font-size:11px}
+  #roomBar button{background:#ff7a1a;border:0;border-radius:5px;padding:5px 10px;font-weight:700;cursor:pointer;color:#14100a}
   /* HUD */
   #hud{position:fixed;inset:0;pointer-events:none;z-index:20}
   #xhair{--g:3px;position:absolute;left:50%;top:50%;width:0;height:0}
@@ -92,6 +104,7 @@
   <div id="feed"></div>
   <div id="centerMsg"></div>
   <div id="killBanner"></div>
+  <div id="roomBar" class="hidden"><span id="rbTxt"></span><input id="rbLink" readonly><button id="rbCopy"></button></div>
 </div>
 
 <div id="touchUI">
@@ -104,9 +117,15 @@
 <div id="menu" class="overlay">
   <h1 id="mTitle"></h1>
   <p class="sub" id="mSub"></p>
-  <div style="font-size:13px;letter-spacing:.14em;opacity:.7;margin-bottom:12px" id="mChoose"></div>
+  <input id="nameInp" maxlength="14" spellcheck="false" autocomplete="off">
+  <div class="menuRow">
+    <button class="btn" id="onlineBtn"></button>
+    <button class="btn ghost" id="startBtn"></button>
+  </div>
+  <div id="mRandom"></div>
+  <div id="mStatus"></div>
+  <div style="font-size:13px;letter-spacing:.14em;opacity:.7;margin:16px 0 12px" id="mChoose"></div>
   <div class="maps" id="mapCards"></div>
-  <button class="btn" id="startBtn"></button>
   <p class="help" id="mHelp"></p>
 </div>
 
