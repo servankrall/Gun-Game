@@ -1306,7 +1306,48 @@ function render() {
 }
 
 /* ---------------- menus ---------------- */
+// The platform edge-caches index.html far longer than the JS modules, so a
+// deploy can pair fresh JS with a stale shell. Create any missing online-UI
+// elements here; no-ops once the new HTML is being served.
+function ensureOnlineDom() {
+  if ($("nameInp")) return;
+  const css = document.createElement("style");
+  css.textContent = `
+    #nameInp{background:#1a1f29;border:2px solid #3a4150;color:#e8e4da;border-radius:8px;padding:10px 14px;
+      font-size:15px;text-align:center;letter-spacing:.08em;margin-bottom:16px;width:200px;outline:none}
+    #nameInp:focus{border-color:#ffb03a}
+    .menuRow{display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:center}
+    .menuRow .btn.ghost{margin-top:0}
+    #mRandom{font-size:11px;opacity:.5;margin-top:10px}
+    #mStatus{min-height:18px;color:#4ad7e8;font-size:13px;margin-top:8px}
+    #roomBar{position:absolute;top:64px;left:50%;transform:translateX(-50%);display:flex;gap:8px;align-items:center;
+      background:#000000aa;border:1px solid #3a4150;border-radius:8px;padding:8px 12px;pointer-events:auto;font-size:12px}
+    #roomBar.hidden{display:none}
+    #roomBar input{width:min(210px,42vw);background:#1a1f29;border:1px solid #3a4150;color:#9aa4b2;border-radius:5px;
+      padding:4px 8px;font-size:11px}
+    #roomBar button{background:#ff7a1a;border:0;border-radius:5px;padding:5px 10px;font-weight:700;cursor:pointer;color:#14100a}`;
+  document.head.appendChild(css);
+  const menu = $("menu"), startBtn = $("startBtn");
+  const nameInp = document.createElement("input");
+  nameInp.id = "nameInp"; nameInp.maxLength = 14; nameInp.spellcheck = false;
+  const row = document.createElement("div"); row.className = "menuRow";
+  const onlineBtn = document.createElement("button");
+  onlineBtn.id = "onlineBtn"; onlineBtn.className = "btn";
+  menu.insertBefore(nameInp, startBtn);
+  menu.insertBefore(row, startBtn);
+  row.appendChild(onlineBtn); row.appendChild(startBtn);   // startBtn moves into the row
+  startBtn.classList.add("ghost");
+  const mRandom = document.createElement("div"); mRandom.id = "mRandom";
+  const mStatus = document.createElement("div"); mStatus.id = "mStatus";
+  row.after(mStatus); row.after(mRandom);
+  const bar = document.createElement("div");
+  bar.id = "roomBar"; bar.className = "hidden";
+  bar.innerHTML = '<span id="rbTxt"></span><input id="rbLink" readonly><button id="rbCopy"></button>';
+  $("hud").appendChild(bar);
+}
+
 function setupMenus() {
+  ensureOnlineDom();
   $("mTitle").innerHTML = STR.title.replace("ARENA", '<span class="accent">ARENA</span>');
   $("mSub").textContent = STR.subtitle;
   $("mChoose").textContent = STR.chooseMap;
