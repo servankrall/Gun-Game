@@ -44,7 +44,7 @@ export const STR = {
     play: "PLAY ONLINE",
     join: "JOIN THIS ROOM",
     name: "CALLSIGN",
-    randomMap: "Online matches drop the whole room on a random arena",
+    randomMap: "Every match drops into a random arena — you don't pick",
     connecting: "Connecting to the arena…",
     reconnecting: "Connection lost — reconnecting…",
     waitShare: "Waiting for fighters — share this link:",

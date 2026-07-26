@@ -69,6 +69,13 @@ const MAPS = {
   },
 };
 
+const MAP_IDS = Object.keys(MAPS);
+const randomMap = () => MAP_IDS[(Math.random() * MAP_IDS.length) | 0];
+
+// squad accent colors — deterministic per player id so every client agrees
+const ACCENTS = [0xff7a1a, 0xe84a4a, 0xb44ae8, 0x4ae87a, 0xe8d84a, 0x4a8ae8, 0xff5aa0];
+const accentFor = id => ACCENTS[[...String(id)].reduce((a, c) => a + c.charCodeAt(0), 0) % ACCENTS.length];
+
 /* ---------------- seeded RNG (sim only) ---------------- */
 function mulberry32(a) {
   return function () {
@@ -132,8 +139,10 @@ const BIND = { KeyW: "up", KeyS: "down", KeyA: "left", KeyD: "right", Space: "ju
                ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right" };
 const held = new Set();
 let mouseDown = false, lookDX = 0, lookDY = 0;
-addEventListener("keydown", e => { const c = BIND[e.code]; if (c) { held.add(c); e.preventDefault(); } });
-addEventListener("keyup", e => { const c = BIND[e.code]; if (c) held.delete(c); });
+// never capture game keys while the player is typing (callsign input: W/A/S/D/R…)
+const typing = e => e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA");
+addEventListener("keydown", e => { if (typing(e)) return; const c = BIND[e.code]; if (c) { held.add(c); e.preventDefault(); } });
+addEventListener("keyup", e => { if (typing(e)) return; const c = BIND[e.code]; if (c) held.delete(c); });
 addEventListener("mousedown", e => { if (e.button === 0) mouseDown = true; if (e.button === 2) held.add("zoom"); });
 addEventListener("mouseup", e => { if (e.button === 0) mouseDown = false; if (e.button === 2) held.delete("zoom"); });
 addEventListener("contextmenu", e => e.preventDefault());
@@ -308,34 +317,77 @@ function makeGunMesh(id, world) {
   return g;
 }
 
+// Third-person trooper: jointed low-poly figure built from one shared box geo.
+// Feet sit at y=0; the whole group is placed at the entity's position. Joint
+// groups (legL/legR at the hip, armL/armR at the shoulder) are what render()
+// animates — everything else is detail welded to torso/head.
 function makeSoldier(accent) {
   const g = new THREE.Group();
-  const body = mat(COL.skinE), acc = mat(accent, { emissive: accent, emissiveIntensity: 0.35 });
-  const dark = mat(0x23262c);
+  const fatigue = mat(0x5b5446);                                   // olive uniform
+  const gear    = mat(0x2b2e34);                                   // vest / webbing
+  const bootMat = mat(0x181a1e);                                   // boots / gloves
+  const skin    = mat(0xbf9c84);                                   // exposed skin
+  const acc     = mat(accent, { emissive: accent, emissiveIntensity: 0.5 });
+  const accDim  = mat(accent, { emissive: accent, emissiveIntensity: 0.22 });
+  const visor   = new THREE.MeshLambertMaterial({ color: 0x10131a, emissive: accent, emissiveIntensity: 0.14 });
   const part = (m, x, y, z, sx, sy, sz, parent = g) => {
     const b = new THREE.Mesh(boxGeo, m); b.position.set(x, y, z); b.scale.set(sx, sy, sz); parent.add(b); return b;
   };
-  // torso pivot at ground
-  const torso = part(body, 0, 1.15, 0, 0.55, 0.62, 0.32);
-  part(acc, 0, 1.32, 0, 0.57, 0.1, 0.34);                    // chest signal stripe
-  const head = part(body, 0, 1.68, 0, 0.3, 0.3, 0.3);
-  part(dark, 0, 1.7, -0.09, 0.32, 0.12, 0.16);               // visor
-  part(acc, 0, 1.84, 0, 0.32, 0.05, 0.32);                   // helmet ring
-  const armL = new THREE.Group(); armL.position.set(-0.38, 1.42, 0); g.add(armL);
-  part(body, 0, -0.28, 0, 0.16, 0.56, 0.18, armL);
-  const armR = new THREE.Group(); armR.position.set(0.38, 1.42, 0); g.add(armR);
-  part(body, 0, -0.28, 0, 0.16, 0.56, 0.18, armR);
-  const legL = new THREE.Group(); legL.position.set(-0.16, 0.84, 0); g.add(legL);
-  part(dark, 0, -0.42, 0, 0.2, 0.84, 0.22, legL);
-  const legR = new THREE.Group(); legR.position.set(0.16, 0.84, 0); g.add(legR);
-  part(dark, 0, -0.42, 0, 0.2, 0.84, 0.22, legR);
-  // gun holder in right hand
-  const gunHold = new THREE.Group(); gunHold.position.set(0.1, -0.5, -0.25); armR.add(gunHold);
+
+  // ---- legs: hip-pivoted groups (thigh → knee → shin → boot) ----
+  const mkLeg = side => {
+    const grp = new THREE.Group(); grp.position.set(side * 0.17, 0.92, 0); g.add(grp);
+    part(fatigue, 0, -0.22, 0, 0.23, 0.46, 0.25, grp);            // thigh
+    part(gear,    0, -0.45, 0.02, 0.21, 0.10, 0.24, grp);         // knee pad
+    part(fatigue, 0, -0.66, 0, 0.18, 0.40, 0.20, grp);            // shin
+    part(bootMat, 0, -0.90, 0.04, 0.22, 0.15, 0.32, grp);         // boot
+    return grp;
+  };
+  const legL = mkLeg(-1), legR = mkLeg(1);
+
+  // ---- pelvis / belt ----
+  part(gear,   0, 0.98, 0, 0.46, 0.18, 0.30);
+  part(accDim, 0, 0.98, 0.17, 0.12, 0.10, 0.04);                  // buckle
+
+  // ---- torso: tapered (narrow waist, broad chest + vest) ----
+  part(fatigue, 0, 1.12, 0, 0.40, 0.18, 0.26);                    // waist
+  const torso = part(fatigue, 0, 1.30, 0, 0.48, 0.46, 0.28);      // chest
+  part(gear,    0, 1.32, 0.03, 0.52, 0.42, 0.30);                 // plate carrier
+  part(acc,     0, 1.34, 0.18, 0.10, 0.24, 0.03);                 // team stripe
+  part(gear,    0, 1.16, 0.16, 0.30, 0.12, 0.06);                 // ammo pouches
+  part(gear,    0, 1.30, -0.21, 0.34, 0.42, 0.15);               // backpack
+  part(accDim,  0, 1.46, -0.24, 0.10, 0.07, 0.04);               // pack tab
+
+  // ---- neck + head + helmet ----
+  part(skin,  0, 1.55, 0, 0.16, 0.11, 0.16);                      // neck
+  const head = part(skin, 0, 1.67, 0.01, 0.26, 0.27, 0.26);      // head
+  part(visor, 0, 1.68, -0.09, 0.28, 0.13, 0.16);                 // goggles
+  part(gear,  0, 1.80, -0.01, 0.31, 0.18, 0.33);                // helmet
+  part(gear,  0, 1.73, 0.13, 0.30, 0.07, 0.10);                 // brim
+  part(acc,   0, 1.86, 0, 0.32, 0.05, 0.34);                    // helmet band
+
+  // ---- arms: shoulder-pivoted (pauldron → upper → elbow → forearm → glove) ----
+  const mkArm = side => {
+    const grp = new THREE.Group(); grp.position.set(side * 0.33, 1.45, 0); g.add(grp);
+    part(acc,     side * 0.02, 0.04, 0, 0.20, 0.17, 0.25, grp);   // team pauldron
+    part(fatigue, 0, -0.19, 0, 0.15, 0.34, 0.17, grp);           // upper arm
+    part(gear,    0, -0.39, 0, 0.14, 0.10, 0.16, grp);           // elbow
+    part(fatigue, 0, -0.55, 0, 0.13, 0.28, 0.15, grp);           // forearm
+    part(bootMat, 0, -0.71, 0.03, 0.15, 0.15, 0.19, grp);        // glove
+    return grp;
+  };
+  const armL = mkArm(-1), armR = mkArm(1);
+
+  // gun holder at the right hand; the PI/2 tilt points the world gun's barrel
+  // forward once the arm is raised to aim (fixes it aiming skyward otherwise).
+  const gunHold = new THREE.Group();
+  gunHold.position.set(0.05, -0.66, -0.04); gunHold.rotation.x = Math.PI / 2;
+  armR.add(gunHold);
+
   // blob shadow
   const blob = new THREE.Sprite(new THREE.SpriteMaterial({ map: blobTex, depthWrite: false }));
-  blob.scale.set(1.4, 1.4, 1); blob.position.y = 0.02; blob.material.rotation = 0;
-  blob.center.set(0.5, 0.5); g.add(blob);
-  blob.onBeforeRender = () => {};
+  blob.scale.set(1.5, 1.5, 1); blob.position.y = 0.02; blob.center.set(0.5, 0.5);
+  g.add(blob);
   return { group: g, torso, head, armL, armR, legL, legR, gunHold, blob };
 }
 
@@ -995,7 +1047,7 @@ function entityByNid(nid) {
 
 function addRemote(rp) {
   if (rp.id === NET.id || remotes.has(rp.id)) return null;
-  const e = makeEntity(rp.name, false, COL.orange);
+  const e = makeEntity(rp.name, false, accentFor(rp.id));
   e.remote = true; e.nid = rp.id;
   e.weapon = rp.weapon || 0; e.gunKills = rp.gunKills || 0;
   e.totalKills = rp.kills || 0; e.deaths = rp.deaths || 0;
@@ -1197,7 +1249,7 @@ function startMatch(mapId, opts = {}) {
   player.nid = online ? NET.id : null;
   ents.push(player);
   if (online) for (const rp of opts.players || []) addRemote(rp);
-  else for (let i = 0; i < CFG.bots; i++) ents.push(makeEntity(STR.bots[i % STR.bots.length], false, COL.orange));
+  else for (let i = 0; i < CFG.bots; i++) ents.push(makeEntity(STR.bots[i % STR.bots.length], false, ACCENTS[(i + 1) % ACCENTS.length]));
   match = { t: 0, timeLeft: online ? (opts.timeLeft ?? CFG.matchTime) : CFG.matchTime,
             over: false, winner: null, online };
   for (const e of ents) if (!e.remote) spawnEntity(e);
@@ -1213,6 +1265,9 @@ function startMatch(mapId, opts = {}) {
   running = true; inMenu = false;
   AudioMan.music();
   hud.center(isTouch ? STR.help.touch : "", 4);
+  // read-only inspection hook for automated checks; only under ?dev
+  if (new URLSearchParams(location.search).has("dev"))
+    window.__gg = { get ents() { return ents; }, get player() { return player; }, camera };
 }
 
 function endMatch(winner) {
@@ -1350,7 +1405,6 @@ function setupMenus() {
   ensureOnlineDom();
   $("mTitle").innerHTML = STR.title.replace("ARENA", '<span class="accent">ARENA</span>');
   $("mSub").textContent = STR.subtitle;
-  $("mChoose").textContent = STR.chooseMap;
   $("startBtn").textContent = STR.start;
   $("mHelp").textContent = isTouch ? STR.help.touch : STR.help.desktop;
   $("pTitle").textContent = STR.paused;
@@ -1359,21 +1413,9 @@ function setupMenus() {
   $("againBtn").textContent = STR.end.again;
   $("eMenuBtn").textContent = STR.end.menu;
 
-  const cards = $("mapCards"); cards.innerHTML = "";
-  let selMap = "dust";
-  const swCol = { dust: "#c9a87a,#8d8d85", neon: "#3a4560,#4ad7e8", frost: "#e8eef4,#9aa8b5" };
-  for (const id of Object.keys(MAPS)) {
-    const c = document.createElement("div");
-    c.className = "mapCard" + (id === selMap ? " sel" : "");
-    c.innerHTML = `<div class="sw" style="background:linear-gradient(135deg,${swCol[id]})"></div>
-      <b>${STR.maps[id].name}</b><span>${STR.maps[id].desc}</span>`;
-    c.onclick = () => {
-      selMap = id;
-      [...cards.children].forEach(x => x.classList.remove("sel"));
-      c.classList.add("sel");
-    };
-    cards.appendChild(c);
-  }
+  // arena is always random — no picker (drop the old selection UI from either shell)
+  $("mChoose")?.remove();
+  $("mapCards")?.remove();
 
   // callsign
   const nameInp = $("nameInp");
@@ -1411,7 +1453,7 @@ function setupMenus() {
     await AudioMan.init(); AudioMan.resume();
     NET.stop();
     $("mStatus").textContent = "";
-    startMatch(selMap);
+    startMatch(randomMap());          // solo: fresh random arena every match
     if (!isTouch) canvas.requestPointerLock?.();
   };
   $("startBtn").onclick = begin;
