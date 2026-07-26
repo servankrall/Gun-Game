@@ -4,7 +4,7 @@
   "url": "https://sweet-cloud-511.higgsfield.gg/",
   "mode": "custom-server",
   "deployed_at": "2026-07-26",
-  "source_game": "https://d2ol7oe51mr4n9.cloudfront.net/user_3H2TbHs4NAolF83PLXpaJkfJOyw/92fbc33c-8645-476f-a2d9-fe078fcf9b80.zip",
+  "source_game": "https://d2ol7oe51mr4n9.cloudfront.net/user_3H2TbHs4NAolF83PLXpaJkfJOyw/6576946a-227e-427c-9c28-dd1c8c36d363.zip",
   "thumbnail": "https://d2ol7oe51mr4n9.cloudfront.net/user_3H2TbHs4NAolF83PLXpaJkfJOyw/741687d7-a814-4969-afe2-e28d18207e04.png",
   "favicon": "https://d2ol7oe51mr4n9.cloudfront.net/user_3H2TbHs4NAolF83PLXpaJkfJOyw/853a756b-acaf-4dac-aa88-8420794ec65b.png",
   "note": "To update: rebuild zip (game/ contents at archive root: server.js + index.html + assets), upload via media_upload + PUT + media_confirm, then deploy_game with this exact game_id. The public URL serves an embed wrapper; the game itself runs in the #hf-frame iframe at ?__raw=1 (top-level browser visits to ?__raw=1 are redirected back to the wrapper — curl gets the raw page). Automated tests must drive the iframe. This container's proxy blocks the Higgsfield CDN/upload hosts; assemble inside sandbox_exec, pulling changed files from GitHub raw at a commit SHA."
