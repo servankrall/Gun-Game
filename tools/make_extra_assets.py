@@ -58,10 +58,11 @@ def metal_tile(n=512, seed=7):
     wear = wear / (np.abs(wear).max() + 1e-9) * 9
     img += wear[..., None]
 
-    # panel gap lines (dark) at 0 and half on both axes
+    # panel gap lines (dark) at 0 and half, wrap-symmetric so the tile repeats
     for c in (0, half):
-        img[max(c - 1, 0):c + 2, :, :] -= 18
-        img[:, max(c - 1, 0):c + 2, :] -= 18
+        for off in (-1, 0, 1):
+            img[(c + off) % n, :, :] -= 18
+            img[:, (c + off) % n, :] -= 18
 
     out = Image.fromarray(np.clip(img, 0, 255).astype(np.uint8))
     d = ImageDraw.Draw(out)
