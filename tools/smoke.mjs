@@ -20,7 +20,10 @@ const srv = createServer(async (req, res) => {
 });
 await new Promise(r => srv.listen(8931, r));
 
-const browser = await chromium.launch({ args: ["--enable-unsafe-swiftshader", "--use-gl=swiftshader"] });
+const browser = await chromium.launch({
+  executablePath: process.env.PW_CHROMIUM || undefined,   // pinned browser fallback for CI/sandboxes
+  args: ["--enable-unsafe-swiftshader", "--use-gl=swiftshader"],
+});
 const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
 const errors = [], missing = [];
 page.on("console", m => { if (m.type() === "error") errors.push(m.text()); });

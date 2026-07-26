@@ -10,7 +10,7 @@ const CFG = {
   matchTime: 360,               // seconds
   killsPerGun: 3,
   bots: 6,
-  player: { speed: 5.5, jumpV: 7.2, gravity: 20, radius: 0.42, eye: 1.62, hp: 100,
+  player: { speed: 5.5, accel: 14, airAccel: 3.2, jumpV: 7.2, gravity: 20, radius: 0.42, eye: 1.62, hp: 100,
             regenDelay: 4, regenRate: 30, respawn: 3 },
   bot: { speed: 4.4, hp: 100, respawn: 3.5, reactMin: 0.28, reactMax: 0.55,
          spreadMul: 2.4, engageRange: 46, repath: 2.8, dmgMul: 0.7 },
@@ -508,7 +508,7 @@ function makeEntity(name, isPlayer, accent) {
     yaw: 0, pitch: 0, hp: CFG.player.hp, alive: true,
     weapon: 0, gunKills: 0, totalKills: 0, deaths: 0,
     fireCd: 0, reloadT: 0, ammo: WEAPONS[0].mag,
-    respawnT: 0, lastHurtT: -99, walkPhase: 0, moving: false,
+    respawnT: 0, lastHurtT: -99, walkPhase: 0, moving: false, speed2d: 0,
     // bot brain
     target: null, wp: null, repathT: 0, reactT: 0, strafeDir: 1, strafeT: 0,
     model: null, guns: null, muzzleSp: null,
@@ -559,8 +559,13 @@ function fireWeapon(sh) {
   const spreadBase = w.spread * (sh.isPlayer ? 1 : CFG.bot.spreadMul);
   const dist0 = sh.isPlayer ? 0.2 : 0.6;
 
+  // velocity-scaled accuracy: inaccuracy grows with speed, worst airborne
+  const moveErr = sh.isPlayer
+    ? 1.7 * Math.min(1, (sh.speed2d ?? 0) / CFG.player.speed) + (sh.pos.y > 0.05 ? 1.5 : 0)
+    : 0;
+
   for (let p = 0; p < w.pellets; p++) {
-    const sp = (spreadBase + (sh.isPlayer && sh.moving ? 0.8 : 0)) * Math.PI / 180;
+    const sp = (spreadBase + moveErr) * Math.PI / 180;
     const ry = sh.yaw + rr(-sp, sp), rp = sh.pitch + rr(-sp, sp);
     const dx = -Math.sin(ry) * Math.cos(rp), dy = Math.sin(rp), dz = -Math.cos(ry) * Math.cos(rp);
     const ox = sh.pos.x + dx * dist0, oy = eye + dy * dist0, oz = sh.pos.z + dz * dist0;
@@ -629,6 +634,7 @@ function kill(victim, attacker) {
   attacker.totalKills++; attacker.gunKills++;
   hud.feed(STR.feed.killed.replace("{a}", attacker.name).replace("{b}", victim.name),
            attacker.isPlayer || victim.isPlayer);
+  if (attacker.isPlayer) hud.killBanner(victim.name);
   if (attacker.gunKills >= CFG.killsPerGun) {
     if (attacker.weapon >= WEAPONS.length - 1) { endMatch(attacker); return; }
     attacker.weapon++; attacker.gunKills = 0;
@@ -705,16 +711,18 @@ function botThink(e, dt) {
 
 function botMove(e, mvx, mvz, dt) {
   const m = Math.hypot(mvx, mvz);
-  if (m < 1e-6) { e.moving = false; return; }
-  mvx /= m; mvz /= m;
+  let tx = 0, tz = 0;
+  if (m > 1e-6) { tx = mvx / m * CFG.bot.speed; tz = mvz / m * CFG.bot.speed; }
+  const k = 1 - Math.exp(-10 * dt);
+  e.vel.x += (tx - e.vel.x) * k; e.vel.z += (tz - e.vel.z) * k;
   const oldX = e.pos.x, oldZ = e.pos.z;
-  e.pos.x += mvx * CFG.bot.speed * dt;
-  e.pos.z += mvz * CFG.bot.speed * dt;
+  e.pos.x += e.vel.x * dt;
+  e.pos.z += e.vel.z * dt;
   collide(e.pos, CFG.player.radius);
   e.moving = Math.hypot(e.pos.x - oldX, e.pos.z - oldZ) > 0.001;
   if (e.moving) e.walkPhase += dt * 9;
   // stuck → new waypoint
-  if (!e.moving && !e.target) e.repathT = 0;
+  if (m > 1e-6 && !e.moving && !e.target) e.repathT = 0;
 }
 
 /* ---------------- player sim ---------------- */
@@ -728,22 +736,36 @@ function playerUpdate(dt, cmds) {
   e.yaw -= cmds.lookGX * 2.6 * dt; e.pitch -= cmds.lookGY * 2.0 * dt;
   e.pitch = Math.max(-1.45, Math.min(1.45, e.pitch));
 
-  // move relative to yaw
+  // wish direction relative to yaw (W = camera forward, S = straight back)
   const cos = Math.cos(e.yaw), sin = Math.sin(e.yaw);
-  const mvx = cmds.mx * cos - cmds.my * sin;
-  const mvz = -cmds.mx * sin - cmds.my * cos;
-  const oldX = e.pos.x, oldZ = e.pos.z;
-  e.pos.x += mvx * CFG.player.speed * dt;
-  e.pos.z += mvz * CFG.player.speed * dt;
-  collide(e.pos, CFG.player.radius);
-  e.moving = Math.hypot(e.pos.x - oldX, e.pos.z - oldZ) > 0.001;
-  if (e.moving) e.walkPhase += dt * 10;
+  const fwd = -cmds.my;
+  const wishX = cmds.mx * cos - fwd * sin;
+  const wishZ = -cmds.mx * sin - fwd * cos;
 
-  // jump/gravity
-  if (cmds.jump && e.pos.y <= 0.001) e.vel.y = CFG.player.jumpV;
+  // velocity model: quick ramp, quick stop — tapping the opposite key
+  // (counter-strafe) doubles the decel and snaps you accurate sooner
+  const grounded = e.pos.y <= 0.001;
+  const k = 1 - Math.exp(-(grounded ? CFG.player.accel : CFG.player.airAccel) * dt);
+  e.vel.x += (wishX * CFG.player.speed - e.vel.x) * k;
+  e.vel.z += (wishZ * CFG.player.speed - e.vel.z) * k;
+  const oldX = e.pos.x, oldZ = e.pos.z;
+  e.pos.x += e.vel.x * dt;
+  e.pos.z += e.vel.z * dt;
+  collide(e.pos, CFG.player.radius);
+  e.vel.x = (e.pos.x - oldX) / dt; e.vel.z = (e.pos.z - oldZ) / dt;   // walls kill velocity
+  e.speed2d = Math.hypot(e.vel.x, e.vel.z);
+  e.moving = e.speed2d > 0.3;
+  if (e.moving) e.walkPhase += dt * (6 + 5 * e.speed2d / CFG.player.speed);
+
+  // jump/gravity + landing dip
+  if (cmds.jump && grounded) e.vel.y = CFG.player.jumpV;
   e.vel.y -= CFG.player.gravity * dt;
+  const fallV = e.vel.y;
   e.pos.y = Math.max(0, e.pos.y + e.vel.y * dt);
-  if (e.pos.y === 0) e.vel.y = Math.max(0, e.vel.y);
+  if (e.pos.y === 0) {
+    if (!grounded && fallV < -4.5) vm.land = Math.min(1, -fallV / 11);
+    e.vel.y = Math.max(0, e.vel.y);
+  }
 
   // regen
   if (match.t - e.lastHurtT > CFG.player.regenDelay && e.hp < CFG.player.hp)
@@ -769,6 +791,7 @@ function playerUpdate(dt, cmds) {
 /* ---------------- viewmodel ---------------- */
 const vm = {
   group: null, guns: null, flashSp: null, flashT: 0, recoil: 0, bob: 0,
+  swayX: 0, swayY: 0, land: 0, idle: 0, dip: 0,
   init() {
     this.group = new THREE.Group();
     this.guns = WEAPONS.map(w => { const g = makeGunMesh(w.id, false); g.visible = false; return g; });
@@ -784,12 +807,58 @@ const vm = {
     this.cur = i; this.dip = 1;
   },
   update(dt) {
-    this.recoil = Math.max(0, this.recoil - dt * 6);
-    this.dip = Math.max(0, (this.dip ?? 0) - dt * 3);
-    if (player.moving && player.alive) this.bob += dt * 9;
-    const bobY = Math.sin(this.bob * 2) * 0.012, bobX = Math.cos(this.bob) * 0.01;
-    this.group.position.set(0.28 + bobX, -0.26 + bobY - this.dip * 0.25 + this.recoil * 0.03, -0.5 + this.recoil * 0.08);
-    this.group.rotation.set(this.recoil * 0.12, 0, 0);
+    const w = WEAPONS[player.weapon];
+    this.recoil = Math.max(0, this.recoil - dt * (4 + this.recoil * 5));
+    this.dip = Math.max(0, this.dip - dt * 3.2);
+    this.land = Math.max(0, this.land - dt * 2.8);
+    this.idle += dt;
+
+    // look sway — the gun lags a touch behind camera turns
+    const dyaw = player.yaw - (this._pyaw ?? player.yaw);
+    const dpitch = player.pitch - (this._ppitch ?? player.pitch);
+    this._pyaw = player.yaw; this._ppitch = player.pitch;
+    const kS = Math.min(1, dt * 9);
+    this.swayX += (Math.max(-0.05, Math.min(0.05, dyaw * 1.6)) - this.swayX) * kS;
+    this.swayY += (Math.max(-0.04, Math.min(0.04, dpitch * 1.6)) - this.swayY) * kS;
+
+    // movement in gun-local space: strafe rolls the gun, running pulls it back
+    const cos = Math.cos(player.yaw), sin = Math.sin(player.yaw);
+    const lat = (player.vel.x * cos - player.vel.z * sin) / CFG.player.speed;
+    const fwd = (-player.vel.x * sin - player.vel.z * cos) / CFG.player.speed;
+    const spd = Math.min(1, (player.speed2d ?? 0) / CFG.player.speed);
+    const grounded = player.pos.y <= 0.001;
+
+    // figure-8 bob scaled by real speed, damped in the air; idle breathing when still
+    if (player.moving && player.alive && grounded) this.bob += dt * (7 + 4 * spd);
+    const amp = spd * (grounded ? 1 : 0.25);
+    const bobX = Math.cos(this.bob) * 0.014 * amp;
+    const bobY = Math.sin(this.bob * 2) * 0.011 * amp;
+    const idleY = Math.sin(this.idle * 1.7) * 0.004 * (1 - spd * 0.8);
+
+    // reload — barrel swings down and rolls, then comes back up
+    let relX = 0, relZ = 0, relY = 0;
+    if (player.reloadT > 0) {
+      const p = 1 - player.reloadT / w.reload;
+      const c = Math.sin(Math.PI * Math.min(1, p * 1.12));
+      relX = c * 0.8; relZ = c * 0.3; relY = -c * 0.08;
+    }
+
+    // target pose, then exponential smoothing toward it
+    const tx = 0.28 + bobX - this.swayX * 0.5 - lat * 0.022;
+    const ty = -0.26 + bobY + idleY + this.swayY * 0.6 - this.dip * 0.22 - this.land * 0.07 + relY + this.recoil * 0.025;
+    const tz = -0.5 + this.recoil * 0.09 - fwd * 0.014;
+    const rX = this.recoil * 0.15 + relX - this.dip * 0.85 - this.land * 0.16 + this.swayY * 1.3;
+    const rY = this.swayX * 1.6;
+    const rZ = -lat * 0.07 + relZ + this.swayX * 0.7;
+    const s = 1 - Math.exp(-dt * 16);
+    const g = this.group;
+    g.position.x += (tx - g.position.x) * s;
+    g.position.y += (ty - g.position.y) * s;
+    g.position.z += (tz - g.position.z) * s;
+    g.rotation.x += (rX - g.rotation.x) * s;
+    g.rotation.y += (rY - g.rotation.y) * s;
+    g.rotation.z += (rZ - g.rotation.z) * s;
+
     if (this.flashT > 0) {
       this.flashT -= dt;
       const mz = this.guns[this.cur].userData.muzzle;
@@ -797,9 +866,6 @@ const vm = {
       this.flashSp.visible = this.flashT > 0;
       this.flashSp.material.rotation = Math.random() * Math.PI;
     } else this.flashSp.visible = false;
-    const w = WEAPONS[player.weapon];
-    const reloading = player.reloadT > 0;
-    this.group.rotation.x += reloading ? 0.5 : 0;
   },
 };
 
@@ -832,6 +898,11 @@ const hud = {
     } else if (this.centerT > 0) {
       $("centerMsg").textContent = this.centerText;
     } else $("centerMsg").textContent = "";
+    // dynamic crosshair: blooms with speed, recoil and airtime
+    const spd = Math.min(1, (player.speed2d ?? 0) / CFG.player.speed);
+    const gap = 3 + spd * 8 + vm.recoil * 10 + (player.pos.y > 0.05 ? 6 : 0);
+    this._g = (this._g ?? 3) + (gap - (this._g ?? 3)) * 0.25;
+    $("xhair").style.setProperty("--g", this._g.toFixed(1) + "px");
   },
   center(text, dur) { this.centerText = text; this.centerT = dur; },
   tick(dt) { if (this.centerT > 0) this.centerT -= dt; },
@@ -839,6 +910,14 @@ const hud = {
   hitmark() {
     const el = $("hitmark"); el.style.opacity = 1;
     clearTimeout(this._hm); this._hm = setTimeout(() => el.style.opacity = 0, 90);
+  },
+  killBanner(name) {
+    const el = $("killBanner");
+    el.textContent = STR.hud.youKilled.replace("{name}", name.toUpperCase());
+    el.style.opacity = 1;
+    $("xhair").classList.add("kill");
+    clearTimeout(this._kb); this._kb = setTimeout(() => el.style.opacity = 0, 1300);
+    clearTimeout(this._kx); this._kx = setTimeout(() => $("xhair").classList.remove("kill"), 170);
   },
   hurt() {
     const el = $("vign"); el.style.boxShadow = "inset 0 0 120px rgba(255,40,20,.55)";
@@ -926,29 +1005,37 @@ function update(dtMs) {
   }
   playerUpdate(dt, cmds);
   fxUpdate(dt);
+  hud.update();
 }
 
 /* ---------------- render ---------------- */
+let camRoll = 0;
 function render() {
   if (!scene) return;
-  // camera from player
-  camera.position.set(player.pos.x, player.pos.y + CFG.player.eye, player.pos.z);
+  // camera from player: landing dip, recoil kick, subtle strafe roll
+  const pcos = Math.cos(player.yaw), psin = Math.sin(player.yaw);
+  const latR = (player.vel.x * pcos - player.vel.z * psin) / CFG.player.speed;
+  camRoll += (-latR * 0.014 - camRoll) * 0.15;
+  camera.position.set(player.pos.x, player.pos.y + CFG.player.eye - vm.land * 0.09, player.pos.z);
   camera.rotation.set(0, 0, 0);
-  camera.rotateY(player.yaw); camera.rotateX(player.pitch);
+  camera.rotateY(player.yaw); camera.rotateX(player.pitch + vm.recoil * 0.012); camera.rotateZ(camRoll);
   vm.update(1 / 60);
   vm.group.visible = player.alive;
 
-  // bots visuals
+  // bots visuals: leg swing fades with real speed, body leans into strafes
   for (const e of ents) {
     if (e.isPlayer || !e.model) continue;
     const g = e.model.group;
     g.position.set(e.pos.x, e.pos.y, e.pos.z);
     g.rotation.y = e.yaw;
-    const sw = e.moving ? Math.sin(e.walkPhase) * 0.55 : 0;
+    const spdR = Math.min(1, Math.hypot(e.vel.x, e.vel.z) / CFG.bot.speed);
+    const sw = Math.sin(e.walkPhase) * 0.55 * spdR;
     e.model.legL.rotation.x = sw; e.model.legR.rotation.x = -sw;
     e.model.armL.rotation.x = -sw * 0.5;
     // right arm aims with pitch
-    e.model.armR.rotation.x = -Math.PI / 2 + (e.target ? -e.pitch : 0.3) + (e.moving && !e.target ? sw * 0.3 : 0);
+    e.model.armR.rotation.x = -Math.PI / 2 + (e.target ? -e.pitch : 0.3) + (!e.target ? sw * 0.3 : 0);
+    const blat = (e.vel.x * Math.cos(e.yaw) - e.vel.z * Math.sin(e.yaw)) / CFG.bot.speed;
+    g.rotation.z = -blat * 0.1;
     e.model.blob.position.set(0, 0.02, 0);
   }
   renderer.render(scene, camera);

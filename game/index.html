@@ -30,10 +30,15 @@
   .help{margin-top:22px;font-size:12px;opacity:.55;max-width:520px}
   /* HUD */
   #hud{position:fixed;inset:0;pointer-events:none;z-index:20}
-  #xhair{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:22px;height:22px}
-  #xhair div{position:absolute;background:#e8e4da;box-shadow:0 0 3px #000}
-  #xhair .h1{left:0;top:10px;width:6px;height:2px}#xhair .h2{right:0;top:10px;width:6px;height:2px}
-  #xhair .v1{left:10px;top:0;width:2px;height:6px}#xhair .v2{left:10px;bottom:0;width:2px;height:6px}
+  #xhair{--g:3px;position:absolute;left:50%;top:50%;width:0;height:0}
+  #xhair div{position:absolute;left:0;top:0;background:#e8e4da;box-shadow:0 0 3px #000}
+  #xhair .h1{width:7px;height:2px;transform:translate(calc(-100% - var(--g)),-1px)}
+  #xhair .h2{width:7px;height:2px;transform:translate(var(--g),-1px)}
+  #xhair .v1{width:2px;height:7px;transform:translate(-1px,calc(-100% - var(--g)))}
+  #xhair .v2{width:2px;height:7px;transform:translate(-1px,var(--g))}
+  #xhair.kill div{background:#ffb03a}
+  #killBanner{position:absolute;left:50%;bottom:24%;transform:translateX(-50%);font-size:15px;font-weight:700;
+    letter-spacing:.18em;color:#ffb03a;text-shadow:0 2px 6px #000;opacity:0;transition:opacity .35s;white-space:nowrap}
   #hitmark{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(45deg);width:26px;height:26px;
     opacity:0;transition:opacity .12s}
   #hitmark div{position:absolute;background:#ff7a1a}
@@ -86,6 +91,7 @@
   <div id="ladder"></div>
   <div id="feed"></div>
   <div id="centerMsg"></div>
+  <div id="killBanner"></div>
 </div>
 
 <div id="touchUI">

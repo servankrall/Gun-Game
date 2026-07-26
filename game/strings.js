@@ -27,6 +27,7 @@ export const STR = {
     leader: "Leader: {name}",
     respawnIn: "Respawn in {s}",
     killedBy: "Taken down by {name}",
+    youKilled: "YOU TOOK DOWN {name}",
   },
   feed: { killed: "{a} ➤ {b}", advanced: "{a} advanced to {gun}" },
   end: {
