@@ -1,0 +1,2847 @@
+{
+ "name": "VANTAGE",
+ "version": "1.0",
+ "description": "Original competitive-tactical FPS material foundation (procedural, stylized-PBR, seamless).",
+ "resolutions": [
+  512,
+  1024,
+  2048,
+  4096
+ ],
+ "maps": [
+  "albedo",
+  "normal",
+  "ao",
+  "roughness",
+  "metallic",
+  "height",
+  "displacement",
+  "orm",
+  "curvature",
+  "opacity",
+  "emission"
+ ],
+ "defaults": {},
+ "materials": [
+  {
+   "id": "concrete_clean",
+   "category": "concrete",
+   "family": "concrete",
+   "palette": {
+    "base": "#cfd0cc",
+    "base2": "#c4c5c0",
+    "recess": "#83857d"
+   },
+   "roughness": 0.72,
+   "rough_var": 0.16,
+   "metallic": 0.0,
+   "wear": 0.06,
+   "normal_strength": 2.1,
+   "seed": 12521586,
+   "params": {}
+  },
+  {
+   "id": "concrete_weathered",
+   "category": "concrete",
+   "family": "concrete",
+   "palette": {
+    "base": "#bfc0ba",
+    "base2": "#a9aaa3",
+    "recess": "#83857d"
+   },
+   "roughness": 0.72,
+   "rough_var": 0.16,
+   "metallic": 0.0,
+   "wear": 0.16,
+   "normal_strength": 2.1,
+   "seed": 2121993,
+   "params": {}
+  },
+  {
+   "id": "concrete_industrial",
+   "category": "concrete",
+   "family": "concrete",
+   "palette": {
+    "base": "#b4b6b0",
+    "base2": "#9a9c96",
+    "recess": "#83857d"
+   },
+   "roughness": 0.72,
+   "rough_var": 0.16,
+   "metallic": 0.0,
+   "wear": 0.16,
+   "normal_strength": 2.1,
+   "seed": 13407765,
+   "params": {}
+  },
+  {
+   "id": "concrete_painted",
+   "category": "concrete",
+   "family": "concrete",
+   "palette": {
+    "base": "#cdd2cf",
+    "base2": "#c2c7c4",
+    "recess": "#83857d"
+   },
+   "roughness": 0.72,
+   "rough_var": 0.16,
+   "metallic": 0.0,
+   "wear": 0.16,
+   "normal_strength": 2.1,
+   "seed": 15152545,
+   "params": {}
+  },
+  {
+   "id": "concrete_polished",
+   "category": "concrete",
+   "family": "concrete",
+   "palette": {
+    "base": "#c8cac7",
+    "base2": "#bcbeba",
+    "recess": "#83857d"
+   },
+   "roughness": 0.42,
+   "rough_var": 0.1,
+   "metallic": 0.0,
+   "wear": 0.06,
+   "normal_strength": 1.4,
+   "seed": 10246887,
+   "params": {}
+  },
+  {
+   "id": "concrete_old",
+   "category": "concrete",
+   "family": "concrete",
+   "palette": {
+    "base": "#b0b1aa",
+    "base2": "#989a90",
+    "recess": "#83857d"
+   },
+   "roughness": 0.72,
+   "rough_var": 0.16,
+   "metallic": 0.0,
+   "wear": 0.16,
+   "normal_strength": 2.1,
+   "seed": 4031354,
+   "params": {}
+  },
+  {
+   "id": "concrete_damaged",
+   "category": "concrete",
+   "family": "concrete",
+   "palette": {
+    "base": "#aeafa8",
+    "base2": "#8f918a",
+    "recess": "#83857d"
+   },
+   "roughness": 0.72,
+   "rough_var": 0.16,
+   "metallic": 0.0,
+   "wear": 0.16,
+   "normal_strength": 2.1,
+   "seed": 8008159,
+   "params": {}
+  },
+  {
+   "id": "concrete_sidewalk",
+   "category": "concrete",
+   "family": "concrete",
+   "palette": {
+    "base": "#c6c7c2",
+    "base2": "#b3b4ae",
+    "recess": "#83857d"
+   },
+   "roughness": 0.72,
+   "rough_var": 0.16,
+   "metallic": 0.0,
+   "wear": 0.16,
+   "normal_strength": 2.1,
+   "seed": 13141656,
+   "params": {}
+  },
+  {
+   "id": "concrete_parking",
+   "category": "concrete",
+   "family": "concrete",
+   "palette": {
+    "base": "#b9bab5",
+    "base2": "#a3a49e",
+    "recess": "#83857d"
+   },
+   "roughness": 0.72,
+   "rough_var": 0.16,
+   "metallic": 0.0,
+   "wear": 0.16,
+   "normal_strength": 2.1,
+   "seed": 14294622,
+   "params": {}
+  },
+  {
+   "id": "concrete_military",
+   "category": "concrete",
+   "family": "concrete",
+   "palette": {
+    "base": "#b6b8ad",
+    "base2": "#9ea094",
+    "recess": "#83857d"
+   },
+   "roughness": 0.72,
+   "rough_var": 0.16,
+   "metallic": 0.0,
+   "wear": 0.16,
+   "normal_strength": 2.1,
+   "seed": 11720935,
+   "params": {}
+  },
+  {
+   "id": "concrete_airport",
+   "category": "concrete",
+   "family": "concrete",
+   "palette": {
+    "base": "#c9cbc6",
+    "base2": "#b8bab4",
+    "recess": "#83857d"
+   },
+   "roughness": 0.72,
+   "rough_var": 0.16,
+   "metallic": 0.0,
+   "wear": 0.16,
+   "normal_strength": 2.1,
+   "seed": 10264122,
+   "params": {}
+  },
+  {
+   "id": "concrete_bridge",
+   "category": "concrete",
+   "family": "concrete",
+   "palette": {
+    "base": "#b7b9b3",
+    "base2": "#a0a29b",
+    "recess": "#83857d"
+   },
+   "roughness": 0.72,
+   "rough_var": 0.16,
+   "metallic": 0.0,
+   "wear": 0.16,
+   "normal_strength": 2.1,
+   "seed": 11264833,
+   "params": {}
+  },
+  {
+   "id": "concrete_road",
+   "category": "concrete",
+   "family": "concrete",
+   "palette": {
+    "base": "#a9aaa4",
+    "base2": "#93948e",
+    "recess": "#83857d"
+   },
+   "roughness": 0.72,
+   "rough_var": 0.16,
+   "metallic": 0.0,
+   "wear": 0.16,
+   "normal_strength": 2.1,
+   "seed": 13832600,
+   "params": {}
+  },
+  {
+   "id": "concrete_wall",
+   "category": "concrete",
+   "family": "concrete",
+   "palette": {
+    "base": "#c2c3be",
+    "base2": "#aeafa9",
+    "recess": "#83857d"
+   },
+   "roughness": 0.72,
+   "rough_var": 0.16,
+   "metallic": 0.0,
+   "wear": 0.16,
+   "normal_strength": 2.1,
+   "seed": 7380344,
+   "params": {}
+  },
+  {
+   "id": "concrete_floor",
+   "category": "concrete",
+   "family": "concrete",
+   "palette": {
+    "base": "#c0c1bc",
+    "base2": "#adaea8",
+    "recess": "#83857d"
+   },
+   "roughness": 0.72,
+   "rough_var": 0.16,
+   "metallic": 0.0,
+   "wear": 0.16,
+   "normal_strength": 2.1,
+   "seed": 14385153,
+   "params": {}
+  },
+  {
+   "id": "concrete_roof",
+   "category": "concrete",
+   "family": "concrete",
+   "palette": {
+    "base": "#aeb0a9",
+    "base2": "#96988f",
+    "recess": "#83857d"
+   },
+   "roughness": 0.72,
+   "rough_var": 0.16,
+   "metallic": 0.0,
+   "wear": 0.16,
+   "normal_strength": 2.1,
+   "seed": 159698,
+   "params": {}
+  },
+  {
+   "id": "concrete_stairs",
+   "category": "concrete",
+   "family": "concrete",
+   "palette": {
+    "base": "#c1c2bd",
+    "base2": "#adaea7",
+    "recess": "#83857d"
+   },
+   "roughness": 0.72,
+   "rough_var": 0.16,
+   "metallic": 0.0,
+   "wear": 0.16,
+   "normal_strength": 2.1,
+   "seed": 7442752,
+   "params": {}
+  },
+  {
+   "id": "concrete_barrier",
+   "category": "concrete",
+   "family": "concrete",
+   "palette": {
+    "base": "#c4c6c0",
+    "base2": "#b0b2ab",
+    "recess": "#83857d"
+   },
+   "roughness": 0.72,
+   "rough_var": 0.16,
+   "metallic": 0.0,
+   "wear": 0.16,
+   "normal_strength": 2.1,
+   "seed": 3947018,
+   "params": {}
+  },
+  {
+   "id": "concrete_bunker",
+   "category": "concrete",
+   "family": "concrete",
+   "palette": {
+    "base": "#a6a89f",
+    "base2": "#8d8f86",
+    "recess": "#83857d"
+   },
+   "roughness": 0.72,
+   "rough_var": 0.16,
+   "metallic": 0.0,
+   "wear": 0.16,
+   "normal_strength": 2.1,
+   "seed": 2026119,
+   "params": {}
+  },
+  {
+   "id": "concrete_tunnel",
+   "category": "concrete",
+   "family": "concrete",
+   "palette": {
+    "base": "#9fa199",
+    "base2": "#87897f",
+    "recess": "#83857d"
+   },
+   "roughness": 0.72,
+   "rough_var": 0.16,
+   "metallic": 0.0,
+   "wear": 0.16,
+   "normal_strength": 2.1,
+   "seed": 14869808,
+   "params": {}
+  },
+  {
+   "id": "metal_brushed_steel",
+   "category": "metal",
+   "family": "smooth",
+   "palette": {
+    "base": "#9aa0a6",
+    "base2": "#8f959b",
+    "recess": "#4a4d52"
+   },
+   "roughness": 0.34,
+   "rough_var": 0.12,
+   "metallic": 1.0,
+   "wear": 0.1,
+   "normal_strength": 2.2,
+   "seed": 14941087,
+   "params": {
+    "brushed": true
+   }
+  },
+  {
+   "id": "metal_polished_steel",
+   "category": "metal",
+   "family": "smooth",
+   "palette": {
+    "base": "#b4b9be",
+    "base2": "#a7acb1",
+    "recess": "#4a4d52"
+   },
+   "roughness": 0.14,
+   "rough_var": 0.12,
+   "metallic": 1.0,
+   "wear": 0.1,
+   "normal_strength": 2.2,
+   "seed": 12036163,
+   "params": {
+    "brushed": false
+   }
+  },
+  {
+   "id": "metal_military_steel",
+   "category": "metal",
+   "family": "panel",
+   "palette": {
+    "base": "#7f858b",
+    "base2": "#70767c",
+    "recess": "#4a4d52"
+   },
+   "roughness": 0.5,
+   "rough_var": 0.12,
+   "metallic": 1.0,
+   "wear": 0.1,
+   "normal_strength": 2.2,
+   "seed": 7120496,
+   "params": {
+    "nx": 3,
+    "ny": 4,
+    "seam": 0.02,
+    "bolts": true
+   }
+  },
+  {
+   "id": "metal_industrial_steel",
+   "category": "metal",
+   "family": "panel",
+   "palette": {
+    "base": "#8a9096",
+    "base2": "#7b8187",
+    "recess": "#4a4d52"
+   },
+   "roughness": 0.46,
+   "rough_var": 0.12,
+   "metallic": 1.0,
+   "wear": 0.1,
+   "normal_strength": 2.2,
+   "seed": 6727952,
+   "params": {
+    "nx": 3,
+    "ny": 4,
+    "seam": 0.02,
+    "bolts": true
+   }
+  },
+  {
+   "id": "metal_galvanized",
+   "category": "metal",
+   "family": "panel",
+   "palette": {
+    "base": "#b8c0c6",
+    "base2": "#a7b0b6",
+    "recess": "#4a4d52"
+   },
+   "roughness": 0.4,
+   "rough_var": 0.12,
+   "metallic": 1.0,
+   "wear": 0.1,
+   "normal_strength": 2.2,
+   "seed": 1056494,
+   "params": {
+    "nx": 2,
+    "ny": 2,
+    "seam": 0.015,
+    "bolts": false
+   }
+  },
+  {
+   "id": "metal_aluminum",
+   "category": "metal",
+   "family": "smooth",
+   "palette": {
+    "base": "#c3c7cb",
+    "base2": "#b4b8bc",
+    "recess": "#4a4d52"
+   },
+   "roughness": 0.3,
+   "rough_var": 0.12,
+   "metallic": 1.0,
+   "wear": 0.1,
+   "normal_strength": 2.2,
+   "seed": 12971728,
+   "params": {
+    "brushed": true
+   }
+  },
+  {
+   "id": "metal_titanium",
+   "category": "metal",
+   "family": "smooth",
+   "palette": {
+    "base": "#a9adb2",
+    "base2": "#9a9ea3",
+    "recess": "#4a4d52"
+   },
+   "roughness": 0.28,
+   "rough_var": 0.12,
+   "metallic": 1.0,
+   "wear": 0.1,
+   "normal_strength": 2.2,
+   "seed": 10184369,
+   "params": {
+    "brushed": true
+   }
+  },
+  {
+   "id": "metal_copper",
+   "category": "metal",
+   "family": "smooth",
+   "palette": {
+    "base": "#b5723a",
+    "base2": "#a5652f",
+    "recess": "#4a4d52"
+   },
+   "roughness": 0.35,
+   "rough_var": 0.12,
+   "metallic": 1.0,
+   "wear": 0.1,
+   "normal_strength": 2.2,
+   "seed": 668113,
+   "params": {
+    "brushed": true
+   }
+  },
+  {
+   "id": "metal_bronze",
+   "category": "metal",
+   "family": "smooth",
+   "palette": {
+    "base": "#8a6a3a",
+    "base2": "#7a5c30",
+    "recess": "#4a4d52"
+   },
+   "roughness": 0.4,
+   "rough_var": 0.12,
+   "metallic": 1.0,
+   "wear": 0.1,
+   "normal_strength": 2.2,
+   "seed": 10765461,
+   "params": {
+    "nx": 3,
+    "ny": 4,
+    "seam": 0.02,
+    "bolts": true
+   }
+  },
+  {
+   "id": "metal_cast_iron",
+   "category": "metal",
+   "family": "panel",
+   "palette": {
+    "base": "#3f4247",
+    "base2": "#34373b",
+    "recess": "#4a4d52"
+   },
+   "roughness": 0.62,
+   "rough_var": 0.12,
+   "metallic": 1.0,
+   "wear": 0.1,
+   "normal_strength": 2.2,
+   "seed": 16040969,
+   "params": {
+    "nx": 2,
+    "ny": 2,
+    "seam": 0.02,
+    "bolts": false
+   }
+  },
+  {
+   "id": "metal_black",
+   "category": "metal",
+   "family": "smooth",
+   "palette": {
+    "base": "#2a2d31",
+    "base2": "#232629",
+    "recess": "#4a4d52"
+   },
+   "roughness": 0.5,
+   "rough_var": 0.12,
+   "metallic": 1.0,
+   "wear": 0.1,
+   "normal_strength": 2.2,
+   "seed": 2173863,
+   "params": {
+    "nx": 3,
+    "ny": 4,
+    "seam": 0.02,
+    "bolts": true
+   }
+  },
+  {
+   "id": "metal_painted",
+   "category": "metal",
+   "family": "panel",
+   "palette": {
+    "base": "#3f6f8c",
+    "base2": "#396580",
+    "recess": "#4a4d52",
+    "metal": "#8a8f96"
+   },
+   "roughness": 0.55,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.1,
+   "normal_strength": 2.2,
+   "seed": 14131156,
+   "params": {
+    "nx": 3,
+    "ny": 4,
+    "seam": 0.02,
+    "bolts": true
+   },
+   "chips": true
+  },
+  {
+   "id": "metal_scratched",
+   "category": "metal",
+   "family": "panel",
+   "palette": {
+    "base": "#8f9599",
+    "base2": "#82888c",
+    "recess": "#4a4d52",
+    "metal": "#b4b9be"
+   },
+   "roughness": 0.44,
+   "rough_var": 0.12,
+   "metallic": 1.0,
+   "wear": 0.22,
+   "normal_strength": 2.2,
+   "seed": 10812324,
+   "params": {
+    "nx": 3,
+    "ny": 4,
+    "seam": 0.02,
+    "bolts": true
+   },
+   "chips": true
+  },
+  {
+   "id": "metal_machined",
+   "category": "metal",
+   "family": "smooth",
+   "palette": {
+    "base": "#9fa4a9",
+    "base2": "#9297a0",
+    "recess": "#4a4d52"
+   },
+   "roughness": 0.26,
+   "rough_var": 0.12,
+   "metallic": 1.0,
+   "wear": 0.1,
+   "normal_strength": 2.2,
+   "seed": 11633312,
+   "params": {
+    "brushed": true
+   }
+  },
+  {
+   "id": "metal_anodized_alu",
+   "category": "metal",
+   "family": "smooth",
+   "palette": {
+    "base": "#4a7c78",
+    "base2": "#437270",
+    "recess": "#4a4d52"
+   },
+   "roughness": 0.3,
+   "rough_var": 0.12,
+   "metallic": 0.7,
+   "wear": 0.1,
+   "normal_strength": 2.2,
+   "seed": 10744199,
+   "params": {
+    "nx": 3,
+    "ny": 4,
+    "seam": 0.02,
+    "bolts": true
+   }
+  },
+  {
+   "id": "metal_carbon_steel",
+   "category": "metal",
+   "family": "panel",
+   "palette": {
+    "base": "#767b80",
+    "base2": "#696e73",
+    "recess": "#4a4d52"
+   },
+   "roughness": 0.5,
+   "rough_var": 0.12,
+   "metallic": 1.0,
+   "wear": 0.1,
+   "normal_strength": 2.2,
+   "seed": 11245948,
+   "params": {
+    "nx": 3,
+    "ny": 4,
+    "seam": 0.02,
+    "bolts": true
+   }
+  },
+  {
+   "id": "metal_corrugated",
+   "category": "metal",
+   "family": "corrugated",
+   "palette": {
+    "base": "#9aa0a6",
+    "base2": "#8b9197",
+    "recess": "#4a4d52"
+   },
+   "roughness": 0.42,
+   "rough_var": 0.12,
+   "metallic": 1.0,
+   "wear": 0.1,
+   "normal_strength": 2.2,
+   "seed": 6306095,
+   "params": {
+    "waves": 18,
+    "vertical": true
+   }
+  },
+  {
+   "id": "metal_diamond_plate",
+   "category": "metal",
+   "family": "diamond",
+   "palette": {
+    "base": "#8b9096",
+    "base2": "#7d8288",
+    "recess": "#4a4d52"
+   },
+   "roughness": 0.44,
+   "rough_var": 0.12,
+   "metallic": 1.0,
+   "wear": 0.1,
+   "normal_strength": 2.2,
+   "seed": 15734881,
+   "params": {
+    "n": 10
+   }
+  },
+  {
+   "id": "metal_reinforced",
+   "category": "metal",
+   "family": "panel",
+   "palette": {
+    "base": "#7a8086",
+    "base2": "#6c7278",
+    "recess": "#4a4d52"
+   },
+   "roughness": 0.5,
+   "rough_var": 0.12,
+   "metallic": 1.0,
+   "wear": 0.1,
+   "normal_strength": 2.2,
+   "seed": 13836585,
+   "params": {
+    "nx": 3,
+    "ny": 4,
+    "seam": 0.02,
+    "bolts": true
+   }
+  },
+  {
+   "id": "metal_modern_alloy",
+   "category": "metal",
+   "family": "smooth",
+   "palette": {
+    "base": "#aeb3b8",
+    "base2": "#a0a5aa",
+    "recess": "#4a4d52"
+   },
+   "roughness": 0.24,
+   "rough_var": 0.12,
+   "metallic": 1.0,
+   "wear": 0.1,
+   "normal_strength": 2.2,
+   "seed": 11822561,
+   "params": {
+    "brushed": true
+   }
+  },
+  {
+   "id": "wood_oak",
+   "category": "wood",
+   "family": "planks",
+   "palette": {
+    "base": "#b98c55",
+    "base2": "#a97e4a",
+    "recess": "#5c4227"
+   },
+   "roughness": 0.55,
+   "rough_var": 0.14,
+   "metallic": 0.0,
+   "wear": 0.09,
+   "normal_strength": 1.7,
+   "seed": 12805503,
+   "params": {
+    "n": 6,
+    "gap": 0.02,
+    "grain": 9,
+    "vertical": true
+   }
+  },
+  {
+   "id": "wood_walnut",
+   "category": "wood",
+   "family": "planks",
+   "palette": {
+    "base": "#6b4a30",
+    "base2": "#5b3d27",
+    "recess": "#33210f"
+   },
+   "roughness": 0.55,
+   "rough_var": 0.14,
+   "metallic": 0.0,
+   "wear": 0.09,
+   "normal_strength": 1.7,
+   "seed": 16603382,
+   "params": {
+    "n": 6,
+    "gap": 0.02,
+    "grain": 9,
+    "vertical": true
+   }
+  },
+  {
+   "id": "wood_pine",
+   "category": "wood",
+   "family": "planks",
+   "palette": {
+    "base": "#d8b783",
+    "base2": "#c9a874",
+    "recess": "#8a6b42"
+   },
+   "roughness": 0.55,
+   "rough_var": 0.14,
+   "metallic": 0.0,
+   "wear": 0.09,
+   "normal_strength": 1.7,
+   "seed": 7491236,
+   "params": {
+    "n": 6,
+    "gap": 0.02,
+    "grain": 9,
+    "vertical": true
+   }
+  },
+  {
+   "id": "wood_birch",
+   "category": "wood",
+   "family": "planks",
+   "palette": {
+    "base": "#e6d3ad",
+    "base2": "#d8c49c",
+    "recess": "#a58f66"
+   },
+   "roughness": 0.55,
+   "rough_var": 0.14,
+   "metallic": 0.0,
+   "wear": 0.09,
+   "normal_strength": 1.7,
+   "seed": 13604800,
+   "params": {
+    "n": 6,
+    "gap": 0.02,
+    "grain": 9,
+    "vertical": true
+   }
+  },
+  {
+   "id": "wood_painted",
+   "category": "wood",
+   "family": "planks",
+   "palette": {
+    "base": "#c9cfcb",
+    "base2": "#bcc3bf",
+    "recess": "#7f857f"
+   },
+   "roughness": 0.55,
+   "rough_var": 0.14,
+   "metallic": 0.0,
+   "wear": 0.09,
+   "normal_strength": 1.7,
+   "seed": 753244,
+   "params": {
+    "n": 6,
+    "gap": 0.02,
+    "grain": 9,
+    "vertical": true
+   }
+  },
+  {
+   "id": "wood_weathered",
+   "category": "wood",
+   "family": "planks",
+   "palette": {
+    "base": "#a99a86",
+    "base2": "#958672",
+    "recess": "#6b5f4e"
+   },
+   "roughness": 0.55,
+   "rough_var": 0.14,
+   "metallic": 0.0,
+   "wear": 0.14,
+   "normal_strength": 1.7,
+   "seed": 16507126,
+   "params": {
+    "n": 6,
+    "gap": 0.02,
+    "grain": 9,
+    "vertical": true
+   }
+  },
+  {
+   "id": "wood_interior",
+   "category": "wood",
+   "family": "planks",
+   "palette": {
+    "base": "#c39a63",
+    "base2": "#b48c57",
+    "recess": "#7a5c37"
+   },
+   "roughness": 0.55,
+   "rough_var": 0.14,
+   "metallic": 0.0,
+   "wear": 0.09,
+   "normal_strength": 1.7,
+   "seed": 9994495,
+   "params": {
+    "n": 6,
+    "gap": 0.02,
+    "grain": 9,
+    "vertical": true
+   }
+  },
+  {
+   "id": "wood_exterior",
+   "category": "wood",
+   "family": "planks",
+   "palette": {
+    "base": "#9c8560",
+    "base2": "#8c7654",
+    "recess": "#5e4d34"
+   },
+   "roughness": 0.55,
+   "rough_var": 0.14,
+   "metallic": 0.0,
+   "wear": 0.14,
+   "normal_strength": 1.7,
+   "seed": 2627239,
+   "params": {
+    "n": 6,
+    "gap": 0.02,
+    "grain": 9,
+    "vertical": true
+   }
+  },
+  {
+   "id": "wood_dark",
+   "category": "wood",
+   "family": "planks",
+   "palette": {
+    "base": "#4b3520",
+    "base2": "#3d2a19",
+    "recess": "#20150a"
+   },
+   "roughness": 0.55,
+   "rough_var": 0.14,
+   "metallic": 0.0,
+   "wear": 0.09,
+   "normal_strength": 1.7,
+   "seed": 7490029,
+   "params": {
+    "n": 6,
+    "gap": 0.02,
+    "grain": 9,
+    "vertical": true
+   }
+  },
+  {
+   "id": "wood_light",
+   "category": "wood",
+   "family": "planks",
+   "palette": {
+    "base": "#dcc79a",
+    "base2": "#cfba8d",
+    "recess": "#9a8560"
+   },
+   "roughness": 0.55,
+   "rough_var": 0.14,
+   "metallic": 0.0,
+   "wear": 0.09,
+   "normal_strength": 1.7,
+   "seed": 7415128,
+   "params": {
+    "n": 6,
+    "gap": 0.02,
+    "grain": 9,
+    "vertical": true
+   }
+  },
+  {
+   "id": "wood_factory",
+   "category": "wood",
+   "family": "planks",
+   "palette": {
+    "base": "#8f7a5a",
+    "base2": "#7f6c4e",
+    "recess": "#544632"
+   },
+   "roughness": 0.55,
+   "rough_var": 0.14,
+   "metallic": 0.0,
+   "wear": 0.09,
+   "normal_strength": 1.7,
+   "seed": 14297808,
+   "params": {
+    "n": 6,
+    "gap": 0.02,
+    "grain": 9,
+    "vertical": true
+   }
+  },
+  {
+   "id": "wood_crate",
+   "category": "wood",
+   "family": "planks",
+   "palette": {
+    "base": "#c2a069",
+    "base2": "#b2915c",
+    "recess": "#7c6238"
+   },
+   "roughness": 0.55,
+   "rough_var": 0.14,
+   "metallic": 0.0,
+   "wear": 0.09,
+   "normal_strength": 1.7,
+   "seed": 13310966,
+   "params": {
+    "n": 5,
+    "gap": 0.02,
+    "grain": 9,
+    "vertical": true
+   }
+  },
+  {
+   "id": "wood_pallet",
+   "category": "wood",
+   "family": "planks",
+   "palette": {
+    "base": "#b59a6d",
+    "base2": "#a68b60",
+    "recess": "#6f5b39"
+   },
+   "roughness": 0.55,
+   "rough_var": 0.14,
+   "metallic": 0.0,
+   "wear": 0.09,
+   "normal_strength": 1.7,
+   "seed": 1805114,
+   "params": {
+    "n": 5,
+    "gap": 0.02,
+    "grain": 9,
+    "vertical": true
+   }
+  },
+  {
+   "id": "wood_lumber",
+   "category": "wood",
+   "family": "planks",
+   "palette": {
+    "base": "#caa972",
+    "base2": "#bb9a63",
+    "recess": "#846740"
+   },
+   "roughness": 0.55,
+   "rough_var": 0.14,
+   "metallic": 0.0,
+   "wear": 0.09,
+   "normal_strength": 1.7,
+   "seed": 2380141,
+   "params": {
+    "n": 6,
+    "gap": 0.02,
+    "grain": 9,
+    "vertical": true
+   }
+  },
+  {
+   "id": "wood_panel",
+   "category": "wood",
+   "family": "planks",
+   "palette": {
+    "base": "#b58f5c",
+    "base2": "#a78351",
+    "recess": "#6d5230"
+   },
+   "roughness": 0.55,
+   "rough_var": 0.14,
+   "metallic": 0.0,
+   "wear": 0.09,
+   "normal_strength": 1.7,
+   "seed": 14690195,
+   "params": {
+    "n": 6,
+    "gap": 0.02,
+    "grain": 9,
+    "vertical": true
+   }
+  },
+  {
+   "id": "wood_furniture",
+   "category": "wood",
+   "family": "planks",
+   "palette": {
+    "base": "#7a5230",
+    "base2": "#684627",
+    "recess": "#3d2814"
+   },
+   "roughness": 0.55,
+   "rough_var": 0.14,
+   "metallic": 0.0,
+   "wear": 0.09,
+   "normal_strength": 1.7,
+   "seed": 13034406,
+   "params": {
+    "n": 6,
+    "gap": 0.02,
+    "grain": 9,
+    "vertical": true
+   }
+  },
+  {
+   "id": "rubber_soft",
+   "category": "rubber",
+   "family": "smooth",
+   "palette": {
+    "base": "#2a2c2e",
+    "base2": "#2a2c2e",
+    "recess": "#141517"
+   },
+   "roughness": 0.78,
+   "rough_var": 0.05,
+   "metallic": 0.0,
+   "wear": 0.05,
+   "normal_strength": 1.1,
+   "seed": 16644637,
+   "params": {}
+  },
+  {
+   "id": "rubber_industrial",
+   "category": "rubber",
+   "family": "smooth",
+   "palette": {
+    "base": "#26282a",
+    "base2": "#26282a",
+    "recess": "#141517"
+   },
+   "roughness": 0.72,
+   "rough_var": 0.05,
+   "metallic": 0.0,
+   "wear": 0.05,
+   "normal_strength": 1.1,
+   "seed": 13225136,
+   "params": {}
+  },
+  {
+   "id": "rubber_military",
+   "category": "rubber",
+   "family": "smooth",
+   "palette": {
+    "base": "#2c2e2a",
+    "base2": "#2c2e2a",
+    "recess": "#141517"
+   },
+   "roughness": 0.8,
+   "rough_var": 0.05,
+   "metallic": 0.0,
+   "wear": 0.05,
+   "normal_strength": 1.1,
+   "seed": 13372852,
+   "params": {}
+  },
+  {
+   "id": "rubber_grip",
+   "category": "rubber",
+   "family": "fabric",
+   "palette": {
+    "base": "#1f2123",
+    "base2": "#1f2123",
+    "recess": "#141517"
+   },
+   "roughness": 0.85,
+   "rough_var": 0.05,
+   "metallic": 0.0,
+   "wear": 0.05,
+   "normal_strength": 1.1,
+   "seed": 5823853,
+   "params": {
+    "n": 70
+   }
+  },
+  {
+   "id": "rubber_vehicle",
+   "category": "rubber",
+   "family": "smooth",
+   "palette": {
+    "base": "#232527",
+    "base2": "#232527",
+    "recess": "#141517"
+   },
+   "roughness": 0.7,
+   "rough_var": 0.05,
+   "metallic": 0.0,
+   "wear": 0.05,
+   "normal_strength": 1.1,
+   "seed": 1803743,
+   "params": {}
+  },
+  {
+   "id": "rubber_flooring",
+   "category": "rubber",
+   "family": "fabric",
+   "palette": {
+    "base": "#303234",
+    "base2": "#303234",
+    "recess": "#141517"
+   },
+   "roughness": 0.74,
+   "rough_var": 0.05,
+   "metallic": 0.0,
+   "wear": 0.05,
+   "normal_strength": 1.1,
+   "seed": 10475244,
+   "params": {
+    "n": 70
+   }
+  },
+  {
+   "id": "rubber_seal",
+   "category": "rubber",
+   "family": "smooth",
+   "palette": {
+    "base": "#212325",
+    "base2": "#212325",
+    "recess": "#141517"
+   },
+   "roughness": 0.7,
+   "rough_var": 0.05,
+   "metallic": 0.0,
+   "wear": 0.05,
+   "normal_strength": 1.1,
+   "seed": 8437611,
+   "params": {}
+  },
+  {
+   "id": "rubber_cable",
+   "category": "rubber",
+   "family": "smooth",
+   "palette": {
+    "base": "#1c1e20",
+    "base2": "#1c1e20",
+    "recess": "#141517"
+   },
+   "roughness": 0.65,
+   "rough_var": 0.05,
+   "metallic": 0.0,
+   "wear": 0.05,
+   "normal_strength": 1.1,
+   "seed": 8033275,
+   "params": {}
+  },
+  {
+   "id": "rubber_mat",
+   "category": "rubber",
+   "family": "fabric",
+   "palette": {
+    "base": "#2b2d2f",
+    "base2": "#2b2d2f",
+    "recess": "#141517"
+   },
+   "roughness": 0.82,
+   "rough_var": 0.05,
+   "metallic": 0.0,
+   "wear": 0.05,
+   "normal_strength": 1.1,
+   "seed": 13355715,
+   "params": {
+    "n": 70
+   }
+  },
+  {
+   "id": "plastic_abs",
+   "category": "plastic",
+   "family": "smooth",
+   "palette": {
+    "base": "#3a3d42",
+    "base2": "#34373c",
+    "recess": "#26282c"
+   },
+   "roughness": 0.45,
+   "rough_var": 0.06,
+   "metallic": 0.0,
+   "wear": 0.05,
+   "normal_strength": 1.0,
+   "seed": 11097698,
+   "params": {}
+  },
+  {
+   "id": "plastic_polycarbonate",
+   "category": "plastic",
+   "family": "smooth",
+   "palette": {
+    "base": "#c9ced2",
+    "base2": "#bdc2c6",
+    "recess": "#26282c"
+   },
+   "roughness": 0.3,
+   "rough_var": 0.06,
+   "metallic": 0.0,
+   "wear": 0.05,
+   "normal_strength": 1.0,
+   "seed": 9721627,
+   "params": {}
+  },
+  {
+   "id": "plastic_hdpe",
+   "category": "plastic",
+   "family": "smooth",
+   "palette": {
+    "base": "#c7cbc4",
+    "base2": "#bcc0b9",
+    "recess": "#26282c"
+   },
+   "roughness": 0.5,
+   "rough_var": 0.06,
+   "metallic": 0.0,
+   "wear": 0.05,
+   "normal_strength": 1.0,
+   "seed": 6964767,
+   "params": {}
+  },
+  {
+   "id": "plastic_pvc",
+   "category": "plastic",
+   "family": "smooth",
+   "palette": {
+    "base": "#d3d6d8",
+    "base2": "#c7cacc",
+    "recess": "#26282c"
+   },
+   "roughness": 0.42,
+   "rough_var": 0.06,
+   "metallic": 0.0,
+   "wear": 0.05,
+   "normal_strength": 1.0,
+   "seed": 9940200,
+   "params": {}
+  },
+  {
+   "id": "plastic_industrial",
+   "category": "plastic",
+   "family": "smooth",
+   "palette": {
+    "base": "#4a4f55",
+    "base2": "#43484e",
+    "recess": "#26282c"
+   },
+   "roughness": 0.5,
+   "rough_var": 0.06,
+   "metallic": 0.0,
+   "wear": 0.05,
+   "normal_strength": 1.0,
+   "seed": 4059622,
+   "params": {}
+  },
+  {
+   "id": "plastic_military",
+   "category": "plastic",
+   "family": "smooth",
+   "palette": {
+    "base": "#3d4238",
+    "base2": "#373c33",
+    "recess": "#26282c"
+   },
+   "roughness": 0.55,
+   "rough_var": 0.06,
+   "metallic": 0.0,
+   "wear": 0.05,
+   "normal_strength": 1.0,
+   "seed": 14329231,
+   "params": {}
+  },
+  {
+   "id": "plastic_injection",
+   "category": "plastic",
+   "family": "smooth",
+   "palette": {
+    "base": "#2e3136",
+    "base2": "#292c31",
+    "recess": "#26282c"
+   },
+   "roughness": 0.4,
+   "rough_var": 0.06,
+   "metallic": 0.0,
+   "wear": 0.05,
+   "normal_strength": 1.0,
+   "seed": 5097145,
+   "params": {}
+  },
+  {
+   "id": "plastic_hard",
+   "category": "plastic",
+   "family": "smooth",
+   "palette": {
+    "base": "#40444a",
+    "base2": "#3a3e44",
+    "recess": "#26282c"
+   },
+   "roughness": 0.38,
+   "rough_var": 0.06,
+   "metallic": 0.0,
+   "wear": 0.05,
+   "normal_strength": 1.0,
+   "seed": 8082497,
+   "params": {}
+  },
+  {
+   "id": "plastic_soft",
+   "category": "plastic",
+   "family": "smooth",
+   "palette": {
+    "base": "#54595f",
+    "base2": "#4d5258",
+    "recess": "#26282c"
+   },
+   "roughness": 0.6,
+   "rough_var": 0.06,
+   "metallic": 0.0,
+   "wear": 0.05,
+   "normal_strength": 1.0,
+   "seed": 3770525,
+   "params": {}
+  },
+  {
+   "id": "plastic_transparent",
+   "category": "plastic",
+   "family": "smooth",
+   "palette": {
+    "base": "#cfe0e2",
+    "base2": "#c3d4d6",
+    "recess": "#26282c"
+   },
+   "roughness": 0.2,
+   "rough_var": 0.06,
+   "metallic": 0.0,
+   "wear": 0.05,
+   "normal_strength": 1.0,
+   "seed": 16211923,
+   "params": {},
+   "opacity": 0.35
+  },
+  {
+   "id": "glass_clear",
+   "category": "glass",
+   "family": "smooth",
+   "palette": {
+    "base": "#cfe6ea",
+    "base2": "#cfe6ea",
+    "recess": "#7fa0a8"
+   },
+   "roughness": 0.06,
+   "rough_var": 0.04,
+   "metallic": 0.0,
+   "wear": 0.02,
+   "normal_strength": 0.6,
+   "seed": 10232552,
+   "params": {
+    "brushed": false
+   },
+   "opacity": 0.16
+  },
+  {
+   "id": "glass_tinted",
+   "category": "glass",
+   "family": "smooth",
+   "palette": {
+    "base": "#3f5a63",
+    "base2": "#3f5a63",
+    "recess": "#7fa0a8"
+   },
+   "roughness": 0.08,
+   "rough_var": 0.04,
+   "metallic": 0.0,
+   "wear": 0.02,
+   "normal_strength": 0.6,
+   "seed": 5372762,
+   "params": {
+    "brushed": false
+   },
+   "opacity": 0.45
+  },
+  {
+   "id": "glass_bulletproof",
+   "category": "glass",
+   "family": "smooth",
+   "palette": {
+    "base": "#a9c3c8",
+    "base2": "#a9c3c8",
+    "recess": "#7fa0a8"
+   },
+   "roughness": 0.12,
+   "rough_var": 0.04,
+   "metallic": 0.0,
+   "wear": 0.02,
+   "normal_strength": 0.6,
+   "seed": 16292604,
+   "params": {
+    "brushed": false
+   },
+   "opacity": 0.5
+  },
+  {
+   "id": "glass_frosted",
+   "category": "glass",
+   "family": "smooth",
+   "palette": {
+    "base": "#dfe8ea",
+    "base2": "#dfe8ea",
+    "recess": "#7fa0a8"
+   },
+   "roughness": 0.35,
+   "rough_var": 0.04,
+   "metallic": 0.0,
+   "wear": 0.02,
+   "normal_strength": 0.6,
+   "seed": 5964825,
+   "params": {
+    "brushed": false
+   },
+   "opacity": 0.7
+  },
+  {
+   "id": "glass_office",
+   "category": "glass",
+   "family": "smooth",
+   "palette": {
+    "base": "#bcd3d8",
+    "base2": "#bcd3d8",
+    "recess": "#7fa0a8"
+   },
+   "roughness": 0.06,
+   "rough_var": 0.04,
+   "metallic": 0.0,
+   "wear": 0.02,
+   "normal_strength": 0.6,
+   "seed": 16426639,
+   "params": {
+    "brushed": false
+   },
+   "opacity": 0.28
+  },
+  {
+   "id": "glass_laboratory",
+   "category": "glass",
+   "family": "smooth",
+   "palette": {
+    "base": "#d6e6e8",
+    "base2": "#d6e6e8",
+    "recess": "#7fa0a8"
+   },
+   "roughness": 0.05,
+   "rough_var": 0.04,
+   "metallic": 0.0,
+   "wear": 0.02,
+   "normal_strength": 0.6,
+   "seed": 9277059,
+   "params": {
+    "brushed": false
+   },
+   "opacity": 0.2
+  },
+  {
+   "id": "glass_broken",
+   "category": "glass",
+   "family": "smooth",
+   "palette": {
+    "base": "#c6dadd",
+    "base2": "#c6dadd",
+    "recess": "#7fa0a8"
+   },
+   "roughness": 0.3,
+   "rough_var": 0.04,
+   "metallic": 0.0,
+   "wear": 0.02,
+   "normal_strength": 0.6,
+   "seed": 11257375,
+   "params": {
+    "brushed": false
+   },
+   "opacity": 0.4
+  },
+  {
+   "id": "glass_reflective",
+   "category": "glass",
+   "family": "smooth",
+   "palette": {
+    "base": "#9fb9c0",
+    "base2": "#9fb9c0",
+    "recess": "#7fa0a8"
+   },
+   "roughness": 0.04,
+   "rough_var": 0.04,
+   "metallic": 0.0,
+   "wear": 0.02,
+   "normal_strength": 0.6,
+   "seed": 1108239,
+   "params": {
+    "brushed": false
+   },
+   "opacity": 0.3
+  },
+  {
+   "id": "glass_architectural",
+   "category": "glass",
+   "family": "smooth",
+   "palette": {
+    "base": "#8fb0b8",
+    "base2": "#8fb0b8",
+    "recess": "#7fa0a8"
+   },
+   "roughness": 0.06,
+   "rough_var": 0.04,
+   "metallic": 0.0,
+   "wear": 0.02,
+   "normal_strength": 0.6,
+   "seed": 4623156,
+   "params": {
+    "brushed": false
+   },
+   "opacity": 0.35
+  },
+  {
+   "id": "fabric_canvas",
+   "category": "fabric",
+   "family": "fabric",
+   "palette": {
+    "base": "#b2a888",
+    "base2": "#a69c7d",
+    "recess": "#20221e"
+   },
+   "roughness": 0.85,
+   "rough_var": 0.05,
+   "metallic": 0.0,
+   "wear": 0.06,
+   "normal_strength": 1.0,
+   "seed": 8312849,
+   "params": {
+    "n": 100,
+    "mesh": false
+   }
+  },
+  {
+   "id": "fabric_military",
+   "category": "fabric",
+   "family": "fabric",
+   "palette": {
+    "base": "#5c6146",
+    "base2": "#53583f",
+    "recess": "#20221e"
+   },
+   "roughness": 0.85,
+   "rough_var": 0.05,
+   "metallic": 0.0,
+   "wear": 0.06,
+   "normal_strength": 1.0,
+   "seed": 13892052,
+   "params": {
+    "n": 100,
+    "mesh": false
+   }
+  },
+  {
+   "id": "fabric_tactical_nylon",
+   "category": "fabric",
+   "family": "fabric",
+   "palette": {
+    "base": "#33362f",
+    "base2": "#2d302a",
+    "recess": "#20221e"
+   },
+   "roughness": 0.85,
+   "rough_var": 0.05,
+   "metallic": 0.0,
+   "wear": 0.06,
+   "normal_strength": 1.0,
+   "seed": 11357255,
+   "params": {
+    "n": 100,
+    "mesh": false
+   }
+  },
+  {
+   "id": "fabric_ballistic_weave",
+   "category": "fabric",
+   "family": "fabric",
+   "palette": {
+    "base": "#3a3d34",
+    "base2": "#34372e",
+    "recess": "#20221e"
+   },
+   "roughness": 0.85,
+   "rough_var": 0.05,
+   "metallic": 0.0,
+   "wear": 0.06,
+   "normal_strength": 1.0,
+   "seed": 15150997,
+   "params": {
+    "n": 100,
+    "mesh": false
+   }
+  },
+  {
+   "id": "fabric_polyester",
+   "category": "fabric",
+   "family": "fabric",
+   "palette": {
+    "base": "#4a4f55",
+    "base2": "#43484e",
+    "recess": "#20221e"
+   },
+   "roughness": 0.85,
+   "rough_var": 0.05,
+   "metallic": 0.0,
+   "wear": 0.06,
+   "normal_strength": 1.0,
+   "seed": 16439623,
+   "params": {
+    "n": 100,
+    "mesh": false
+   }
+  },
+  {
+   "id": "fabric_cotton",
+   "category": "fabric",
+   "family": "fabric",
+   "palette": {
+    "base": "#cfcabb",
+    "base2": "#c3beb0",
+    "recess": "#20221e"
+   },
+   "roughness": 0.85,
+   "rough_var": 0.05,
+   "metallic": 0.0,
+   "wear": 0.06,
+   "normal_strength": 1.0,
+   "seed": 11557416,
+   "params": {
+    "n": 100,
+    "mesh": false
+   }
+  },
+  {
+   "id": "fabric_industrial",
+   "category": "fabric",
+   "family": "fabric",
+   "palette": {
+    "base": "#6a6f63",
+    "base2": "#61665b",
+    "recess": "#20221e"
+   },
+   "roughness": 0.85,
+   "rough_var": 0.05,
+   "metallic": 0.0,
+   "wear": 0.06,
+   "normal_strength": 1.0,
+   "seed": 13859541,
+   "params": {
+    "n": 100,
+    "mesh": false
+   }
+  },
+  {
+   "id": "fabric_mesh",
+   "category": "fabric",
+   "family": "fabric",
+   "palette": {
+    "base": "#2c2f2a",
+    "base2": "#282b26",
+    "recess": "#20221e"
+   },
+   "roughness": 0.85,
+   "rough_var": 0.05,
+   "metallic": 0.0,
+   "wear": 0.06,
+   "normal_strength": 1.0,
+   "seed": 1878593,
+   "params": {
+    "n": 100,
+    "mesh": true
+   }
+  },
+  {
+   "id": "fabric_seat",
+   "category": "fabric",
+   "family": "fabric",
+   "palette": {
+    "base": "#3f434a",
+    "base2": "#393d43",
+    "recess": "#20221e"
+   },
+   "roughness": 0.85,
+   "rough_var": 0.05,
+   "metallic": 0.0,
+   "wear": 0.06,
+   "normal_strength": 1.0,
+   "seed": 13831322,
+   "params": {
+    "n": 100,
+    "mesh": false
+   }
+  },
+  {
+   "id": "fabric_curtain",
+   "category": "fabric",
+   "family": "fabric",
+   "palette": {
+    "base": "#6d5f56",
+    "base2": "#63564e",
+    "recess": "#20221e"
+   },
+   "roughness": 0.85,
+   "rough_var": 0.05,
+   "metallic": 0.0,
+   "wear": 0.06,
+   "normal_strength": 1.0,
+   "seed": 7083652,
+   "params": {
+    "n": 100,
+    "mesh": false
+   }
+  },
+  {
+   "id": "leather_black",
+   "category": "leather",
+   "family": "grain",
+   "palette": {
+    "base": "#26272a",
+    "base2": "#202124",
+    "recess": "#161615"
+   },
+   "roughness": 0.55,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.08,
+   "normal_strength": 1.4,
+   "seed": 12396685,
+   "params": {
+    "cells": 56
+   }
+  },
+  {
+   "id": "leather_brown",
+   "category": "leather",
+   "family": "grain",
+   "palette": {
+    "base": "#5a3d28",
+    "base2": "#4d3421",
+    "recess": "#161615"
+   },
+   "roughness": 0.55,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.08,
+   "normal_strength": 1.4,
+   "seed": 8427641,
+   "params": {
+    "cells": 56
+   }
+  },
+  {
+   "id": "leather_synthetic",
+   "category": "leather",
+   "family": "grain",
+   "palette": {
+    "base": "#33353a",
+    "base2": "#2d2f34",
+    "recess": "#161615"
+   },
+   "roughness": 0.55,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.08,
+   "normal_strength": 1.4,
+   "seed": 4500059,
+   "params": {
+    "cells": 56
+   }
+  },
+  {
+   "id": "leather_premium",
+   "category": "leather",
+   "family": "grain",
+   "palette": {
+    "base": "#3a2a20",
+    "base2": "#31231a",
+    "recess": "#161615"
+   },
+   "roughness": 0.55,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.08,
+   "normal_strength": 1.4,
+   "seed": 2771057,
+   "params": {
+    "cells": 56
+   }
+  },
+  {
+   "id": "leather_industrial",
+   "category": "leather",
+   "family": "grain",
+   "palette": {
+    "base": "#43352b",
+    "base2": "#3a2d24",
+    "recess": "#161615"
+   },
+   "roughness": 0.55,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.08,
+   "normal_strength": 1.4,
+   "seed": 16105936,
+   "params": {
+    "cells": 56
+   }
+  },
+  {
+   "id": "leather_vehicle",
+   "category": "leather",
+   "family": "grain",
+   "palette": {
+    "base": "#2b2c30",
+    "base2": "#25262a",
+    "recess": "#161615"
+   },
+   "roughness": 0.55,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.08,
+   "normal_strength": 1.4,
+   "seed": 4263121,
+   "params": {
+    "cells": 56
+   }
+  },
+  {
+   "id": "carbon_matte",
+   "category": "carbon",
+   "family": "woven",
+   "palette": {
+    "base": "#26282c",
+    "base2": "#1c1e21",
+    "recess": "#121316"
+   },
+   "roughness": 0.5,
+   "rough_var": 0.06,
+   "metallic": 0.2,
+   "wear": 0.03,
+   "normal_strength": 1.3,
+   "seed": 10096365,
+   "params": {
+    "n": 26
+   }
+  },
+  {
+   "id": "carbon_gloss",
+   "category": "carbon",
+   "family": "woven",
+   "palette": {
+    "base": "#26282c",
+    "base2": "#1c1e21",
+    "recess": "#121316"
+   },
+   "roughness": 0.16,
+   "rough_var": 0.06,
+   "metallic": 0.2,
+   "wear": 0.03,
+   "normal_strength": 1.3,
+   "seed": 14167871,
+   "params": {
+    "n": 26
+   }
+  },
+  {
+   "id": "carbon_forged",
+   "category": "carbon",
+   "family": "woven",
+   "palette": {
+    "base": "#26282c",
+    "base2": "#1c1e21",
+    "recess": "#121316"
+   },
+   "roughness": 0.3,
+   "rough_var": 0.06,
+   "metallic": 0.2,
+   "wear": 0.03,
+   "normal_strength": 1.3,
+   "seed": 2587791,
+   "params": {
+    "n": 40
+   }
+  },
+  {
+   "id": "carbon_woven",
+   "category": "carbon",
+   "family": "woven",
+   "palette": {
+    "base": "#26282c",
+    "base2": "#1c1e21",
+    "recess": "#121316"
+   },
+   "roughness": 0.35,
+   "rough_var": 0.06,
+   "metallic": 0.2,
+   "wear": 0.03,
+   "normal_strength": 1.3,
+   "seed": 8377381,
+   "params": {
+    "n": 26
+   }
+  },
+  {
+   "id": "carbon_raw",
+   "category": "carbon",
+   "family": "woven",
+   "palette": {
+    "base": "#26282c",
+    "base2": "#1c1e21",
+    "recess": "#121316"
+   },
+   "roughness": 0.45,
+   "rough_var": 0.06,
+   "metallic": 0.2,
+   "wear": 0.03,
+   "normal_strength": 1.3,
+   "seed": 7350216,
+   "params": {
+    "n": 26
+   }
+  },
+  {
+   "id": "stone_granite",
+   "category": "stone",
+   "family": "grain",
+   "palette": {
+    "base": "#8f8d8a",
+    "base2": "#7e7c79",
+    "recess": "#5c5a57"
+   },
+   "roughness": 0.62,
+   "rough_var": 0.14,
+   "metallic": 0.0,
+   "wear": 0.07,
+   "normal_strength": 1.6,
+   "seed": 14534530,
+   "params": {
+    "cells": 50
+   }
+  },
+  {
+   "id": "stone_marble",
+   "category": "stone",
+   "family": "grain",
+   "palette": {
+    "base": "#dcdcd8",
+    "base2": "#cfd0cf",
+    "recess": "#b7b8b8"
+   },
+   "roughness": 0.45,
+   "rough_var": 0.14,
+   "metallic": 0.0,
+   "wear": 0.07,
+   "normal_strength": 1.6,
+   "seed": 5191677,
+   "params": {
+    "cells": 6
+   }
+  },
+  {
+   "id": "stone_slate",
+   "category": "stone",
+   "family": "grain",
+   "palette": {
+    "base": "#4b5157",
+    "base2": "#41474d",
+    "recess": "#2e3237"
+   },
+   "roughness": 0.62,
+   "rough_var": 0.14,
+   "metallic": 0.0,
+   "wear": 0.07,
+   "normal_strength": 1.6,
+   "seed": 688587,
+   "params": {
+    "cells": 30
+   }
+  },
+  {
+   "id": "stone_sandstone",
+   "category": "stone",
+   "family": "grain",
+   "palette": {
+    "base": "#c8ac82",
+    "base2": "#ba9e75",
+    "recess": "#8a744f"
+   },
+   "roughness": 0.62,
+   "rough_var": 0.14,
+   "metallic": 0.0,
+   "wear": 0.07,
+   "normal_strength": 1.6,
+   "seed": 16418706,
+   "params": {
+    "cells": 40
+   }
+  },
+  {
+   "id": "stone_limestone",
+   "category": "stone",
+   "family": "grain",
+   "palette": {
+    "base": "#cbc6b4",
+    "base2": "#bdb8a6",
+    "recess": "#938e7c"
+   },
+   "roughness": 0.62,
+   "rough_var": 0.14,
+   "metallic": 0.0,
+   "wear": 0.07,
+   "normal_strength": 1.6,
+   "seed": 16515367,
+   "params": {
+    "cells": 36
+   }
+  },
+  {
+   "id": "brick_red",
+   "category": "brick",
+   "family": "brick",
+   "palette": {
+    "base": "#9e5a44",
+    "base2": "#8c4d3a",
+    "recess": "#b8b3a6"
+   },
+   "roughness": 0.75,
+   "rough_var": 0.14,
+   "metallic": 0.0,
+   "wear": 0.12,
+   "normal_strength": 2.3,
+   "seed": 4853416,
+   "params": {
+    "rows": 12,
+    "cols": 6,
+    "mortar": 0.05
+   }
+  },
+  {
+   "id": "brick_white",
+   "category": "brick",
+   "family": "brick",
+   "palette": {
+    "base": "#d7d3c8",
+    "base2": "#c9c4b8",
+    "recess": "#b6b0a2"
+   },
+   "roughness": 0.75,
+   "rough_var": 0.14,
+   "metallic": 0.0,
+   "wear": 0.12,
+   "normal_strength": 2.3,
+   "seed": 15627452,
+   "params": {
+    "rows": 12,
+    "cols": 6,
+    "mortar": 0.05
+   }
+  },
+  {
+   "id": "brick_old",
+   "category": "brick",
+   "family": "brick",
+   "palette": {
+    "base": "#8f5a48",
+    "base2": "#7d4c3c",
+    "recess": "#a49c8c"
+   },
+   "roughness": 0.75,
+   "rough_var": 0.14,
+   "metallic": 0.0,
+   "wear": 0.12,
+   "normal_strength": 2.3,
+   "seed": 3841521,
+   "params": {
+    "rows": 12,
+    "cols": 6,
+    "mortar": 0.05
+   }
+  },
+  {
+   "id": "brick_industrial",
+   "category": "brick",
+   "family": "brick",
+   "palette": {
+    "base": "#7a6f66",
+    "base2": "#6c625a",
+    "recess": "#9a9084"
+   },
+   "roughness": 0.75,
+   "rough_var": 0.14,
+   "metallic": 0.0,
+   "wear": 0.12,
+   "normal_strength": 2.3,
+   "seed": 16311905,
+   "params": {
+    "rows": 12,
+    "cols": 6,
+    "mortar": 0.05
+   }
+  },
+  {
+   "id": "brick_modern",
+   "category": "brick",
+   "family": "brick",
+   "palette": {
+    "base": "#a86a52",
+    "base2": "#976049",
+    "recess": "#c4beb0"
+   },
+   "roughness": 0.75,
+   "rough_var": 0.14,
+   "metallic": 0.0,
+   "wear": 0.12,
+   "normal_strength": 2.3,
+   "seed": 2691850,
+   "params": {
+    "rows": 12,
+    "cols": 6,
+    "mortar": 0.05
+   }
+  },
+  {
+   "id": "brick_painted",
+   "category": "brick",
+   "family": "brick",
+   "palette": {
+    "base": "#c9cbc4",
+    "base2": "#bdbfb8",
+    "recess": "#a7a99f"
+   },
+   "roughness": 0.75,
+   "rough_var": 0.14,
+   "metallic": 0.0,
+   "wear": 0.12,
+   "normal_strength": 2.3,
+   "seed": 11864596,
+   "params": {
+    "rows": 12,
+    "cols": 6,
+    "mortar": 0.05
+   }
+  },
+  {
+   "id": "ceramic_industrial",
+   "category": "ceramic",
+   "family": "tile",
+   "palette": {
+    "base": "#c9cbc7",
+    "base2": "#bcbeba",
+    "recess": "#a9aca6"
+   },
+   "roughness": 0.55,
+   "rough_var": 0.08,
+   "metallic": 0.0,
+   "wear": 0.04,
+   "normal_strength": 1.5,
+   "seed": 225039,
+   "params": {
+    "n": 6,
+    "grout": 0.035,
+    "polish": false
+   }
+  },
+  {
+   "id": "tile_bathroom",
+   "category": "ceramic",
+   "family": "tile",
+   "palette": {
+    "base": "#dfe3e2",
+    "base2": "#d3d7d6",
+    "recess": "#a9aca6"
+   },
+   "roughness": 0.16,
+   "rough_var": 0.08,
+   "metallic": 0.0,
+   "wear": 0.04,
+   "normal_strength": 1.5,
+   "seed": 8132280,
+   "params": {
+    "n": 6,
+    "grout": 0.035,
+    "polish": true
+   }
+  },
+  {
+   "id": "tile_kitchen",
+   "category": "ceramic",
+   "family": "tile",
+   "palette": {
+    "base": "#e4e2da",
+    "base2": "#d8d6cf",
+    "recess": "#a9aca6"
+   },
+   "roughness": 0.16,
+   "rough_var": 0.08,
+   "metallic": 0.0,
+   "wear": 0.04,
+   "normal_strength": 1.5,
+   "seed": 15735226,
+   "params": {
+    "n": 6,
+    "grout": 0.035,
+    "polish": true
+   }
+  },
+  {
+   "id": "ceramic_white",
+   "category": "ceramic",
+   "family": "tile",
+   "palette": {
+    "base": "#eceae4",
+    "base2": "#e0ded8",
+    "recess": "#a9aca6"
+   },
+   "roughness": 0.16,
+   "rough_var": 0.08,
+   "metallic": 0.0,
+   "wear": 0.04,
+   "normal_strength": 1.5,
+   "seed": 11403625,
+   "params": {
+    "n": 6,
+    "grout": 0.035,
+    "polish": true
+   }
+  },
+  {
+   "id": "ceramic_black",
+   "category": "ceramic",
+   "family": "tile",
+   "palette": {
+    "base": "#26282b",
+    "base2": "#212326",
+    "recess": "#a9aca6"
+   },
+   "roughness": 0.16,
+   "rough_var": 0.08,
+   "metallic": 0.0,
+   "wear": 0.04,
+   "normal_strength": 1.5,
+   "seed": 15183800,
+   "params": {
+    "n": 6,
+    "grout": 0.035,
+    "polish": true
+   }
+  },
+  {
+   "id": "ceramic_matte",
+   "category": "ceramic",
+   "family": "tile",
+   "palette": {
+    "base": "#c4c6c2",
+    "base2": "#b8bab6",
+    "recess": "#a9aca6"
+   },
+   "roughness": 0.55,
+   "rough_var": 0.08,
+   "metallic": 0.0,
+   "wear": 0.04,
+   "normal_strength": 1.5,
+   "seed": 5763833,
+   "params": {
+    "n": 6,
+    "grout": 0.035,
+    "polish": false
+   }
+  },
+  {
+   "id": "ceramic_gloss",
+   "category": "ceramic",
+   "family": "tile",
+   "palette": {
+    "base": "#d6dad9",
+    "base2": "#cacecd",
+    "recess": "#a9aca6"
+   },
+   "roughness": 0.16,
+   "rough_var": 0.08,
+   "metallic": 0.0,
+   "wear": 0.04,
+   "normal_strength": 1.5,
+   "seed": 6594395,
+   "params": {
+    "n": 6,
+    "grout": 0.035,
+    "polish": true
+   }
+  },
+  {
+   "id": "ground_asphalt",
+   "category": "ground",
+   "family": "asphalt",
+   "palette": {
+    "base": "#3b3d40",
+    "base2": "#333538",
+    "recess": "#4a4136"
+   },
+   "roughness": 0.8,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.05,
+   "normal_strength": 1.0,
+   "seed": 11930263,
+   "params": {}
+  },
+  {
+   "id": "ground_road",
+   "category": "ground",
+   "family": "asphalt",
+   "palette": {
+    "base": "#3f4144",
+    "base2": "#37393c",
+    "recess": "#4a4136"
+   },
+   "roughness": 0.82,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.05,
+   "normal_strength": 1.0,
+   "seed": 11645415,
+   "params": {}
+  },
+  {
+   "id": "ground_sand",
+   "category": "ground",
+   "family": "grain",
+   "palette": {
+    "base": "#cdb587",
+    "base2": "#c0a878",
+    "recess": "#4a4136"
+   },
+   "roughness": 0.9,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.05,
+   "normal_strength": 1.8,
+   "seed": 13259008,
+   "params": {
+    "cells": 60
+   }
+  },
+  {
+   "id": "ground_mud",
+   "category": "ground",
+   "family": "grain",
+   "palette": {
+    "base": "#5a4a38",
+    "base2": "#4d3f30",
+    "recess": "#4a4136"
+   },
+   "roughness": 0.7,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.05,
+   "normal_strength": 1.8,
+   "seed": 15710092,
+   "params": {
+    "cells": 34
+   }
+  },
+  {
+   "id": "ground_gravel",
+   "category": "ground",
+   "family": "grain",
+   "palette": {
+    "base": "#8f8c86",
+    "base2": "#7d7a74",
+    "recess": "#4a4136"
+   },
+   "roughness": 0.85,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.05,
+   "normal_strength": 1.8,
+   "seed": 2275156,
+   "params": {
+    "cells": 70
+   }
+  },
+  {
+   "id": "ground_grass",
+   "category": "ground",
+   "family": "grain",
+   "palette": {
+    "base": "#5c7042",
+    "base2": "#52643a",
+    "recess": "#4a4136"
+   },
+   "roughness": 0.9,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.05,
+   "normal_strength": 1.8,
+   "seed": 16440659,
+   "params": {
+    "cells": 48
+   }
+  },
+  {
+   "id": "ground_dry_grass",
+   "category": "ground",
+   "family": "grain",
+   "palette": {
+    "base": "#a79a63",
+    "base2": "#998d59",
+    "recess": "#4a4136"
+   },
+   "roughness": 0.9,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.05,
+   "normal_strength": 1.8,
+   "seed": 3452760,
+   "params": {
+    "cells": 48
+   }
+  },
+  {
+   "id": "ground_wet_grass",
+   "category": "ground",
+   "family": "grain",
+   "palette": {
+    "base": "#465e34",
+    "base2": "#3d532d",
+    "recess": "#4a4136"
+   },
+   "roughness": 0.6,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.05,
+   "normal_strength": 1.8,
+   "seed": 11684730,
+   "params": {
+    "cells": 48
+   }
+  },
+  {
+   "id": "ground_snow",
+   "category": "ground",
+   "family": "grain",
+   "palette": {
+    "base": "#e9edf0",
+    "base2": "#dde2e6",
+    "recess": "#4a4136"
+   },
+   "roughness": 0.5,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.05,
+   "normal_strength": 1.8,
+   "seed": 3351303,
+   "params": {
+    "cells": 30
+   }
+  },
+  {
+   "id": "ground_ice",
+   "category": "ground",
+   "family": "smooth",
+   "palette": {
+    "base": "#c4d6dc",
+    "base2": "#b6cbd2",
+    "recess": "#4a4136"
+   },
+   "roughness": 0.12,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.05,
+   "normal_strength": 1.0,
+   "seed": 15498412,
+   "params": {}
+  },
+  {
+   "id": "ground_rock",
+   "category": "ground",
+   "family": "grain",
+   "palette": {
+    "base": "#7c7a76",
+    "base2": "#6c6a66",
+    "recess": "#4a4136"
+   },
+   "roughness": 0.7,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.05,
+   "normal_strength": 1.8,
+   "seed": 10822699,
+   "params": {
+    "cells": 26
+   }
+  },
+  {
+   "id": "ground_pebbles",
+   "category": "ground",
+   "family": "grain",
+   "palette": {
+    "base": "#9a968e",
+    "base2": "#88847c",
+    "recess": "#4a4136"
+   },
+   "roughness": 0.8,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.05,
+   "normal_strength": 1.8,
+   "seed": 12545569,
+   "params": {
+    "cells": 80
+   }
+  },
+  {
+   "id": "ground_forest_soil",
+   "category": "ground",
+   "family": "grain",
+   "palette": {
+    "base": "#4a3d2c",
+    "base2": "#3f3426",
+    "recess": "#4a4136"
+   },
+   "roughness": 0.8,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.05,
+   "normal_strength": 1.8,
+   "seed": 14105283,
+   "params": {
+    "cells": 40
+   }
+  },
+  {
+   "id": "ground_construction_dirt",
+   "category": "ground",
+   "family": "grain",
+   "palette": {
+    "base": "#8a7a60",
+    "base2": "#7c6d54",
+    "recess": "#4a4136"
+   },
+   "roughness": 0.85,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.05,
+   "normal_strength": 1.8,
+   "seed": 1910613,
+   "params": {
+    "cells": 44
+   }
+  },
+  {
+   "id": "ground_urban_dirt",
+   "category": "ground",
+   "family": "grain",
+   "palette": {
+    "base": "#7f7668",
+    "base2": "#726a5d",
+    "recess": "#4a4136"
+   },
+   "roughness": 0.85,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.05,
+   "normal_strength": 1.8,
+   "seed": 11054251,
+   "params": {
+    "cells": 40
+   }
+  },
+  {
+   "id": "ground_dust",
+   "category": "ground",
+   "family": "grain",
+   "palette": {
+    "base": "#bcb2a0",
+    "base2": "#b0a694",
+    "recess": "#4a4136"
+   },
+   "roughness": 0.9,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.05,
+   "normal_strength": 1.8,
+   "seed": 13098564,
+   "params": {
+    "cells": 50
+   }
+  },
+  {
+   "id": "accent_signal_orange",
+   "category": "accent",
+   "family": "panel",
+   "palette": {
+    "base": "#ff7a1a",
+    "base2": "#f06e12",
+    "recess": "#b34f0c"
+   },
+   "roughness": 0.5,
+   "rough_var": 0.15,
+   "metallic": 0.0,
+   "wear": 0.06,
+   "normal_strength": 2.0,
+   "seed": 15727264,
+   "params": {
+    "nx": 2,
+    "ny": 2,
+    "seam": 0.02,
+    "bolts": false
+   }
+  },
+  {
+   "id": "accent_safety_yellow",
+   "category": "accent",
+   "family": "panel",
+   "palette": {
+    "base": "#ffd23b",
+    "base2": "#f5c62f",
+    "recess": "#b8901f"
+   },
+   "roughness": 0.5,
+   "rough_var": 0.15,
+   "metallic": 0.0,
+   "wear": 0.06,
+   "normal_strength": 2.0,
+   "seed": 8185044,
+   "params": {
+    "nx": 2,
+    "ny": 2,
+    "seam": 0.02,
+    "bolts": false
+   }
+  },
+  {
+   "id": "accent_wayfinding_teal",
+   "category": "accent",
+   "family": "smooth",
+   "palette": {
+    "base": "#2ec5c0",
+    "base2": "#2ab4b0",
+    "recess": "#1c7d7a"
+   },
+   "roughness": 0.4,
+   "rough_var": 0.15,
+   "metallic": 0.0,
+   "wear": 0.03,
+   "normal_strength": 2.0,
+   "seed": 9086596,
+   "params": {}
+  },
+  {
+   "id": "accent_hazard_stripe",
+   "category": "accent",
+   "family": "panel",
+   "palette": {
+    "base": "#ffd23b",
+    "base2": "#1c1e20",
+    "recess": "#111213"
+   },
+   "roughness": 0.55,
+   "rough_var": 0.15,
+   "metallic": 0.0,
+   "wear": 0.08,
+   "normal_strength": 2.0,
+   "seed": 13373988,
+   "params": {
+    "nx": 8,
+    "ny": 1,
+    "seam": 0.001,
+    "bolts": false
+   }
+  },
+  {
+   "id": "emissive_guide_strip",
+   "category": "accent",
+   "family": "smooth",
+   "palette": {
+    "base": "#0c0d0f",
+    "base2": "#0c0d0f",
+    "recess": "#0c0d0f"
+   },
+   "roughness": 0.3,
+   "rough_var": 0.15,
+   "metallic": 0.0,
+   "wear": 0.0,
+   "normal_strength": 2.0,
+   "seed": 16604300,
+   "params": {},
+   "emission": {
+    "color": "#2ec5c0",
+    "mask": 0.9
+   }
+  },
+  {
+   "id": "emissive_objective_red",
+   "category": "accent",
+   "family": "smooth",
+   "palette": {
+    "base": "#0c0d0f",
+    "base2": "#0c0d0f",
+    "recess": "#0c0d0f"
+   },
+   "roughness": 0.3,
+   "rough_var": 0.15,
+   "metallic": 0.0,
+   "wear": 0.0,
+   "normal_strength": 2.0,
+   "seed": 7984221,
+   "params": {},
+   "emission": {
+    "color": "#e5484d",
+    "mask": 0.9
+   }
+  }
+ ]
+}
