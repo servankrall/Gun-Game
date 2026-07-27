@@ -196,3 +196,81 @@ contact points, accent colors for navigation, strong silhouettes.
 **Don't:** photogrammetry, noisy surfaces, over-detailing, scratch-storms,
 extreme dirt, muddy colors, exaggerated destruction, post-apocalyptic or horror
 atmosphere, baked lighting in albedo, accent colors on dead surfaces.
+
+---
+
+## 12. Weapon material library (`weapon` category, 44 materials)
+
+Premium, modern, lightweight, engineered — clean machining and honest PBR, no
+fantasy, no exaggerated sci-fi, no cartoon decoration. Built from four weapon
+families in `texgen.py`:
+
+- **`machined`** — CNC tool marks: `mode:"linear"` (mill) or `"concentric"`
+  (lathe). Concentric is radial, authored for UV-mapped parts (barrels, muzzle
+  devices), not for tiling — tiling applies *where appropriate*.
+- **`knurl`** — fine diamond knurling for grips (seamless at even `n`).
+- **`hex`** — hexagonal grip cells (tileable).
+- **`micro`** — bead-blast / cerakote micro-stipple (the matte tactical finish).
+- plus `smooth`(+brushed) and `woven` (carbon / kevlar) from the base set.
+
+Coverage: military / machined / heat-treated / cold-rolled / carbon / stainless
+/ bluing steel · titanium + alloy · aircraft / anodized / FDE / forged / brushed
+/ cast aluminum · industrial + magnesium alloy · polymers (receiver / FDE /
+military / GRP / injection / textured / hard / soft) · grips (rubber / diamond /
+hex / micro / fine / coarse / competition / tactical / weather) · carbon (matte /
+gloss / forged) + kevlar · coatings (cerakote black/grey, ceramic, anti-corrosion,
+heat-resistant, ceramic armor). Wear stays *tasteful* — edge polish, contact
+sheen, faint carbon — never deep rust, cracks, or missing parts.
+
+**Modular components** (upper/lower, handguard, rail, charging handle, magazine,
+trigger group, bolt/carrier, barrel, muzzle devices, suppressor, stock, grips,
+optic, mounts, small hardware) are authored as **material + trim-sheet
+assignments**, not as unique textures per part — one steel, one polymer, one grip
+serves the whole weapon, which is how AAA weapon art keeps memory low and looks
+consistent. The 3D geometry itself is specified in `MESH_SPEC.md` (a texture
+generator produces surfaces, not meshes).
+
+## 13. Skin themes (20 original finishes)
+
+`texgen.py --theme <name>` applies a **luminance-preserving recolor**: the base
+material's machining detail, wear, and value structure are kept, only chroma
+shifts toward the theme tint (with a roughness/metallic bias). One material ×
+one theme = a cohesive, readable finish — no geometry or detail change, so
+competitive clarity is never traded for a skin.
+
+Themes: Urban Graphite · Desert Sandstorm · Midnight Alloy · Arctic Frost ·
+Volcanic Basalt · Forest Moss · Digital Mist · Blue Steel · Copper Ember ·
+Industrial Titanium · White Ceramic · Obsidian Black · Crimson Alloy · Emerald
+Matrix · Storm Grey · Golden Bronze · Shadow Carbon · Silver Phantom · Slate
+Tactical · Titan Core. All original — no recognizable commercial skin patterns.
+
+## 14. Environment expansion (`environment` category, 27 materials)
+
+Walls (drywall / office / lab / acoustic / metal-panel / steel / block / modular
+/ reinforced), floors (vinyl / epoxy / rubber / carpet / warehouse / steel-grate
+/ raised-access / laminate), ceilings (acoustic / metal / suspended), panels &
+structural (brushed-alu / powder-coated / perforated / corrugated / concrete &
+steel columns / steel beam). These extend the base concrete(20) / brick / tile /
+ground / glass / metal / wood set. Many spec names (e.g. "airport concrete" vs
+"office concrete") are **instances of one material** with a palette/roughness
+tweak — trim-sheet philosophy, not a unique 4K set per synonym.
+
+## 15. Decal, signage & marking library (`decals.json`, 142 decals)
+
+A separate flat-vector engine (`decalgen.py`) — **original iconography only**,
+drawn from geometric primitives (no copyrighted pictograms, no branding). Kinds:
+warning (yellow triangle), prohibition (red ring), mandatory (blue circle), safe
+/ exit (green), directional plates & arrows, room/level numbering, ID bands,
+floor markings (hazard stripes / lanes / keep-clear), pipe & system labels,
+security, engraved electronics labels, vehicle markings, and soft small-detail
+marks (scuff / wheel / oil / water / rust / stain / smudge / dust).
+
+Each decal exports a **transparent** albedo (RGBA) + `opacity`, plus `normal`,
+`roughness`, `ao`, packed `orm`, `height`. **Material response** drives the
+relief and gloss: `paint` / `vinyl` (flat), `reflective` (low-rough),
+`embossed` (raised), `engraved` (cut-in, bare metal in the grooves), `sticker`
+(slight lift). Flat graphic design, minimal noise, high readability, scalable —
+the same sign reads at 2 m and 50 m.
+
+Sign palette: white, black, light/dark grey, industrial yellow, safety orange,
+emergency red, deep blue, olive, cyan, muted green, neutral beige.

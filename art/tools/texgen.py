@@ -179,10 +179,79 @@ def fam_smooth(res, p, seed):
         h = 0.5 + 0.02 * np.sin(y * 400) + 0.01 * fbm(res, 200, 1, seed)
     return h, np.full((res, res), 0.5), {}
 
+def fam_machined(res, p, seed):
+    # CNC tool marks — linear (mill) or concentric (lathe). Concentric is radial
+    # so it's authored for UV-mapped weapon parts, not for tiling.
+    x, y = coords(res)
+    freq = p.get("freq", 240); mode = p.get("mode", "linear")
+    if mode == "concentric":
+        r = np.hypot(x - 0.5, y - 0.5)
+        h = 0.5 + 0.028 * np.sin(r * freq * np.pi)
+    else:
+        h = 0.5 + 0.026 * np.sin(y * freq * np.pi) + 0.008 * np.sin(y * freq * 3.1 * np.pi)
+    h += (fbm(res, 300, 1, seed + 2) - 0.5) * 0.02           # micro tooth
+    return np.clip(h, 0, 1), np.full((res, res), 0.5), {"aniso": True}
+
+def fam_knurl(res, p, seed):
+    # fine diamond knurling for grips (seamless when n is even)
+    n = p.get("n", 40)
+    x, y = coords(res)
+    a = np.abs(np.sin((x + y) * n * np.pi)); b = np.abs(np.sin((x - y) * n * np.pi))
+    h = 0.38 + 0.5 * np.minimum(a, b)
+    h += (fbm(res, 140, 1, seed) - 0.5) * 0.02
+    return np.clip(h, 0, 1), np.full((res, res), 0.5), {}
+
+def fam_hex(res, p, seed):
+    # hexagonal grip cells (integer freqs → tiles; use even n)
+    n = p.get("n", 12)
+    x, y = coords(res)
+    fx, fy = x * n, y * n
+    a1 = np.cos(2 * np.pi * fx)
+    a2 = np.cos(2 * np.pi * (fx * 0.5 + fy * 0.5))
+    a3 = np.cos(2 * np.pi * (fx * 0.5 - fy * 0.5))
+    cell = (a1 + a2 + a3) / 3.0
+    h = 0.45 + 0.42 * np.clip(cell * 1.4 + 0.35, 0, 1)
+    h += (fbm(res, 120, 1, seed) - 0.5) * 0.015
+    return np.clip(h, 0, 1), np.full((res, res), 0.5), {}
+
+def fam_micro(res, p, seed):
+    # micro-sandblasted stipple — the matte "cerakote"/bead-blast surface
+    stip = fbm(res, p.get("cells", 200), 2, seed, 0.55)
+    h = 0.5 + (stip - 0.5) * p.get("amp", 0.10)
+    return np.clip(h, 0, 1), np.full((res, res), 0.5), {}
+
 FAMILIES = {
     "concrete": fam_concrete, "brick": fam_brick, "tile": fam_tile, "planks": fam_planks,
     "panel": fam_panel, "corrugated": fam_corrugated, "diamond": fam_diamond, "woven": fam_woven,
     "grain": fam_grain, "fabric": fam_fabric, "asphalt": fam_asphalt, "smooth": fam_smooth,
+    "machined": fam_machined, "knurl": fam_knurl, "hex": fam_hex, "micro": fam_micro,
+}
+
+# ----------------------------------------------------------------------------
+# skin themes — original finishes applied as luminance-preserving recolors so
+# one material + one theme = a cohesive weapon/prop finish (no geometry change).
+# ----------------------------------------------------------------------------
+THEMES = {
+    "urban_graphite":     {"tint": "#4c525a", "strength": 0.72, "gain": 1.35, "rough": 0.04},
+    "desert_sandstorm":   {"tint": "#c2a878", "strength": 0.70, "gain": 1.25, "rough": 0.05},
+    "midnight_alloy":     {"tint": "#2b3340", "strength": 0.80, "gain": 1.30, "rough": -0.02},
+    "arctic_frost":       {"tint": "#dfe6ea", "strength": 0.68, "gain": 1.10, "rough": 0.03},
+    "volcanic_basalt":    {"tint": "#2a2622", "strength": 0.80, "gain": 1.40, "rough": 0.06},
+    "forest_moss":        {"tint": "#5c6a44", "strength": 0.70, "gain": 1.28, "rough": 0.05},
+    "digital_mist":       {"tint": "#8794a0", "strength": 0.66, "gain": 1.22, "rough": 0.02},
+    "blue_steel":         {"tint": "#5a7488", "strength": 0.70, "gain": 1.25, "rough": -0.03},
+    "copper_ember":       {"tint": "#b5723a", "strength": 0.68, "gain": 1.30, "rough": -0.02, "metal": 0.15},
+    "industrial_titanium":{"tint": "#9aa0a6", "strength": 0.62, "gain": 1.18, "rough": -0.04, "metal": 0.15},
+    "white_ceramic":      {"tint": "#e9e7e1", "strength": 0.72, "gain": 1.08, "rough": 0.02},
+    "obsidian_black":     {"tint": "#1c1e22", "strength": 0.82, "gain": 1.45, "rough": 0.0},
+    "crimson_alloy":      {"tint": "#8f3b3b", "strength": 0.72, "gain": 1.32, "rough": 0.0},
+    "emerald_matrix":     {"tint": "#2f7d63", "strength": 0.70, "gain": 1.30, "rough": -0.02},
+    "storm_grey":         {"tint": "#6b7178", "strength": 0.68, "gain": 1.20, "rough": 0.03},
+    "golden_bronze":      {"tint": "#a9843e", "strength": 0.68, "gain": 1.28, "rough": -0.02, "metal": 0.15},
+    "shadow_carbon":      {"tint": "#33373c", "strength": 0.78, "gain": 1.35, "rough": 0.02},
+    "silver_phantom":     {"tint": "#c2c7cc", "strength": 0.60, "gain": 1.12, "rough": -0.05, "metal": 0.20},
+    "slate_tactical":     {"tint": "#565d63", "strength": 0.72, "gain": 1.25, "rough": 0.04},
+    "titan_core":         {"tint": "#3d4a52", "strength": 0.76, "gain": 1.30, "rough": -0.03, "metal": 0.10},
 }
 
 # ----------------------------------------------------------------------------
@@ -226,7 +295,7 @@ def curvature_from_height(h):
 def hex2rgb(h):
     h = h.lstrip("#"); return np.array([int(h[i:i + 2], 16) for i in (0, 2, 4)]) / 255.0
 
-def build(mat, res):
+def build(mat, res, theme=None):
     seed = mat.get("seed", 1234)
     fam = FAMILIES[mat["family"]]
     h, tone, extra = fam(res, mat.get("params", {}), seed)
@@ -258,6 +327,17 @@ def build(mat, res):
         chip = (fbm(res, 12, 3, seed + 21) > 0.82).astype(float)
         metal = np.maximum(metal, chip); rough = np.clip(rough - chip * 0.3, 0.04, 1)
         col = col * (1 - chip[..., None]) + hex2rgb(pal.get("metal", "#8a8f96"))[None, None] * chip[..., None]
+
+    # skin theme — luminance-preserving recolor (keeps machining detail + readability)
+    if theme:
+        th = THEMES.get(theme, theme) if isinstance(theme, str) else theme
+        tint = hex2rgb(th["tint"]); s = th.get("strength", 0.7)
+        lum = (col * np.array([0.2126, 0.7152, 0.0722])[None, None]).sum(-1, keepdims=True)
+        tinted = np.clip(lum * tint[None, None, :] * th.get("gain", 1.25), 0, 1)
+        col = np.clip(col * (1 - s) + tinted * s, 0, 1)
+        rough = np.clip(rough + th.get("rough", 0.0), 0.04, 1.0)
+        if th.get("metal"):
+            metal = np.clip(metal + th["metal"], 0, 1)
 
     nrm = normal_from_height(h, mat.get("normal_strength", 2.0))
     ao = ao_from_height(h)
@@ -296,7 +376,7 @@ def save(maps, outdir, mid, res):
 # ----------------------------------------------------------------------------
 # contact sheet (albedo + normal + orm + height thumbnails per material)
 # ----------------------------------------------------------------------------
-def contact(mats, res, outpath, cols=6, thumb=200):
+def contact(mats, res, outpath, cols=6, thumb=200, theme=None):
     rows = (len(mats) + cols - 1) // cols
     pad, lab = 10, 16
     cw, ch = thumb + pad, thumb + pad + lab
@@ -304,7 +384,7 @@ def contact(mats, res, outpath, cols=6, thumb=200):
     from PIL import ImageDraw
     dr = ImageDraw.Draw(sheet)
     for i, mat in enumerate(mats):
-        m = build(mat, res)
+        m = build(mat, res, theme)
         alb = Image.fromarray(m["albedo"]).resize((thumb, thumb), Image.LANCZOS)
         r, c = divmod(i, cols)
         x = pad + c * cw; y = pad + r * ch
@@ -332,22 +412,29 @@ def main():
     ap.add_argument("--only", default="")
     ap.add_argument("--contact", default="")
     ap.add_argument("--limit", type=int, default=0)
+    ap.add_argument("--theme", default="", help="apply a skin theme (see THEMES)")
     a = ap.parse_args()
+    theme = a.theme or None
+    suffix = f"_{theme}" if theme else ""
 
     if a.catalog:
         cat, mats = load_catalog(a.catalog)
         if a.only:
             cats = set(a.only.split(","))
             mats = [m for m in mats if m["category"] in cats]
+        if a.material:                       # target specific id(s) within the catalog
+            ids = set(a.material.split(","))
+            mats = [m for m in mats if m["id"] in ids]
         if a.limit:
             mats = mats[:a.limit]
         if a.contact:
             os.makedirs(a.contact, exist_ok=True)
-            p = contact(mats, min(a.res, 512), os.path.join(a.contact, f"contact_{a.res}.png"))
+            name = f"contact{suffix}_{a.res}.png"
+            p = contact(mats, min(a.res, 512), os.path.join(a.contact, name), theme=theme)
             print("contact sheet:", p, f"({len(mats)} materials)")
             return
         for m in mats:
-            d = save(build(m, a.res), a.out, m["id"], a.res)
+            d = save(build(m, a.res, theme), a.out, m["id"] + suffix, a.res)
             print("wrote", d)
     elif a.material:
         # standalone quick material by family name for smoke tests

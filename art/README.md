@@ -1,28 +1,37 @@
-# VANTAGE — Texture Library
+# VANTAGE — Material, Skin & Decal Library
 
-Original, AAA-quality, competitive-tactical-FPS material foundation. Everything
-here is **procedural**: no photogrammetry, no scanned data, no imitation of any
-existing game's identity, characters, maps, logos, or symbols. Read
-[`ART_DIRECTION.md`](ART_DIRECTION.md) for the full art bible (style pillars,
-color language, PBR spec, engine integration).
+Original, AAA-quality, competitive-tactical-FPS art foundation spanning
+**environment surfaces, weapon materials, skin themes, and signage/decals**.
+Everything here is **procedural**: no photogrammetry, no scanned data, no
+imitation of any existing game's identity, characters, maps, logos, or symbols.
+Read [`ART_DIRECTION.md`](ART_DIRECTION.md) for the full art bible and
+[`MESH_SPEC.md`](MESH_SPEC.md) for the prop/3D-asset authoring contract.
 
 ## What's in here
 
 ```
 art/
-  ART_DIRECTION.md      the art-direction bible (identity, palette, PBR/map spec)
-  materials.json        the catalog — 145 materials across 14 categories (the contract)
+  ART_DIRECTION.md      the art bible (identity, palette, PBR spec, engines,
+                        weapons §12, skins §13, environment §14, decals §15)
+  MESH_SPEC.md          prop / LOD / collision / UV contract (geometry is specced,
+                        not generated — a texture pipeline makes surfaces, not meshes)
+  materials.json        216 materials across 16 categories (env / weapon / metal / …)
+  decals.json           142 original signage, marking & micro-detail decals
   tools/
-    build_catalog.py    emits materials.json
-    texgen.py           procedural PBR generator (numpy + PIL)
-    verify.py           renders a 145-material contact sheet
-    tilecheck.py        2×2 seamless-tiling proof for a few families
-    seamcheck.py        numeric edge-seam metric
+    build_catalog.py    emits materials.json (incl. weapon + environment sets)
+    build_decals.py     emits decals.json
+    texgen.py           procedural PBR material generator (+ 20 skin themes)
+    decalgen.py         procedural flat-vector decal / sign generator
+    verify.py tilecheck.py seamcheck.py   contact sheet + tiling/seam checks
   previews/
-    contact_512.png     all 145 materials at a glance
-    maps_brick_red.png  one material, every map channel labelled
-    tiling_check.png    seamless verification
-  out/                  8 flagship material sets rendered at 1024 (samples)
+    contact_512.png       all base materials at a glance
+    weapons_512.png       44 weapon materials
+    environment_512.png   27 environment materials
+    skins_machined_512.png one material across all 20 skin themes
+    decals_512.png        142 signage / marking / detail decals
+    maps_brick_red.png    one material, every map channel labelled
+    tiling_check.png      seamless verification
+  out/                    flagship material sets rendered at 1024 (samples)
 ```
 
 The library is generated **on demand** — the repo ships the generator, the
@@ -48,9 +57,22 @@ python3 tools/texgen.py --catalog materials.json --res 4096 --out out/ --only co
 # Render a single material, all its maps
 python3 tools/texgen.py --catalog materials.json --res 4096 --out out/ --material brick_red
 
+# Apply a skin theme to a category (luminance-preserving recolor)
+python3 tools/texgen.py --catalog materials.json --only weapon --res 2048 --out out/ --theme copper_ember
+
 # Contact sheet of the whole set
 python3 tools/verify.py
+
+# Decals / signage (transparent PNG + opacity/normal/roughness/ORM)
+python3 tools/build_decals.py > decals.json
+python3 tools/decalgen.py --catalog decals.json --res 2048 --out out_decals/
+python3 tools/decalgen.py --catalog decals.json --contact previews/ --res 512
 ```
+
+Skin themes (`--theme`): `urban_graphite desert_sandstorm midnight_alloy
+arctic_frost volcanic_basalt forest_moss digital_mist blue_steel copper_ember
+industrial_titanium white_ceramic obsidian_black crimson_alloy emerald_matrix
+storm_grey golden_bronze shadow_carbon silver_phantom slate_tactical titan_core`.
 
 Valid `--res`: `512 1024 2048 4096`. `--only <category>` filters by category
 (`concrete, metal, wood, ground, plastic, fabric, glass, rubber, ceramic,

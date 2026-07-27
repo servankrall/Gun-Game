@@ -1,0 +1,1229 @@
+{
+ "name": "VANTAGE Decals",
+ "version": "1.0",
+ "description": "Original flat-vector signage, markings, labels and micro-detail decals (transparent PNG + opacity/normal/roughness/ORM).",
+ "resolutions": [
+  512,
+  1024,
+  2048,
+  4096
+ ],
+ "maps": [
+  "albedo(rgba)",
+  "opacity",
+  "normal",
+  "ao",
+  "roughness",
+  "orm",
+  "height"
+ ],
+ "decals": [
+  {
+   "id": "warn_electrical_hazard",
+   "category": "warning",
+   "kind": "warning",
+   "symbol": "bolt",
+   "response": "vinyl"
+  },
+  {
+   "id": "warn_high_voltage",
+   "category": "warning",
+   "kind": "warning",
+   "symbol": "bolt",
+   "response": "vinyl"
+  },
+  {
+   "id": "warn_machine_warning",
+   "category": "warning",
+   "kind": "warning",
+   "symbol": "gear",
+   "response": "vinyl"
+  },
+  {
+   "id": "warn_rotating_equipment",
+   "category": "warning",
+   "kind": "warning",
+   "symbol": "gear",
+   "response": "vinyl"
+  },
+  {
+   "id": "warn_hot_surface",
+   "category": "warning",
+   "kind": "warning",
+   "symbol": "flame",
+   "response": "vinyl"
+  },
+  {
+   "id": "warn_fire_equipment",
+   "category": "warning",
+   "kind": "warning",
+   "symbol": "flame",
+   "response": "vinyl"
+  },
+  {
+   "id": "warn_compressed_gas",
+   "category": "warning",
+   "kind": "warning",
+   "symbol": "cylinder",
+   "response": "vinyl"
+  },
+  {
+   "id": "warn_chemical_storage",
+   "category": "warning",
+   "kind": "warning",
+   "symbol": "drop",
+   "response": "vinyl"
+  },
+  {
+   "id": "warn_laser_hazard",
+   "category": "warning",
+   "kind": "warning",
+   "symbol": "laser",
+   "response": "vinyl"
+  },
+  {
+   "id": "warn_overhead_crane",
+   "category": "warning",
+   "kind": "warning",
+   "symbol": "crane",
+   "response": "vinyl"
+  },
+  {
+   "id": "warn_heavy_load",
+   "category": "warning",
+   "kind": "warning",
+   "symbol": "crane",
+   "response": "vinyl"
+  },
+  {
+   "id": "warn_forklift_traffic",
+   "category": "warning",
+   "kind": "warning",
+   "symbol": "forklift",
+   "response": "vinyl"
+  },
+  {
+   "id": "warn_moving_machinery",
+   "category": "warning",
+   "kind": "warning",
+   "symbol": "gear",
+   "response": "vinyl"
+  },
+  {
+   "id": "warn_slippery_surface",
+   "category": "warning",
+   "kind": "warning",
+   "symbol": "wave",
+   "response": "vinyl"
+  },
+  {
+   "id": "warn_general_warning",
+   "category": "warning",
+   "kind": "warning",
+   "symbol": "exclam",
+   "response": "vinyl"
+  },
+  {
+   "id": "warn_restricted_access",
+   "category": "warning",
+   "kind": "warning",
+   "symbol": "exclam",
+   "response": "vinyl"
+  },
+  {
+   "id": "warn_maintenance_area",
+   "category": "warning",
+   "kind": "warning",
+   "symbol": "hexnut",
+   "response": "vinyl"
+  },
+  {
+   "id": "warn_loading_zone",
+   "category": "warning",
+   "kind": "warning",
+   "symbol": "forklift",
+   "response": "vinyl"
+  },
+  {
+   "id": "must_ppe_required",
+   "category": "mandatory",
+   "kind": "mandatory",
+   "symbol": "person",
+   "response": "vinyl"
+  },
+  {
+   "id": "must_eye_protection",
+   "category": "mandatory",
+   "kind": "mandatory",
+   "symbol": "dot",
+   "response": "vinyl"
+  },
+  {
+   "id": "must_authorized_only",
+   "category": "mandatory",
+   "kind": "mandatory",
+   "symbol": "person",
+   "response": "vinyl"
+  },
+  {
+   "id": "no_no_entry",
+   "category": "prohibition",
+   "kind": "prohibition",
+   "symbol": "person",
+   "response": "vinyl"
+  },
+  {
+   "id": "no_do_not_enter",
+   "category": "prohibition",
+   "kind": "prohibition",
+   "symbol": "person",
+   "response": "vinyl"
+  },
+  {
+   "id": "no_staff_only",
+   "category": "prohibition",
+   "kind": "prohibition",
+   "symbol": "person",
+   "response": "vinyl"
+  },
+  {
+   "id": "no_no_forklift",
+   "category": "prohibition",
+   "kind": "prohibition",
+   "symbol": "forklift",
+   "response": "vinyl"
+  },
+  {
+   "id": "dir_reception",
+   "category": "directional",
+   "kind": "plate",
+   "text": "RECEPTION",
+   "bg": "dgrey",
+   "fg": "white",
+   "response": "vinyl"
+  },
+  {
+   "id": "dir_security",
+   "category": "directional",
+   "kind": "plate",
+   "text": "SECURITY",
+   "bg": "dgrey",
+   "fg": "white",
+   "response": "vinyl"
+  },
+  {
+   "id": "dir_elevator",
+   "category": "directional",
+   "kind": "plate",
+   "text": "ELEVATOR",
+   "bg": "dgrey",
+   "fg": "white",
+   "response": "vinyl"
+  },
+  {
+   "id": "dir_stairs",
+   "category": "directional",
+   "kind": "plate",
+   "text": "STAIRS",
+   "bg": "dgrey",
+   "fg": "white",
+   "response": "vinyl"
+  },
+  {
+   "id": "dir_roof_access",
+   "category": "directional",
+   "kind": "plate",
+   "text": "ROOF ACCESS",
+   "bg": "dgrey",
+   "fg": "white",
+   "response": "vinyl"
+  },
+  {
+   "id": "dir_mechanical",
+   "category": "directional",
+   "kind": "plate",
+   "text": "MECHANICAL",
+   "bg": "dgrey",
+   "fg": "white",
+   "response": "vinyl"
+  },
+  {
+   "id": "dir_electrical",
+   "category": "directional",
+   "kind": "plate",
+   "text": "ELECTRICAL",
+   "bg": "dgrey",
+   "fg": "white",
+   "response": "vinyl"
+  },
+  {
+   "id": "dir_generator",
+   "category": "directional",
+   "kind": "plate",
+   "text": "GENERATOR",
+   "bg": "dgrey",
+   "fg": "white",
+   "response": "vinyl"
+  },
+  {
+   "id": "dir_control_room",
+   "category": "directional",
+   "kind": "plate",
+   "text": "CONTROL ROOM",
+   "bg": "dgrey",
+   "fg": "white",
+   "response": "vinyl"
+  },
+  {
+   "id": "dir_server_room",
+   "category": "directional",
+   "kind": "plate",
+   "text": "SERVER ROOM",
+   "bg": "dgrey",
+   "fg": "white",
+   "response": "vinyl"
+  },
+  {
+   "id": "dir_research",
+   "category": "directional",
+   "kind": "plate",
+   "text": "RESEARCH",
+   "bg": "dgrey",
+   "fg": "white",
+   "response": "vinyl"
+  },
+  {
+   "id": "dir_warehouse",
+   "category": "directional",
+   "kind": "plate",
+   "text": "WAREHOUSE",
+   "bg": "dgrey",
+   "fg": "white",
+   "response": "vinyl"
+  },
+  {
+   "id": "dir_medical",
+   "category": "directional",
+   "kind": "plate",
+   "text": "MEDICAL",
+   "bg": "dgrey",
+   "fg": "white",
+   "response": "vinyl"
+  },
+  {
+   "id": "dir_assembly",
+   "category": "directional",
+   "kind": "plate",
+   "text": "ASSEMBLY",
+   "bg": "dgrey",
+   "fg": "white",
+   "response": "vinyl"
+  },
+  {
+   "id": "dir_parking",
+   "category": "directional",
+   "kind": "plate",
+   "text": "PARKING",
+   "bg": "dgrey",
+   "fg": "white",
+   "response": "vinyl"
+  },
+  {
+   "id": "dir_loading_dock",
+   "category": "directional",
+   "kind": "plate",
+   "text": "LOADING DOCK",
+   "bg": "dgrey",
+   "fg": "white",
+   "response": "vinyl"
+  },
+  {
+   "id": "dir_restroom",
+   "category": "directional",
+   "kind": "plate",
+   "text": "RESTROOM",
+   "bg": "dgrey",
+   "fg": "white",
+   "response": "vinyl"
+  },
+  {
+   "id": "dir_entrance",
+   "category": "directional",
+   "kind": "plate",
+   "text": "ENTRANCE",
+   "bg": "dgrey",
+   "fg": "white",
+   "response": "vinyl"
+  },
+  {
+   "id": "dir_emergency_route",
+   "category": "directional",
+   "kind": "plate",
+   "text": "EMERGENCY ROUTE",
+   "bg": "dgrey",
+   "fg": "white",
+   "response": "vinyl"
+  },
+  {
+   "id": "dir_exit",
+   "category": "directional",
+   "kind": "safe",
+   "text": "EXIT",
+   "symbol": "arrow",
+   "response": "reflective"
+  },
+  {
+   "id": "dir_emergency_exit",
+   "category": "directional",
+   "kind": "safe",
+   "text": "EXIT",
+   "response": "reflective"
+  },
+  {
+   "id": "arrow_orange_right",
+   "category": "directional",
+   "kind": "arrow",
+   "dir": "right",
+   "color": "orange",
+   "response": "reflective"
+  },
+  {
+   "id": "arrow_orange_left",
+   "category": "directional",
+   "kind": "arrow",
+   "dir": "left",
+   "color": "orange",
+   "response": "reflective"
+  },
+  {
+   "id": "arrow_orange_up",
+   "category": "directional",
+   "kind": "arrow",
+   "dir": "up",
+   "color": "orange",
+   "response": "reflective"
+  },
+  {
+   "id": "arrow_orange_down",
+   "category": "directional",
+   "kind": "arrow",
+   "dir": "down",
+   "color": "orange",
+   "response": "reflective"
+  },
+  {
+   "id": "arrow_white_right",
+   "category": "directional",
+   "kind": "arrow",
+   "dir": "right",
+   "color": "white",
+   "response": "reflective"
+  },
+  {
+   "id": "arrow_white_left",
+   "category": "directional",
+   "kind": "arrow",
+   "dir": "left",
+   "color": "white",
+   "response": "reflective"
+  },
+  {
+   "id": "arrow_white_up",
+   "category": "directional",
+   "kind": "arrow",
+   "dir": "up",
+   "color": "white",
+   "response": "reflective"
+  },
+  {
+   "id": "arrow_white_down",
+   "category": "directional",
+   "kind": "arrow",
+   "dir": "down",
+   "color": "white",
+   "response": "reflective"
+  },
+  {
+   "id": "arrow_cyan_right",
+   "category": "directional",
+   "kind": "arrow",
+   "dir": "right",
+   "color": "cyan",
+   "response": "reflective"
+  },
+  {
+   "id": "arrow_cyan_left",
+   "category": "directional",
+   "kind": "arrow",
+   "dir": "left",
+   "color": "cyan",
+   "response": "reflective"
+  },
+  {
+   "id": "arrow_cyan_up",
+   "category": "directional",
+   "kind": "arrow",
+   "dir": "up",
+   "color": "cyan",
+   "response": "reflective"
+  },
+  {
+   "id": "arrow_cyan_down",
+   "category": "directional",
+   "kind": "arrow",
+   "dir": "down",
+   "color": "cyan",
+   "response": "reflective"
+  },
+  {
+   "id": "room_101",
+   "category": "numbering",
+   "kind": "plate",
+   "text": "ROOM 101",
+   "bg": "lgrey",
+   "fg": "black",
+   "response": "vinyl"
+  },
+  {
+   "id": "room_102",
+   "category": "numbering",
+   "kind": "plate",
+   "text": "ROOM 102",
+   "bg": "lgrey",
+   "fg": "black",
+   "response": "vinyl"
+  },
+  {
+   "id": "room_103",
+   "category": "numbering",
+   "kind": "plate",
+   "text": "ROOM 103",
+   "bg": "lgrey",
+   "fg": "black",
+   "response": "vinyl"
+  },
+  {
+   "id": "room_201",
+   "category": "numbering",
+   "kind": "plate",
+   "text": "ROOM 201",
+   "bg": "lgrey",
+   "fg": "black",
+   "response": "vinyl"
+  },
+  {
+   "id": "room_202",
+   "category": "numbering",
+   "kind": "plate",
+   "text": "ROOM 202",
+   "bg": "lgrey",
+   "fg": "black",
+   "response": "vinyl"
+  },
+  {
+   "id": "room_203",
+   "category": "numbering",
+   "kind": "plate",
+   "text": "ROOM 203",
+   "bg": "lgrey",
+   "fg": "black",
+   "response": "vinyl"
+  },
+  {
+   "id": "room_301",
+   "category": "numbering",
+   "kind": "plate",
+   "text": "ROOM 301",
+   "bg": "lgrey",
+   "fg": "black",
+   "response": "vinyl"
+  },
+  {
+   "id": "room_302",
+   "category": "numbering",
+   "kind": "plate",
+   "text": "ROOM 302",
+   "bg": "lgrey",
+   "fg": "black",
+   "response": "vinyl"
+  },
+  {
+   "id": "room_303",
+   "category": "numbering",
+   "kind": "plate",
+   "text": "ROOM 303",
+   "bg": "lgrey",
+   "fg": "black",
+   "response": "vinyl"
+  },
+  {
+   "id": "room_401",
+   "category": "numbering",
+   "kind": "plate",
+   "text": "ROOM 401",
+   "bg": "lgrey",
+   "fg": "black",
+   "response": "vinyl"
+  },
+  {
+   "id": "room_402",
+   "category": "numbering",
+   "kind": "plate",
+   "text": "ROOM 402",
+   "bg": "lgrey",
+   "fg": "black",
+   "response": "vinyl"
+  },
+  {
+   "id": "room_403",
+   "category": "numbering",
+   "kind": "plate",
+   "text": "ROOM 403",
+   "bg": "lgrey",
+   "fg": "black",
+   "response": "vinyl"
+  },
+  {
+   "id": "room_501",
+   "category": "numbering",
+   "kind": "plate",
+   "text": "ROOM 501",
+   "bg": "lgrey",
+   "fg": "black",
+   "response": "vinyl"
+  },
+  {
+   "id": "room_502",
+   "category": "numbering",
+   "kind": "plate",
+   "text": "ROOM 502",
+   "bg": "lgrey",
+   "fg": "black",
+   "response": "vinyl"
+  },
+  {
+   "id": "room_503",
+   "category": "numbering",
+   "kind": "plate",
+   "text": "ROOM 503",
+   "bg": "lgrey",
+   "fg": "black",
+   "response": "vinyl"
+  },
+  {
+   "id": "floor_level_A",
+   "category": "numbering",
+   "kind": "plate",
+   "text": "LEVEL A",
+   "bg": "blue",
+   "fg": "white",
+   "response": "vinyl"
+  },
+  {
+   "id": "floor_level_B",
+   "category": "numbering",
+   "kind": "plate",
+   "text": "LEVEL B",
+   "bg": "blue",
+   "fg": "white",
+   "response": "vinyl"
+  },
+  {
+   "id": "floor_level_C",
+   "category": "numbering",
+   "kind": "plate",
+   "text": "LEVEL C",
+   "bg": "blue",
+   "fg": "white",
+   "response": "vinyl"
+  },
+  {
+   "id": "floor_level_D",
+   "category": "numbering",
+   "kind": "plate",
+   "text": "LEVEL D",
+   "bg": "blue",
+   "fg": "white",
+   "response": "vinyl"
+  },
+  {
+   "id": "id_r_14",
+   "category": "numbering",
+   "kind": "id",
+   "text": "R-14",
+   "bg": "yellow",
+   "fg": "black",
+   "response": "engraved"
+  },
+  {
+   "id": "id_m_07",
+   "category": "numbering",
+   "kind": "id",
+   "text": "M-07",
+   "bg": "yellow",
+   "fg": "black",
+   "response": "engraved"
+  },
+  {
+   "id": "id_p_22",
+   "category": "numbering",
+   "kind": "id",
+   "text": "P-22",
+   "bg": "yellow",
+   "fg": "black",
+   "response": "engraved"
+  },
+  {
+   "id": "id_c_118",
+   "category": "numbering",
+   "kind": "id",
+   "text": "C-118",
+   "bg": "yellow",
+   "fg": "black",
+   "response": "engraved"
+  },
+  {
+   "id": "id_s_03",
+   "category": "numbering",
+   "kind": "id",
+   "text": "S-03",
+   "bg": "yellow",
+   "fg": "black",
+   "response": "engraved"
+  },
+  {
+   "id": "id_d_09",
+   "category": "numbering",
+   "kind": "id",
+   "text": "D-09",
+   "bg": "yellow",
+   "fg": "black",
+   "response": "engraved"
+  },
+  {
+   "id": "floor_hazard_stripe",
+   "category": "floor",
+   "kind": "stripe",
+   "style": "hazard",
+   "a": "yellow",
+   "b": "black",
+   "response": "paint"
+  },
+  {
+   "id": "floor_hazard_orange",
+   "category": "floor",
+   "kind": "stripe",
+   "style": "hazard",
+   "a": "orange",
+   "b": "black",
+   "response": "paint"
+  },
+  {
+   "id": "floor_walk_lane",
+   "category": "floor",
+   "kind": "stripe",
+   "style": "lane",
+   "a": "green",
+   "response": "paint"
+  },
+  {
+   "id": "floor_forklift_lane",
+   "category": "floor",
+   "kind": "stripe",
+   "style": "lane",
+   "a": "yellow",
+   "response": "paint"
+  },
+  {
+   "id": "floor_emergency_lane",
+   "category": "floor",
+   "kind": "stripe",
+   "style": "lane",
+   "a": "red",
+   "response": "paint"
+  },
+  {
+   "id": "floor_lane_dashed",
+   "category": "floor",
+   "kind": "stripe",
+   "style": "dashed",
+   "a": "white",
+   "response": "paint"
+  },
+  {
+   "id": "floor_keep_clear",
+   "category": "floor",
+   "kind": "plate",
+   "text": "KEEP CLEAR",
+   "bg": "red",
+   "fg": "white",
+   "response": "paint"
+  },
+  {
+   "id": "floor_stop",
+   "category": "floor",
+   "kind": "plate",
+   "text": "STOP",
+   "bg": "red",
+   "fg": "white",
+   "response": "paint"
+  },
+  {
+   "id": "floor_assembly_point",
+   "category": "floor",
+   "kind": "plate",
+   "text": "ASSEMBLY",
+   "bg": "green",
+   "fg": "white",
+   "response": "paint"
+  },
+  {
+   "id": "floor_danger_zone",
+   "category": "floor",
+   "kind": "stripe",
+   "style": "hazard",
+   "a": "red",
+   "b": "black",
+   "response": "paint"
+  },
+  {
+   "id": "floor_no_park",
+   "category": "floor",
+   "kind": "plate",
+   "text": "NO PARKING",
+   "bg": "dgrey",
+   "fg": "yellow",
+   "response": "paint"
+  },
+  {
+   "id": "pipe_air_supply",
+   "category": "industrial",
+   "kind": "id",
+   "text": "AIR SUPPLY",
+   "bg": "cyan",
+   "fg": "black",
+   "response": "vinyl"
+  },
+  {
+   "id": "pipe_water_line",
+   "category": "industrial",
+   "kind": "id",
+   "text": "WATER LINE",
+   "bg": "blue",
+   "fg": "white",
+   "response": "vinyl"
+  },
+  {
+   "id": "pipe_power_feed",
+   "category": "industrial",
+   "kind": "id",
+   "text": "POWER FEED",
+   "bg": "yellow",
+   "fg": "black",
+   "response": "vinyl"
+  },
+  {
+   "id": "pipe_fiber_net",
+   "category": "industrial",
+   "kind": "id",
+   "text": "FIBER NET",
+   "bg": "green",
+   "fg": "white",
+   "response": "vinyl"
+  },
+  {
+   "id": "pipe_compressed_air",
+   "category": "industrial",
+   "kind": "id",
+   "text": "COMPRESSED AIR",
+   "bg": "cyan",
+   "fg": "black",
+   "response": "vinyl"
+  },
+  {
+   "id": "pipe_cooling_line",
+   "category": "industrial",
+   "kind": "id",
+   "text": "COOLING LINE",
+   "bg": "blue",
+   "fg": "white",
+   "response": "vinyl"
+  },
+  {
+   "id": "pipe_drain",
+   "category": "industrial",
+   "kind": "id",
+   "text": "DRAIN",
+   "bg": "olive",
+   "fg": "white",
+   "response": "vinyl"
+  },
+  {
+   "id": "pipe_waste_line",
+   "category": "industrial",
+   "kind": "id",
+   "text": "WASTE LINE",
+   "bg": "olive",
+   "fg": "white",
+   "response": "vinyl"
+  },
+  {
+   "id": "pipe_fuel_line",
+   "category": "industrial",
+   "kind": "id",
+   "text": "FUEL LINE",
+   "bg": "orange",
+   "fg": "white",
+   "response": "vinyl"
+  },
+  {
+   "id": "pipe_emergency_stop",
+   "category": "industrial",
+   "kind": "id",
+   "text": "EMERGENCY STOP",
+   "bg": "red",
+   "fg": "white",
+   "response": "vinyl"
+  },
+  {
+   "id": "label_inspection_passed",
+   "category": "industrial",
+   "kind": "plate",
+   "text": "INSPECTION PASSED",
+   "bg": "lgrey",
+   "fg": "black",
+   "response": "sticker"
+  },
+  {
+   "id": "label_inspection_due",
+   "category": "industrial",
+   "kind": "plate",
+   "text": "INSPECTION DUE",
+   "bg": "lgrey",
+   "fg": "black",
+   "response": "sticker"
+  },
+  {
+   "id": "label_maintenance_ok",
+   "category": "industrial",
+   "kind": "plate",
+   "text": "MAINTENANCE OK",
+   "bg": "lgrey",
+   "fg": "black",
+   "response": "sticker"
+  },
+  {
+   "id": "label_calibration_req",
+   "category": "industrial",
+   "kind": "plate",
+   "text": "CALIBRATION REQ",
+   "bg": "lgrey",
+   "fg": "black",
+   "response": "sticker"
+  },
+  {
+   "id": "sec_camera_monitoring",
+   "category": "security",
+   "kind": "warning",
+   "symbol": "camera",
+   "response": "vinyl"
+  },
+  {
+   "id": "sec_security_zone",
+   "category": "security",
+   "kind": "plate",
+   "text": "SECURITY ZONE",
+   "bg": "blue",
+   "fg": "white",
+   "response": "vinyl"
+  },
+  {
+   "id": "sec_badge_required",
+   "category": "security",
+   "kind": "plate",
+   "text": "BADGE REQUIRED",
+   "bg": "blue",
+   "fg": "white",
+   "response": "vinyl"
+  },
+  {
+   "id": "sec_visitor_check_in",
+   "category": "security",
+   "kind": "plate",
+   "text": "VISITOR CHECK-IN",
+   "bg": "blue",
+   "fg": "white",
+   "response": "vinyl"
+  },
+  {
+   "id": "sec_staff_only",
+   "category": "security",
+   "kind": "plate",
+   "text": "STAFF ONLY",
+   "bg": "blue",
+   "fg": "white",
+   "response": "vinyl"
+  },
+  {
+   "id": "sec_security_check",
+   "category": "security",
+   "kind": "plate",
+   "text": "SECURITY CHECK",
+   "bg": "blue",
+   "fg": "white",
+   "response": "vinyl"
+  },
+  {
+   "id": "sec_access_control",
+   "category": "security",
+   "kind": "plate",
+   "text": "ACCESS CONTROL",
+   "bg": "blue",
+   "fg": "white",
+   "response": "vinyl"
+  },
+  {
+   "id": "elec_power",
+   "category": "electronics",
+   "kind": "id",
+   "text": "POWER",
+   "bg": "dgrey",
+   "fg": "white",
+   "response": "engraved"
+  },
+  {
+   "id": "elec_reset",
+   "category": "electronics",
+   "kind": "id",
+   "text": "RESET",
+   "bg": "dgrey",
+   "fg": "white",
+   "response": "engraved"
+  },
+  {
+   "id": "elec_network",
+   "category": "electronics",
+   "kind": "id",
+   "text": "NETWORK",
+   "bg": "dgrey",
+   "fg": "white",
+   "response": "engraved"
+  },
+  {
+   "id": "elec_usb",
+   "category": "electronics",
+   "kind": "id",
+   "text": "USB",
+   "bg": "dgrey",
+   "fg": "white",
+   "response": "engraved"
+  },
+  {
+   "id": "elec_fiber",
+   "category": "electronics",
+   "kind": "id",
+   "text": "FIBER",
+   "bg": "dgrey",
+   "fg": "white",
+   "response": "engraved"
+  },
+  {
+   "id": "elec_cooling",
+   "category": "electronics",
+   "kind": "id",
+   "text": "COOLING",
+   "bg": "dgrey",
+   "fg": "white",
+   "response": "engraved"
+  },
+  {
+   "id": "elec_battery",
+   "category": "electronics",
+   "kind": "id",
+   "text": "BATTERY",
+   "bg": "dgrey",
+   "fg": "white",
+   "response": "engraved"
+  },
+  {
+   "id": "elec_ups",
+   "category": "electronics",
+   "kind": "id",
+   "text": "UPS",
+   "bg": "dgrey",
+   "fg": "white",
+   "response": "engraved"
+  },
+  {
+   "id": "elec_emg_stop",
+   "category": "electronics",
+   "kind": "id",
+   "text": "EMG STOP",
+   "bg": "dgrey",
+   "fg": "white",
+   "response": "engraved"
+  },
+  {
+   "id": "elec_fan",
+   "category": "electronics",
+   "kind": "id",
+   "text": "FAN",
+   "bg": "dgrey",
+   "fg": "white",
+   "response": "engraved"
+  },
+  {
+   "id": "elec_data",
+   "category": "electronics",
+   "kind": "id",
+   "text": "DATA",
+   "bg": "dgrey",
+   "fg": "white",
+   "response": "engraved"
+  },
+  {
+   "id": "elec_service",
+   "category": "electronics",
+   "kind": "id",
+   "text": "SERVICE",
+   "bg": "dgrey",
+   "fg": "white",
+   "response": "engraved"
+  },
+  {
+   "id": "veh_service",
+   "category": "vehicle",
+   "kind": "plate",
+   "text": "SERVICE",
+   "bg": "orange",
+   "fg": "black",
+   "response": "reflective"
+  },
+  {
+   "id": "veh_maintenance",
+   "category": "vehicle",
+   "kind": "plate",
+   "text": "MAINTENANCE",
+   "bg": "yellow",
+   "fg": "black",
+   "response": "reflective"
+  },
+  {
+   "id": "veh_inspection",
+   "category": "vehicle",
+   "kind": "plate",
+   "text": "INSPECTION",
+   "bg": "green",
+   "fg": "white",
+   "response": "reflective"
+  },
+  {
+   "id": "veh_max_load_2t",
+   "category": "vehicle",
+   "kind": "plate",
+   "text": "MAX LOAD 2T",
+   "bg": "black",
+   "fg": "white",
+   "response": "reflective"
+  },
+  {
+   "id": "veh_speed_10",
+   "category": "vehicle",
+   "kind": "plate",
+   "text": "SPEED 10",
+   "bg": "red",
+   "fg": "white",
+   "response": "reflective"
+  },
+  {
+   "id": "veh_fleet_07",
+   "category": "vehicle",
+   "kind": "plate",
+   "text": "FLEET 07",
+   "bg": "blue",
+   "fg": "white",
+   "response": "reflective"
+  },
+  {
+   "id": "mark_scuff",
+   "category": "detail",
+   "kind": "mark",
+   "style": "scuff",
+   "count": 5,
+   "seed": 100,
+   "response": "paint"
+  },
+  {
+   "id": "mark_wheel_marks",
+   "category": "detail",
+   "kind": "mark",
+   "style": "wheel",
+   "count": 8,
+   "seed": 101,
+   "response": "paint"
+  },
+  {
+   "id": "mark_foot_traffic",
+   "category": "detail",
+   "kind": "mark",
+   "style": "foot",
+   "count": 10,
+   "seed": 102,
+   "response": "paint"
+  },
+  {
+   "id": "mark_oil_spot",
+   "category": "detail",
+   "kind": "mark",
+   "style": "oil",
+   "count": 1,
+   "seed": 103,
+   "response": "paint"
+  },
+  {
+   "id": "mark_water_drip",
+   "category": "detail",
+   "kind": "mark",
+   "style": "water",
+   "count": 1,
+   "seed": 104,
+   "response": "paint"
+  },
+  {
+   "id": "mark_rust_stain",
+   "category": "detail",
+   "kind": "mark",
+   "style": "rust",
+   "count": 1,
+   "seed": 105,
+   "response": "paint"
+  },
+  {
+   "id": "mark_concrete_stain",
+   "category": "detail",
+   "kind": "mark",
+   "style": "stain",
+   "count": 1,
+   "seed": 106,
+   "response": "paint"
+  },
+  {
+   "id": "mark_finger_smudge",
+   "category": "detail",
+   "kind": "mark",
+   "style": "smudge",
+   "count": 1,
+   "seed": 107,
+   "response": "paint"
+  },
+  {
+   "id": "mark_dust_buildup",
+   "category": "detail",
+   "kind": "mark",
+   "style": "smudge",
+   "count": 1,
+   "seed": 108,
+   "response": "paint"
+  }
+ ]
+}

@@ -1,7 +1,7 @@
 {
  "name": "VANTAGE",
- "version": "1.0",
- "description": "Original competitive-tactical FPS material foundation (procedural, stylized-PBR, seamless).",
+ "version": "2.0",
+ "description": "Original competitive-tactical FPS material foundation (procedural, stylized-PBR, seamless). Environment + weapon + prop surfaces; pairs with decals.json and 20 skin themes.",
  "resolutions": [
   512,
   1024,
@@ -2841,6 +2841,1395 @@
    "emission": {
     "color": "#e5484d",
     "mask": 0.9
+   }
+  },
+  {
+   "id": "wpn_military_steel",
+   "category": "weapon",
+   "family": "micro",
+   "palette": {
+    "base": "#5a5f64",
+    "base2": "#4f5459",
+    "recess": "#3a3d42"
+   },
+   "roughness": 0.46,
+   "rough_var": 0.1,
+   "metallic": 1.0,
+   "wear": 0.06,
+   "normal_strength": 1.6,
+   "seed": 10611790,
+   "params": {
+    "cells": 180,
+    "amp": 0.08
+   }
+  },
+  {
+   "id": "wpn_machined_steel",
+   "category": "weapon",
+   "family": "machined",
+   "palette": {
+    "base": "#8a9096",
+    "base2": "#7e848a",
+    "recess": "#3a3d42"
+   },
+   "roughness": 0.28,
+   "rough_var": 0.1,
+   "metallic": 1.0,
+   "wear": 0.06,
+   "normal_strength": 1.6,
+   "seed": 5337993,
+   "params": {
+    "mode": "concentric",
+    "freq": 260
+   }
+  },
+  {
+   "id": "wpn_heat_treated_steel",
+   "category": "weapon",
+   "family": "micro",
+   "palette": {
+    "base": "#4a4d54",
+    "base2": "#3f424a",
+    "recess": "#3a3d42"
+   },
+   "roughness": 0.4,
+   "rough_var": 0.1,
+   "metallic": 1.0,
+   "wear": 0.06,
+   "normal_strength": 1.6,
+   "seed": 8485243,
+   "params": {
+    "cells": 160,
+    "amp": 0.07
+   }
+  },
+  {
+   "id": "wpn_cold_rolled_steel",
+   "category": "weapon",
+   "family": "smooth",
+   "palette": {
+    "base": "#9298a0",
+    "base2": "#878d95",
+    "recess": "#3a3d42"
+   },
+   "roughness": 0.3,
+   "rough_var": 0.1,
+   "metallic": 1.0,
+   "wear": 0.06,
+   "normal_strength": 1.6,
+   "seed": 10490384,
+   "params": {
+    "brushed": true
+   }
+  },
+  {
+   "id": "wpn_carbon_steel",
+   "category": "weapon",
+   "family": "micro",
+   "palette": {
+    "base": "#6e7378",
+    "base2": "#63686d",
+    "recess": "#3a3d42"
+   },
+   "roughness": 0.44,
+   "rough_var": 0.1,
+   "metallic": 1.0,
+   "wear": 0.06,
+   "normal_strength": 1.6,
+   "seed": 6045514,
+   "params": {
+    "cells": 170,
+    "amp": 0.08
+   }
+  },
+  {
+   "id": "wpn_stainless_steel",
+   "category": "weapon",
+   "family": "smooth",
+   "palette": {
+    "base": "#b0b5ba",
+    "base2": "#a4a9ae",
+    "recess": "#3a3d42"
+   },
+   "roughness": 0.2,
+   "rough_var": 0.1,
+   "metallic": 1.0,
+   "wear": 0.06,
+   "normal_strength": 1.6,
+   "seed": 185823,
+   "params": {
+    "brushed": true
+   }
+  },
+  {
+   "id": "wpn_bluing_steel",
+   "category": "weapon",
+   "family": "smooth",
+   "palette": {
+    "base": "#2f3540",
+    "base2": "#282e38",
+    "recess": "#3a3d42"
+   },
+   "roughness": 0.24,
+   "rough_var": 0.1,
+   "metallic": 1.0,
+   "wear": 0.06,
+   "normal_strength": 1.6,
+   "seed": 4724580,
+   "params": {}
+  },
+  {
+   "id": "wpn_titanium",
+   "category": "weapon",
+   "family": "micro",
+   "palette": {
+    "base": "#a6abb0",
+    "base2": "#989da2",
+    "recess": "#3a3d42"
+   },
+   "roughness": 0.26,
+   "rough_var": 0.1,
+   "metallic": 1.0,
+   "wear": 0.06,
+   "normal_strength": 1.6,
+   "seed": 13073050,
+   "params": {
+    "cells": 200,
+    "amp": 0.05
+   }
+  },
+  {
+   "id": "wpn_titanium_alloy",
+   "category": "weapon",
+   "family": "machined",
+   "palette": {
+    "base": "#8f959c",
+    "base2": "#848a91",
+    "recess": "#3a3d42"
+   },
+   "roughness": 0.3,
+   "rough_var": 0.1,
+   "metallic": 1.0,
+   "wear": 0.06,
+   "normal_strength": 1.6,
+   "seed": 9383954,
+   "params": {
+    "mode": "linear",
+    "freq": 220
+   }
+  },
+  {
+   "id": "wpn_aircraft_aluminum",
+   "category": "weapon",
+   "family": "smooth",
+   "palette": {
+    "base": "#bcc0c4",
+    "base2": "#b0b4b8",
+    "recess": "#3a3d42"
+   },
+   "roughness": 0.28,
+   "rough_var": 0.1,
+   "metallic": 1.0,
+   "wear": 0.06,
+   "normal_strength": 1.6,
+   "seed": 11732497,
+   "params": {
+    "brushed": true
+   }
+  },
+  {
+   "id": "wpn_anodized_aluminum",
+   "category": "weapon",
+   "family": "micro",
+   "palette": {
+    "base": "#40484f",
+    "base2": "#39414a",
+    "recess": "#3a3d42"
+   },
+   "roughness": 0.3,
+   "rough_var": 0.1,
+   "metallic": 0.7,
+   "wear": 0.06,
+   "normal_strength": 1.6,
+   "seed": 593704,
+   "params": {
+    "cells": 200,
+    "amp": 0.04
+   }
+  },
+  {
+   "id": "wpn_anodized_fde",
+   "category": "weapon",
+   "family": "micro",
+   "palette": {
+    "base": "#a68a5f",
+    "base2": "#997d54",
+    "recess": "#3a3d42"
+   },
+   "roughness": 0.34,
+   "rough_var": 0.1,
+   "metallic": 0.5,
+   "wear": 0.06,
+   "normal_strength": 1.6,
+   "seed": 10268369,
+   "params": {
+    "cells": 200,
+    "amp": 0.05
+   }
+  },
+  {
+   "id": "wpn_forged_aluminum",
+   "category": "weapon",
+   "family": "micro",
+   "palette": {
+    "base": "#a3a8ad",
+    "base2": "#979ca1",
+    "recess": "#3a3d42"
+   },
+   "roughness": 0.36,
+   "rough_var": 0.1,
+   "metallic": 1.0,
+   "wear": 0.06,
+   "normal_strength": 1.6,
+   "seed": 5624535,
+   "params": {
+    "cells": 150,
+    "amp": 0.07
+   }
+  },
+  {
+   "id": "wpn_brushed_aluminum",
+   "category": "weapon",
+   "family": "smooth",
+   "palette": {
+    "base": "#c0c4c8",
+    "base2": "#b3b7bb",
+    "recess": "#3a3d42"
+   },
+   "roughness": 0.26,
+   "rough_var": 0.1,
+   "metallic": 1.0,
+   "wear": 0.06,
+   "normal_strength": 1.6,
+   "seed": 4865454,
+   "params": {
+    "brushed": true
+   }
+  },
+  {
+   "id": "wpn_cast_aluminum",
+   "category": "weapon",
+   "family": "micro",
+   "palette": {
+    "base": "#92979c",
+    "base2": "#878c94",
+    "recess": "#3a3d42"
+   },
+   "roughness": 0.42,
+   "rough_var": 0.1,
+   "metallic": 1.0,
+   "wear": 0.06,
+   "normal_strength": 1.6,
+   "seed": 12286940,
+   "params": {
+    "cells": 130,
+    "amp": 0.09
+   }
+  },
+  {
+   "id": "wpn_industrial_alloy",
+   "category": "weapon",
+   "family": "machined",
+   "palette": {
+    "base": "#7f858b",
+    "base2": "#747a80",
+    "recess": "#3a3d42"
+   },
+   "roughness": 0.4,
+   "rough_var": 0.1,
+   "metallic": 1.0,
+   "wear": 0.06,
+   "normal_strength": 1.6,
+   "seed": 14603877,
+   "params": {
+    "mode": "linear",
+    "freq": 200
+   }
+  },
+  {
+   "id": "wpn_magnesium_alloy",
+   "category": "weapon",
+   "family": "micro",
+   "palette": {
+    "base": "#8b8f92",
+    "base2": "#7f8386",
+    "recess": "#3a3d42"
+   },
+   "roughness": 0.44,
+   "rough_var": 0.1,
+   "metallic": 1.0,
+   "wear": 0.06,
+   "normal_strength": 1.6,
+   "seed": 11035777,
+   "params": {
+    "cells": 140,
+    "amp": 0.08
+   }
+  },
+  {
+   "id": "wpn_polymer_receiver",
+   "category": "weapon",
+   "family": "micro",
+   "palette": {
+    "base": "#33373b",
+    "base2": "#2d3135",
+    "recess": "#3a3d42"
+   },
+   "roughness": 0.5,
+   "rough_var": 0.1,
+   "metallic": 0.0,
+   "wear": 0.06,
+   "normal_strength": 1.2,
+   "seed": 12610955,
+   "params": {
+    "cells": 170,
+    "amp": 0.06
+   }
+  },
+  {
+   "id": "wpn_polymer_fde",
+   "category": "weapon",
+   "family": "micro",
+   "palette": {
+    "base": "#9c8056",
+    "base2": "#8f7550",
+    "recess": "#3a3d42"
+   },
+   "roughness": 0.52,
+   "rough_var": 0.1,
+   "metallic": 0.0,
+   "wear": 0.06,
+   "normal_strength": 1.2,
+   "seed": 10515950,
+   "params": {
+    "cells": 170,
+    "amp": 0.06
+   }
+  },
+  {
+   "id": "wpn_polymer_military",
+   "category": "weapon",
+   "family": "micro",
+   "palette": {
+    "base": "#3a3f36",
+    "base2": "#343a30",
+    "recess": "#3a3d42"
+   },
+   "roughness": 0.55,
+   "rough_var": 0.1,
+   "metallic": 0.0,
+   "wear": 0.06,
+   "normal_strength": 1.2,
+   "seed": 5916926,
+   "params": {
+    "cells": 160,
+    "amp": 0.07
+   }
+  },
+  {
+   "id": "wpn_polymer_grp",
+   "category": "weapon",
+   "family": "micro",
+   "palette": {
+    "base": "#3d4147",
+    "base2": "#373b41",
+    "recess": "#3a3d42"
+   },
+   "roughness": 0.48,
+   "rough_var": 0.1,
+   "metallic": 0.0,
+   "wear": 0.06,
+   "normal_strength": 1.2,
+   "seed": 13068873,
+   "params": {
+    "cells": 150,
+    "amp": 0.06
+   }
+  },
+  {
+   "id": "wpn_polymer_injection",
+   "category": "weapon",
+   "family": "smooth",
+   "palette": {
+    "base": "#2e3236",
+    "base2": "#282c30",
+    "recess": "#3a3d42"
+   },
+   "roughness": 0.42,
+   "rough_var": 0.1,
+   "metallic": 0.0,
+   "wear": 0.06,
+   "normal_strength": 1.0,
+   "seed": 7879632,
+   "params": {}
+  },
+  {
+   "id": "wpn_polymer_textured",
+   "category": "weapon",
+   "family": "hex",
+   "palette": {
+    "base": "#34383d",
+    "base2": "#2e3237",
+    "recess": "#3a3d42"
+   },
+   "roughness": 0.56,
+   "rough_var": 0.1,
+   "metallic": 0.0,
+   "wear": 0.06,
+   "normal_strength": 1.5,
+   "seed": 11117995,
+   "params": {
+    "n": 18
+   }
+  },
+  {
+   "id": "wpn_polymer_hard",
+   "category": "weapon",
+   "family": "smooth",
+   "palette": {
+    "base": "#3c4045",
+    "base2": "#363a3f",
+    "recess": "#3a3d42"
+   },
+   "roughness": 0.4,
+   "rough_var": 0.1,
+   "metallic": 0.0,
+   "wear": 0.06,
+   "normal_strength": 1.0,
+   "seed": 1504578,
+   "params": {}
+  },
+  {
+   "id": "wpn_polymer_soft",
+   "category": "weapon",
+   "family": "micro",
+   "palette": {
+    "base": "#44494f",
+    "base2": "#3e434a",
+    "recess": "#3a3d42"
+   },
+   "roughness": 0.62,
+   "rough_var": 0.1,
+   "metallic": 0.0,
+   "wear": 0.06,
+   "normal_strength": 1.1,
+   "seed": 3547803,
+   "params": {
+    "cells": 120,
+    "amp": 0.06
+   }
+  },
+  {
+   "id": "wpn_grip_rubber",
+   "category": "weapon",
+   "family": "knurl",
+   "palette": {
+    "base": "#24262a",
+    "base2": "#1e2024",
+    "recess": "#3a3d42"
+   },
+   "roughness": 0.82,
+   "rough_var": 0.1,
+   "metallic": 0.0,
+   "wear": 0.05,
+   "normal_strength": 1.8,
+   "seed": 3468364,
+   "params": {
+    "n": 34
+   }
+  },
+  {
+   "id": "wpn_grip_diamond",
+   "category": "weapon",
+   "family": "knurl",
+   "palette": {
+    "base": "#2a2d31",
+    "base2": "#242629",
+    "recess": "#3a3d42"
+   },
+   "roughness": 0.7,
+   "rough_var": 0.1,
+   "metallic": 0.0,
+   "wear": 0.05,
+   "normal_strength": 2.0,
+   "seed": 11933052,
+   "params": {
+    "n": 44
+   }
+  },
+  {
+   "id": "wpn_grip_hex",
+   "category": "weapon",
+   "family": "hex",
+   "palette": {
+    "base": "#2c2f34",
+    "base2": "#26292e",
+    "recess": "#3a3d42"
+   },
+   "roughness": 0.66,
+   "rough_var": 0.1,
+   "metallic": 0.0,
+   "wear": 0.05,
+   "normal_strength": 1.9,
+   "seed": 8097569,
+   "params": {
+    "n": 16
+   }
+  },
+  {
+   "id": "wpn_grip_micro",
+   "category": "weapon",
+   "family": "micro",
+   "palette": {
+    "base": "#303338",
+    "base2": "#2a2d32",
+    "recess": "#3a3d42"
+   },
+   "roughness": 0.6,
+   "rough_var": 0.1,
+   "metallic": 0.0,
+   "wear": 0.06,
+   "normal_strength": 1.4,
+   "seed": 3015981,
+   "params": {
+    "cells": 220,
+    "amp": 0.06
+   }
+  },
+  {
+   "id": "wpn_grip_fine",
+   "category": "weapon",
+   "family": "knurl",
+   "palette": {
+    "base": "#2e3136",
+    "base2": "#282b30",
+    "recess": "#3a3d42"
+   },
+   "roughness": 0.58,
+   "rough_var": 0.1,
+   "metallic": 0.0,
+   "wear": 0.06,
+   "normal_strength": 1.5,
+   "seed": 15269210,
+   "params": {
+    "n": 56
+   }
+  },
+  {
+   "id": "wpn_grip_coarse",
+   "category": "weapon",
+   "family": "knurl",
+   "palette": {
+    "base": "#26282c",
+    "base2": "#202226",
+    "recess": "#3a3d42"
+   },
+   "roughness": 0.74,
+   "rough_var": 0.1,
+   "metallic": 0.0,
+   "wear": 0.06,
+   "normal_strength": 2.2,
+   "seed": 10315378,
+   "params": {
+    "n": 26
+   }
+  },
+  {
+   "id": "wpn_grip_competition",
+   "category": "weapon",
+   "family": "hex",
+   "palette": {
+    "base": "#33373c",
+    "base2": "#2d3136",
+    "recess": "#3a3d42"
+   },
+   "roughness": 0.5,
+   "rough_var": 0.1,
+   "metallic": 0.0,
+   "wear": 0.06,
+   "normal_strength": 1.6,
+   "seed": 10197781,
+   "params": {
+    "n": 20
+   }
+  },
+  {
+   "id": "wpn_grip_tactical",
+   "category": "weapon",
+   "family": "knurl",
+   "palette": {
+    "base": "#2b2e32",
+    "base2": "#25282c",
+    "recess": "#3a3d42"
+   },
+   "roughness": 0.72,
+   "rough_var": 0.1,
+   "metallic": 0.0,
+   "wear": 0.06,
+   "normal_strength": 2.0,
+   "seed": 8158215,
+   "params": {
+    "n": 38
+   }
+  },
+  {
+   "id": "wpn_grip_weather",
+   "category": "weapon",
+   "family": "knurl",
+   "palette": {
+    "base": "#292c30",
+    "base2": "#232629",
+    "recess": "#3a3d42"
+   },
+   "roughness": 0.78,
+   "rough_var": 0.1,
+   "metallic": 0.0,
+   "wear": 0.06,
+   "normal_strength": 2.0,
+   "seed": 11767320,
+   "params": {
+    "n": 32
+   }
+  },
+  {
+   "id": "wpn_carbon_matte",
+   "category": "weapon",
+   "family": "woven",
+   "palette": {
+    "base": "#26282c",
+    "base2": "#1c1e21",
+    "recess": "#121316"
+   },
+   "roughness": 0.5,
+   "rough_var": 0.1,
+   "metallic": 0.2,
+   "wear": 0.03,
+   "normal_strength": 1.6,
+   "seed": 3561413,
+   "params": {
+    "n": 26
+   }
+  },
+  {
+   "id": "wpn_carbon_gloss",
+   "category": "weapon",
+   "family": "woven",
+   "palette": {
+    "base": "#26282c",
+    "base2": "#1c1e21",
+    "recess": "#121316"
+   },
+   "roughness": 0.16,
+   "rough_var": 0.1,
+   "metallic": 0.2,
+   "wear": 0.02,
+   "normal_strength": 1.6,
+   "seed": 9647921,
+   "params": {
+    "n": 26
+   }
+  },
+  {
+   "id": "wpn_carbon_forged",
+   "category": "weapon",
+   "family": "woven",
+   "palette": {
+    "base": "#2a2c30",
+    "base2": "#202226",
+    "recess": "#141518"
+   },
+   "roughness": 0.3,
+   "rough_var": 0.1,
+   "metallic": 0.2,
+   "wear": 0.03,
+   "normal_strength": 1.6,
+   "seed": 11007349,
+   "params": {
+    "n": 40
+   }
+  },
+  {
+   "id": "wpn_kevlar_composite",
+   "category": "weapon",
+   "family": "woven",
+   "palette": {
+    "base": "#4a4636",
+    "base2": "#403c2e",
+    "recess": "#26241a"
+   },
+   "roughness": 0.6,
+   "rough_var": 0.1,
+   "metallic": 0.05,
+   "wear": 0.04,
+   "normal_strength": 1.6,
+   "seed": 16255574,
+   "params": {
+    "n": 30
+   }
+  },
+  {
+   "id": "wpn_cerakote_black",
+   "category": "weapon",
+   "family": "micro",
+   "palette": {
+    "base": "#2c2e31",
+    "base2": "#26282b",
+    "recess": "#3a3d42"
+   },
+   "roughness": 0.55,
+   "rough_var": 0.1,
+   "metallic": 0.1,
+   "wear": 0.06,
+   "normal_strength": 1.1,
+   "seed": 5980651,
+   "params": {
+    "cells": 240,
+    "amp": 0.04
+   }
+  },
+  {
+   "id": "wpn_cerakote_grey",
+   "category": "weapon",
+   "family": "micro",
+   "palette": {
+    "base": "#5a5f64",
+    "base2": "#525760",
+    "recess": "#3a3d42"
+   },
+   "roughness": 0.55,
+   "rough_var": 0.1,
+   "metallic": 0.1,
+   "wear": 0.06,
+   "normal_strength": 1.1,
+   "seed": 14678522,
+   "params": {
+    "cells": 240,
+    "amp": 0.04
+   }
+  },
+  {
+   "id": "wpn_ceramic_coating",
+   "category": "weapon",
+   "family": "micro",
+   "palette": {
+    "base": "#3a3d42",
+    "base2": "#34373c",
+    "recess": "#3a3d42"
+   },
+   "roughness": 0.42,
+   "rough_var": 0.1,
+   "metallic": 0.1,
+   "wear": 0.06,
+   "normal_strength": 1.0,
+   "seed": 16309642,
+   "params": {
+    "cells": 220,
+    "amp": 0.03
+   }
+  },
+  {
+   "id": "wpn_anti_corrosion",
+   "category": "weapon",
+   "family": "micro",
+   "palette": {
+    "base": "#4e5358",
+    "base2": "#464b50",
+    "recess": "#3a3d42"
+   },
+   "roughness": 0.5,
+   "rough_var": 0.1,
+   "metallic": 0.3,
+   "wear": 0.06,
+   "normal_strength": 1.6,
+   "seed": 15235455,
+   "params": {
+    "cells": 200,
+    "amp": 0.05
+   }
+  },
+  {
+   "id": "wpn_heat_resistant",
+   "category": "weapon",
+   "family": "micro",
+   "palette": {
+    "base": "#3f4247",
+    "base2": "#37393e",
+    "recess": "#3a3d42"
+   },
+   "roughness": 0.6,
+   "rough_var": 0.1,
+   "metallic": 0.4,
+   "wear": 0.06,
+   "normal_strength": 1.6,
+   "seed": 13107462,
+   "params": {
+    "cells": 160,
+    "amp": 0.07
+   }
+  },
+  {
+   "id": "wpn_ceramic_armor",
+   "category": "weapon",
+   "family": "micro",
+   "palette": {
+    "base": "#6a6f72",
+    "base2": "#5f6467",
+    "recess": "#3a3d42"
+   },
+   "roughness": 0.48,
+   "rough_var": 0.1,
+   "metallic": 0.05,
+   "wear": 0.06,
+   "normal_strength": 1.2,
+   "seed": 4996598,
+   "params": {
+    "cells": 180,
+    "amp": 0.06
+   }
+  },
+  {
+   "id": "env_drywall_painted",
+   "category": "environment",
+   "family": "smooth",
+   "palette": {
+    "base": "#d5d6d2",
+    "base2": "#cbccc8",
+    "recess": "#b6b7b3"
+   },
+   "roughness": 0.82,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.08,
+   "normal_strength": 0.8,
+   "seed": 2818678,
+   "params": {}
+  },
+  {
+   "id": "env_office_wall",
+   "category": "environment",
+   "family": "smooth",
+   "palette": {
+    "base": "#d9dad6",
+    "base2": "#cfd0cc",
+    "recess": "#bfc0bc"
+   },
+   "roughness": 0.8,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.08,
+   "normal_strength": 0.8,
+   "seed": 354305,
+   "params": {}
+  },
+  {
+   "id": "env_lab_wall",
+   "category": "environment",
+   "family": "smooth",
+   "palette": {
+    "base": "#e6e8e6",
+    "base2": "#dcdedc",
+    "recess": "#c9cbc9"
+   },
+   "roughness": 0.5,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.08,
+   "normal_strength": 0.7,
+   "seed": 7804738,
+   "params": {}
+  },
+  {
+   "id": "env_acoustic_panel",
+   "category": "environment",
+   "family": "fabric",
+   "palette": {
+    "base": "#6a6f66",
+    "base2": "#61665d",
+    "recess": "#3f4239"
+   },
+   "roughness": 0.9,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.08,
+   "normal_strength": 1.2,
+   "seed": 10858203,
+   "params": {
+    "n": 110
+   }
+  },
+  {
+   "id": "env_metal_panel_wall",
+   "category": "environment",
+   "family": "panel",
+   "palette": {
+    "base": "#9aa0a6",
+    "base2": "#8b9197",
+    "recess": "#4a4d52"
+   },
+   "roughness": 0.4,
+   "rough_var": 0.12,
+   "metallic": 1.0,
+   "wear": 0.08,
+   "normal_strength": 2.0,
+   "seed": 16012569,
+   "params": {
+    "nx": 3,
+    "ny": 5,
+    "seam": 0.015,
+    "bolts": true
+   }
+  },
+  {
+   "id": "env_steel_wall",
+   "category": "environment",
+   "family": "panel",
+   "palette": {
+    "base": "#7f858b",
+    "base2": "#71777d",
+    "recess": "#41444a"
+   },
+   "roughness": 0.46,
+   "rough_var": 0.12,
+   "metallic": 1.0,
+   "wear": 0.08,
+   "normal_strength": 2.0,
+   "seed": 10958135,
+   "params": {
+    "nx": 2,
+    "ny": 3,
+    "seam": 0.02,
+    "bolts": true
+   }
+  },
+  {
+   "id": "env_concrete_block_wall",
+   "category": "environment",
+   "family": "brick",
+   "palette": {
+    "base": "#b6b8b2",
+    "base2": "#a4a69f",
+    "recess": "#8a8c85"
+   },
+   "roughness": 0.74,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.08,
+   "normal_strength": 2.2,
+   "seed": 16649605,
+   "params": {
+    "rows": 8,
+    "cols": 4,
+    "mortar": 0.05
+   }
+  },
+  {
+   "id": "env_modular_wall",
+   "category": "environment",
+   "family": "panel",
+   "palette": {
+    "base": "#c2c4c0",
+    "base2": "#b4b6b2",
+    "recess": "#8f918d"
+   },
+   "roughness": 0.6,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.08,
+   "normal_strength": 1.6,
+   "seed": 15697961,
+   "params": {
+    "nx": 4,
+    "ny": 6,
+    "seam": 0.012,
+    "bolts": false
+   }
+  },
+  {
+   "id": "env_reinforced_wall",
+   "category": "environment",
+   "family": "panel",
+   "palette": {
+    "base": "#8a8f88",
+    "base2": "#7c817b",
+    "recess": "#565a54"
+   },
+   "roughness": 0.55,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.08,
+   "normal_strength": 2.0,
+   "seed": 4483711,
+   "params": {
+    "nx": 2,
+    "ny": 2,
+    "seam": 0.02,
+    "bolts": true
+   }
+  },
+  {
+   "id": "env_vinyl_floor",
+   "category": "environment",
+   "family": "smooth",
+   "palette": {
+    "base": "#b9bcbf",
+    "base2": "#adb0b3",
+    "recess": "#93969a"
+   },
+   "roughness": 0.55,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.08,
+   "normal_strength": 0.7,
+   "seed": 4316638,
+   "params": {}
+  },
+  {
+   "id": "env_epoxy_floor",
+   "category": "environment",
+   "family": "smooth",
+   "palette": {
+    "base": "#8a9aa2",
+    "base2": "#7f9099",
+    "recess": "#5f6d75"
+   },
+   "roughness": 0.35,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.08,
+   "normal_strength": 0.6,
+   "seed": 370658,
+   "params": {}
+  },
+  {
+   "id": "env_rubber_floor",
+   "category": "environment",
+   "family": "hex",
+   "palette": {
+    "base": "#303234",
+    "base2": "#2a2c2e",
+    "recess": "#161719"
+   },
+   "roughness": 0.72,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.08,
+   "normal_strength": 1.5,
+   "seed": 2539813,
+   "params": {
+    "n": 14
+   }
+  },
+  {
+   "id": "env_office_carpet",
+   "category": "environment",
+   "family": "fabric",
+   "palette": {
+    "base": "#5a6068",
+    "base2": "#51575f",
+    "recess": "#33373d"
+   },
+   "roughness": 0.95,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.08,
+   "normal_strength": 1.1,
+   "seed": 1341687,
+   "params": {
+    "n": 130
+   }
+  },
+  {
+   "id": "env_warehouse_floor",
+   "category": "environment",
+   "family": "concrete",
+   "palette": {
+    "base": "#a7a9a3",
+    "base2": "#93958f",
+    "recess": "#77796f"
+   },
+   "roughness": 0.7,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.16,
+   "normal_strength": 1.9,
+   "seed": 1111450,
+   "params": {}
+  },
+  {
+   "id": "env_steel_grate",
+   "category": "environment",
+   "family": "panel",
+   "palette": {
+    "base": "#7a7f84",
+    "base2": "#6c7176",
+    "recess": "#3f4247"
+   },
+   "roughness": 0.5,
+   "rough_var": 0.12,
+   "metallic": 1.0,
+   "wear": 0.08,
+   "normal_strength": 2.4,
+   "seed": 16374307,
+   "params": {
+    "nx": 10,
+    "ny": 10,
+    "seam": 0.16,
+    "bolts": false
+   }
+  },
+  {
+   "id": "env_raised_access_floor",
+   "category": "environment",
+   "family": "tile",
+   "palette": {
+    "base": "#9a9d9f",
+    "base2": "#8e9193",
+    "recess": "#6f7274"
+   },
+   "roughness": 0.5,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.08,
+   "normal_strength": 1.4,
+   "seed": 13452939,
+   "params": {
+    "n": 4,
+    "grout": 0.02
+   }
+  },
+  {
+   "id": "env_laminate_floor",
+   "category": "environment",
+   "family": "planks",
+   "palette": {
+    "base": "#b89a6c",
+    "base2": "#a98d60",
+    "recess": "#7a6238"
+   },
+   "roughness": 0.4,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.08,
+   "normal_strength": 1.2,
+   "seed": 12822768,
+   "params": {
+    "n": 5,
+    "gap": 0.012,
+    "grain": 8,
+    "vertical": true
+   }
+  },
+  {
+   "id": "env_acoustic_ceiling",
+   "category": "environment",
+   "family": "tile",
+   "palette": {
+    "base": "#dcdedb",
+    "base2": "#d1d3d0",
+    "recess": "#b8bab7"
+   },
+   "roughness": 0.85,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.08,
+   "normal_strength": 1.0,
+   "seed": 15419433,
+   "params": {
+    "n": 4,
+    "grout": 0.03
+   }
+  },
+  {
+   "id": "env_metal_ceiling",
+   "category": "environment",
+   "family": "panel",
+   "palette": {
+    "base": "#aeb2b6",
+    "base2": "#a1a5a9",
+    "recess": "#7a7d81"
+   },
+   "roughness": 0.45,
+   "rough_var": 0.12,
+   "metallic": 1.0,
+   "wear": 0.08,
+   "normal_strength": 1.6,
+   "seed": 10425863,
+   "params": {
+    "nx": 6,
+    "ny": 6,
+    "seam": 0.02,
+    "bolts": false
+   }
+  },
+  {
+   "id": "env_suspended_ceiling",
+   "category": "environment",
+   "family": "tile",
+   "palette": {
+    "base": "#e2e3e0",
+    "base2": "#d7d8d5",
+    "recess": "#c2c3c0"
+   },
+   "roughness": 0.8,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.08,
+   "normal_strength": 0.9,
+   "seed": 11361425,
+   "params": {
+    "n": 3,
+    "grout": 0.02
+   }
+  },
+  {
+   "id": "env_brushed_alu_panel",
+   "category": "environment",
+   "family": "smooth",
+   "palette": {
+    "base": "#c0c4c8",
+    "base2": "#b3b7bb",
+    "recess": "#8f9296"
+   },
+   "roughness": 0.28,
+   "rough_var": 0.12,
+   "metallic": 1.0,
+   "wear": 0.08,
+   "normal_strength": 0.9,
+   "seed": 1498672,
+   "params": {
+    "brushed": true
+   }
+  },
+  {
+   "id": "env_powder_coated_steel",
+   "category": "environment",
+   "family": "micro",
+   "palette": {
+    "base": "#3f6f8c",
+    "base2": "#396580",
+    "recess": "#274355",
+    "metal": "#8a8f96"
+   },
+   "roughness": 0.55,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.08,
+   "normal_strength": 1.2,
+   "seed": 13967409,
+   "params": {
+    "cells": 200,
+    "amp": 0.04
+   },
+   "chips": true
+  },
+  {
+   "id": "env_perforated_metal",
+   "category": "environment",
+   "family": "panel",
+   "palette": {
+    "base": "#8f9599",
+    "base2": "#82888c",
+    "recess": "#4a4d52"
+   },
+   "roughness": 0.42,
+   "rough_var": 0.12,
+   "metallic": 1.0,
+   "wear": 0.08,
+   "normal_strength": 2.2,
+   "seed": 11872642,
+   "params": {
+    "nx": 14,
+    "ny": 14,
+    "seam": 0.22,
+    "bolts": false
+   }
+  },
+  {
+   "id": "env_corrugated_panel",
+   "category": "environment",
+   "family": "corrugated",
+   "palette": {
+    "base": "#9aa0a6",
+    "base2": "#8b9197",
+    "recess": "#5a5f64"
+   },
+   "roughness": 0.44,
+   "rough_var": 0.12,
+   "metallic": 1.0,
+   "wear": 0.08,
+   "normal_strength": 2.2,
+   "seed": 4493637,
+   "params": {
+    "waves": 20,
+    "vertical": true
+   }
+  },
+  {
+   "id": "env_column_concrete",
+   "category": "environment",
+   "family": "concrete",
+   "palette": {
+    "base": "#bcbeb8",
+    "base2": "#a8aaa4",
+    "recess": "#86887f"
+   },
+   "roughness": 0.68,
+   "rough_var": 0.12,
+   "metallic": 0.0,
+   "wear": 0.08,
+   "normal_strength": 1.8,
+   "seed": 9880092,
+   "params": {}
+  },
+  {
+   "id": "env_column_steel",
+   "category": "environment",
+   "family": "smooth",
+   "palette": {
+    "base": "#7f858b",
+    "base2": "#71777d",
+    "recess": "#4a4d52"
+   },
+   "roughness": 0.4,
+   "rough_var": 0.12,
+   "metallic": 1.0,
+   "wear": 0.08,
+   "normal_strength": 1.0,
+   "seed": 9355818,
+   "params": {
+    "brushed": true
+   }
+  },
+  {
+   "id": "env_beam_steel",
+   "category": "environment",
+   "family": "panel",
+   "palette": {
+    "base": "#767b80",
+    "base2": "#696e73",
+    "recess": "#3f4247"
+   },
+   "roughness": 0.46,
+   "rough_var": 0.12,
+   "metallic": 1.0,
+   "wear": 0.08,
+   "normal_strength": 1.8,
+   "seed": 2427995,
+   "params": {
+    "nx": 1,
+    "ny": 6,
+    "seam": 0.02,
+    "bolts": true
    }
   }
  ]

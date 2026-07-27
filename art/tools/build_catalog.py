@@ -182,10 +182,106 @@ add("emissive_guide_strip","accent","smooth","#0c0d0f","#0c0d0f","#0c0d0f",rough
 add("emissive_objective_red","accent","smooth","#0c0d0f","#0c0d0f","#0c0d0f",rough=0.3,metallic=0.0,wear=0.0,
     emission={"color":"#e5484d","mask":0.9})
 
+# ================= WEAPON MATERIALS (modular FPS armament) =================
+# families: machined (CNC/lathe), knurl/hex (grips), micro (cerakote/bead-blast),
+# smooth+brushed (finished metal), woven (carbon/kevlar), grain (leather).
+def wpn(mid, base, b2, rough, metallic=1.0, family="micro", wear=0.06, nstr=1.6,
+        params=None, recess="#3a3d42", **ex):
+    add(mid, "weapon", family, base, b2, recess, rough=rough, rvar=0.10,
+        metallic=metallic, wear=wear, nstr=nstr, params=params or {}, **ex)
+
+# --- steels ---
+wpn("wpn_military_steel","#5a5f64","#4f5459",0.46,params={"cells":180,"amp":0.08})
+wpn("wpn_machined_steel","#8a9096","#7e848a",0.28,family="machined",params={"mode":"concentric","freq":260})
+wpn("wpn_heat_treated_steel","#4a4d54","#3f424a",0.4,family="micro",params={"cells":160,"amp":0.07})
+wpn("wpn_cold_rolled_steel","#9298a0","#878d95",0.3,family="smooth",params={"brushed":True})
+wpn("wpn_carbon_steel","#6e7378","#63686d",0.44,family="micro",params={"cells":170,"amp":0.08})
+wpn("wpn_stainless_steel","#b0b5ba","#a4a9ae",0.2,family="smooth",params={"brushed":True})
+wpn("wpn_bluing_steel","#2f3540","#282e38",0.24,family="smooth")
+# --- titanium & light alloys ---
+wpn("wpn_titanium","#a6abb0","#989da2",0.26,family="micro",params={"cells":200,"amp":0.05})
+wpn("wpn_titanium_alloy","#8f959c","#848a91",0.3,family="machined",params={"mode":"linear","freq":220})
+wpn("wpn_aircraft_aluminum","#bcc0c4","#b0b4b8",0.28,family="smooth",params={"brushed":True})
+wpn("wpn_anodized_aluminum","#40484f","#39414a" ,0.3,metallic=0.7,family="micro",params={"cells":200,"amp":0.04})
+wpn("wpn_anodized_fde","#a68a5f","#997d54",0.34,metallic=0.5,family="micro",params={"cells":200,"amp":0.05})
+wpn("wpn_forged_aluminum","#a3a8ad","#979ca1",0.36,family="micro",params={"cells":150,"amp":0.07})
+wpn("wpn_brushed_aluminum","#c0c4c8","#b3b7bb",0.26,family="smooth",params={"brushed":True})
+wpn("wpn_cast_aluminum","#92979c","#878c94",0.42,family="micro",params={"cells":130,"amp":0.09})
+wpn("wpn_industrial_alloy","#7f858b","#747a80",0.4,family="machined",params={"mode":"linear","freq":200})
+wpn("wpn_magnesium_alloy","#8b8f92","#7f8386",0.44,family="micro",params={"cells":140,"amp":0.08})
+# --- polymers (receivers/furniture) ---
+wpn("wpn_polymer_receiver","#33373b","#2d3135",0.5,metallic=0.0,family="micro",params={"cells":170,"amp":0.06},nstr=1.2)
+wpn("wpn_polymer_fde","#9c8056","#8f7550",0.52,metallic=0.0,family="micro",params={"cells":170,"amp":0.06},nstr=1.2)
+wpn("wpn_polymer_military","#3a3f36","#343a30",0.55,metallic=0.0,family="micro",params={"cells":160,"amp":0.07},nstr=1.2)
+wpn("wpn_polymer_grp","#3d4147","#373b41",0.48,metallic=0.0,family="micro",params={"cells":150,"amp":0.06},nstr=1.2)
+wpn("wpn_polymer_injection","#2e3236","#282c30",0.42,metallic=0.0,family="smooth",nstr=1.0)
+wpn("wpn_polymer_textured","#34383d","#2e3237",0.56,metallic=0.0,family="hex",params={"n":18},nstr=1.5)
+wpn("wpn_polymer_hard","#3c4045","#363a3f",0.4,metallic=0.0,family="smooth",nstr=1.0)
+wpn("wpn_polymer_soft","#44494f","#3e434a",0.62,metallic=0.0,family="micro",params={"cells":120,"amp":0.06},nstr=1.1)
+# --- grips ---
+wpn("wpn_grip_rubber","#24262a","#1e2024",0.82,metallic=0.0,family="knurl",params={"n":34},nstr=1.8,wear=0.05)
+wpn("wpn_grip_diamond","#2a2d31","#242629",0.7,metallic=0.0,family="knurl",params={"n":44},nstr=2.0,wear=0.05)
+wpn("wpn_grip_hex","#2c2f34","#26292e",0.66,metallic=0.0,family="hex",params={"n":16},nstr=1.9,wear=0.05)
+wpn("wpn_grip_micro","#303338","#2a2d32",0.6,metallic=0.0,family="micro",params={"cells":220,"amp":0.06},nstr=1.4)
+wpn("wpn_grip_fine","#2e3136","#282b30",0.58,metallic=0.0,family="knurl",params={"n":56},nstr=1.5)
+wpn("wpn_grip_coarse","#26282c","#202226",0.74,metallic=0.0,family="knurl",params={"n":26},nstr=2.2)
+wpn("wpn_grip_competition","#33373c","#2d3136",0.5,metallic=0.0,family="hex",params={"n":20},nstr=1.6)
+wpn("wpn_grip_tactical","#2b2e32","#25282c",0.72,metallic=0.0,family="knurl",params={"n":38},nstr=2.0)
+wpn("wpn_grip_weather","#292c30","#232629",0.78,metallic=0.0,family="knurl",params={"n":32},nstr=2.0)
+# --- carbon & composites ---
+wpn("wpn_carbon_matte","#26282c","#1c1e21",0.5,metallic=0.2,family="woven",params={"n":26},recess="#121316",wear=0.03)
+wpn("wpn_carbon_gloss","#26282c","#1c1e21",0.16,metallic=0.2,family="woven",params={"n":26},recess="#121316",wear=0.02)
+wpn("wpn_carbon_forged","#2a2c30","#202226",0.3,metallic=0.2,family="woven",params={"n":40},recess="#141518",wear=0.03)
+wpn("wpn_kevlar_composite","#4a4636","#403c2e",0.6,metallic=0.05,family="woven",params={"n":30},recess="#26241a",wear=0.04)
+# --- coatings / finishes ---
+wpn("wpn_cerakote_black","#2c2e31","#26282b",0.55,metallic=0.1,family="micro",params={"cells":240,"amp":0.04},nstr=1.1)
+wpn("wpn_cerakote_grey","#5a5f64","#525760",0.55,metallic=0.1,family="micro",params={"cells":240,"amp":0.04},nstr=1.1)
+wpn("wpn_ceramic_coating","#3a3d42","#34373c",0.42,metallic=0.1,family="micro",params={"cells":220,"amp":0.03},nstr=1.0)
+wpn("wpn_anti_corrosion","#4e5358","#464b50",0.5,metallic=0.3,family="micro",params={"cells":200,"amp":0.05})
+wpn("wpn_heat_resistant","#3f4247","#37393e",0.6,metallic=0.4,family="micro",params={"cells":160,"amp":0.07})
+wpn("wpn_ceramic_armor","#6a6f72","#5f6467",0.48,metallic=0.05,family="micro",params={"cells":180,"amp":0.06},nstr=1.2)
+
+# ================= ENVIRONMENT EXPANSION (walls/floors/ceilings/panels) =====
+def env(mid, family, base, b2, recess, rough, rvar=0.12, metallic=0.0, wear=0.08,
+        nstr=1.6, params=None, **ex):
+    add(mid, "environment", family, base, b2, recess, rough=rough, rvar=rvar,
+        metallic=metallic, wear=wear, nstr=nstr, params=params or {}, **ex)
+# walls
+env("env_drywall_painted","smooth","#d5d6d2","#cbccc8","#b6b7b3",0.82,nstr=0.8)
+env("env_office_wall","smooth","#d9dad6","#cfd0cc","#bfc0bc",0.8,nstr=0.8)
+env("env_lab_wall","smooth","#e6e8e6","#dcdedc","#c9cbc9",0.5,nstr=0.7)
+env("env_acoustic_panel","fabric","#6a6f66","#61665d","#3f4239",0.9,nstr=1.2,params={"n":110})
+env("env_metal_panel_wall","panel","#9aa0a6","#8b9197","#4a4d52",0.4,metallic=1.0,nstr=2.0,params={"nx":3,"ny":5,"seam":0.015,"bolts":True})
+env("env_steel_wall","panel","#7f858b","#71777d","#41444a",0.46,metallic=1.0,nstr=2.0,params={"nx":2,"ny":3,"seam":0.02,"bolts":True})
+env("env_concrete_block_wall","brick","#b6b8b2","#a4a69f","#8a8c85",0.74,nstr=2.2,params={"rows":8,"cols":4,"mortar":0.05})
+env("env_modular_wall","panel","#c2c4c0","#b4b6b2","#8f918d",0.6,nstr=1.6,params={"nx":4,"ny":6,"seam":0.012,"bolts":False})
+env("env_reinforced_wall","panel","#8a8f88","#7c817b","#565a54",0.55,nstr=2.0,params={"nx":2,"ny":2,"seam":0.02,"bolts":True})
+# floors
+env("env_vinyl_floor","smooth","#b9bcbf","#adb0b3","#93969a",0.55,nstr=0.7)
+env("env_epoxy_floor","smooth","#8a9aa2","#7f9099","#5f6d75",0.35,nstr=0.6)
+env("env_rubber_floor","hex","#303234","#2a2c2e","#161719",0.72,nstr=1.5,params={"n":14})
+env("env_office_carpet","fabric","#5a6068","#51575f","#33373d",0.95,nstr=1.1,params={"n":130})
+env("env_warehouse_floor","concrete","#a7a9a3","#93958f","#77796f",0.7,wear=0.16,nstr=1.9)
+env("env_steel_grate","panel","#7a7f84","#6c7176","#3f4247",0.5,metallic=1.0,nstr=2.4,params={"nx":10,"ny":10,"seam":0.16,"bolts":False})
+env("env_raised_access_floor","tile","#9a9d9f","#8e9193","#6f7274",0.5,nstr=1.4,params={"n":4,"grout":0.02})
+env("env_laminate_floor","planks","#b89a6c","#a98d60","#7a6238",0.4,nstr=1.2,params={"n":5,"gap":0.012,"grain":8,"vertical":True})
+# ceilings
+env("env_acoustic_ceiling","tile","#dcdedb","#d1d3d0","#b8bab7",0.85,nstr=1.0,params={"n":4,"grout":0.03})
+env("env_metal_ceiling","panel","#aeb2b6","#a1a5a9","#7a7d81",0.45,metallic=1.0,nstr=1.6,params={"nx":6,"ny":6,"seam":0.02,"bolts":False})
+env("env_suspended_ceiling","tile","#e2e3e0","#d7d8d5","#c2c3c0",0.8,nstr=0.9,params={"n":3,"grout":0.02})
+# panels / structural
+env("env_brushed_alu_panel","smooth","#c0c4c8","#b3b7bb","#8f9296",0.28,metallic=1.0,nstr=0.9,params={"brushed":True})
+env("env_powder_coated_steel","micro","#3f6f8c","#396580","#274355",0.55,metallic=0.0,nstr=1.2,chips=True,metal_hex="#8a8f96",params={"cells":200,"amp":0.04})
+env("env_perforated_metal","panel","#8f9599","#82888c","#4a4d52",0.42,metallic=1.0,nstr=2.2,params={"nx":14,"ny":14,"seam":0.22,"bolts":False})
+env("env_corrugated_panel","corrugated","#9aa0a6","#8b9197","#5a5f64",0.44,metallic=1.0,nstr=2.2,params={"waves":20,"vertical":True})
+env("env_column_concrete","concrete","#bcbeb8","#a8aaa4","#86887f",0.68,nstr=1.8)
+env("env_column_steel","smooth","#7f858b","#71777d","#4a4d52",0.4,metallic=1.0,nstr=1.0,params={"brushed":True})
+env("env_beam_steel","panel","#767b80","#696e73","#3f4247",0.46,metallic=1.0,nstr=1.8,params={"nx":1,"ny":6,"seam":0.02,"bolts":True})
+
 cat = {
   "name": "VANTAGE",
-  "version": "1.0",
-  "description": "Original competitive-tactical FPS material foundation (procedural, stylized-PBR, seamless).",
+  "version": "2.0",
+  "description": "Original competitive-tactical FPS material foundation (procedural, stylized-PBR, seamless). Environment + weapon + prop surfaces; pairs with decals.json and 20 skin themes.",
   "resolutions": [512, 1024, 2048, 4096],
   "maps": ["albedo","normal","ao","roughness","metallic","height","displacement","orm","curvature","opacity","emission"],
   "defaults": {},
