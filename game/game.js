@@ -377,6 +377,13 @@ function tile(url, rx, ry) {
   t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
   return t;
 }
+// matching VANTAGE tangent-space normal map (linear space); "<name>.png" -> "<name>_n.png"
+function tileN(url, rx, ry) {
+  const t = texLoader.load(url.replace(/\.png$/, "_n.png"));
+  t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rx, ry);
+  t.anisotropy = 4;
+  return t;
+}
 const boxGeo = new THREE.BoxGeometry(1, 1, 1);
 const mat = (c, opts = {}) => new THREE.MeshLambertMaterial({ color: c, ...opts });
 
@@ -506,11 +513,13 @@ function buildWorld(mapId) {
   scene.add(new THREE.AmbientLight(M.amb, 0.25));
 
   const S = M.size || CFG.arena.size, H = M.wallH || CFG.arena.wallH;
-  const floorMat = new THREE.MeshLambertMaterial({ map: tile(`./assets/textures/${M.floor}.png`, S / 6, S / 6) });
+  const floorMat = new THREE.MeshLambertMaterial({ map: tile(`./assets/textures/${M.floor}.png`, S / 6, S / 6),
+    normalMap: tileN(`./assets/textures/${M.floor}.png`, S / 6, S / 6) });
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(S, S), floorMat);
   floor.rotation.x = -Math.PI / 2; scene.add(floor);
 
-  const wallMat = new THREE.MeshLambertMaterial({ map: tile(`./assets/textures/${M.wall}.png`, S / 4, H / 4) });
+  const wallMat = new THREE.MeshLambertMaterial({ map: tile(`./assets/textures/${M.wall}.png`, S / 4, H / 4),
+    normalMap: tileN(`./assets/textures/${M.wall}.png`, S / 4, H / 4) });
   const solids = [];
   const wall = (x, z, sx, sz) => {
     const m = new THREE.Mesh(boxGeo, wallMat);
@@ -520,7 +529,8 @@ function buildWorld(mapId) {
   const h = S / 2, t = 1;
   wall(0, -h, S + t, t); wall(0, h, S + t, t); wall(-h, 0, t, S); wall(h, 0, t, S);
 
-  const crateMat = new THREE.MeshLambertMaterial({ map: tile(`./assets/textures/${M.crate}.png`, 1, 1) });
+  const crateMat = new THREE.MeshLambertMaterial({ map: tile(`./assets/textures/${M.crate}.png`, 1, 1),
+    normalMap: tileN(`./assets/textures/${M.crate}.png`, 1, 1) });
   for (const [x, z, sx, sz, sy] of M.crates) {
     const m = new THREE.Mesh(boxGeo, crateMat);
     m.position.set(x, sy / 2, z); m.scale.set(sx, sy, sz); scene.add(m);
