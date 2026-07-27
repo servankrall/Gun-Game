@@ -227,7 +227,7 @@ addEventListener("mousemove", e => {
 });
 
 // touch: left stick element + right-half drag look + buttons
-const touchState = { mx: 0, my: 0, fire: false, jump: false, reload: false, use: false };
+const touchState = { mx: 0, my: 0, fire: false, jump: false, reload: false, use: false, zoom: false };
 function setupTouch() {
   if (!isTouch) return;
   document.getElementById("touchUI").style.display = "block";
@@ -274,11 +274,22 @@ function setupTouch() {
     el.addEventListener("touchend", e => { off && off(); e.preventDefault(); e.stopPropagation(); }, { passive: false });
   };
   btn("fireBtn", () => touchState.fire = true, () => touchState.fire = false);
+  btn("zoomBtn", () => touchState.zoom = true, () => touchState.zoom = false);
   btn("jumpBtn", () => touchState.jump = true, () => touchState.jump = false);
   btn("reloadBtn", () => touchState.reload = true, () => touchState.reload = false);
   btn("abilityBtn", () => abilityReq = true);
   btn("shopBtn", () => { if (!inMenu && match && !match.over) toggleShop(); });
   btn("useBtn", () => touchState.use = true, () => touchState.use = false);
+  // nudge the player to landscape while in a match (portrait crushes the FPS HUD)
+  addEventListener("resize", updateRotateHint);
+  addEventListener("orientationchange", updateRotateHint);
+  setInterval(updateRotateHint, 600);
+  updateRotateHint();
+}
+function updateRotateHint() {
+  if (!isTouch) return;
+  const r = document.getElementById("rotate"); if (!r) return;
+  r.classList.toggle("show", !inMenu && innerHeight > innerWidth);
 }
 
 function padState() {
@@ -311,7 +322,7 @@ function commands() {
     fire: mouseDown || touchState.fire || gp.fire,
     jump: held.has("jump") || touchState.jump || gp.jump,
     reload: held.has("reload") || touchState.reload || gp.reload,
-    zoom: held.has("zoom") || gp.zoom,
+    zoom: held.has("zoom") || touchState.zoom || gp.zoom,
     use: held.has("use") || touchState.use || gp.use,
     lookGX: gp.lx, lookGY: gp.ly,
   };
@@ -2056,10 +2067,58 @@ function ensureBattleDom() {
     const fb = document.createElement("button"); fb.id = "friendsBtn"; fb.className = "btn ghost";
     $("onlineBtn").after(fb);
   }
-  const tui = $("touchUI");
-  if (tui && !$("abilityBtn")) { const b = document.createElement("div"); b.className = "tbtn"; b.id = "abilityBtn"; tui.appendChild(b); }
-  if (tui && !$("shopBtn")) { const b = document.createElement("div"); b.className = "tbtn"; b.id = "shopBtn"; b.textContent = "🛒"; tui.appendChild(b); }
-  if (tui && !$("useBtn")) { const b = document.createElement("div"); b.className = "tbtn"; b.id = "useBtn"; b.textContent = "USE"; tui.appendChild(b); }
+  ensureTouchDom();
+}
+
+// Build the whole touch UI (stick + all buttons + rotate hint) in JS, idempotently,
+// so mobile works even when the platform serves an old edge-cached index.html that
+// lacks (or only partially has) the #touchUI markup.
+function ensureTouchDom() {
+  if (!document.getElementById("touchCss")) {
+    const sa = "env(safe-area-inset";
+    const st = document.createElement("style"); st.id = "touchCss";
+    st.textContent = `
+      #touchUI{position:fixed;inset:0;z-index:25;display:none;pointer-events:none}
+      #stick{position:absolute;left:calc(26px + ${sa}-left));bottom:calc(72px + ${sa}-bottom));
+        width:132px;height:132px;border:2px solid #ffffff33;border-radius:50%;background:#0000002e;pointer-events:auto;touch-action:none}
+      #knob{position:absolute;left:44px;top:44px;width:44px;height:44px;border-radius:50%;background:#ffffff40}
+      .tbtn{position:absolute;border-radius:50%;border:2px solid #ffffff44;background:#00000066;color:#e8e4da;
+        display:flex;align-items:center;justify-content:center;font-weight:700;pointer-events:auto;letter-spacing:.03em;
+        -webkit-tap-highlight-color:transparent;text-align:center;line-height:1.05;user-select:none;font-size:12px}
+      .tbtn:active{background:#ffffff33;transform:scale(.94)}
+      #fireBtn{right:calc(28px + ${sa}-right));bottom:calc(72px + ${sa}-bottom));width:98px;height:98px;font-size:15px;border-color:#ff7a1a88;color:#ffb03a}
+      #zoomBtn{right:calc(136px + ${sa}-right));bottom:calc(154px + ${sa}-bottom));width:60px;height:60px;border-color:#4ad7e888;color:#4ad7e8}
+      #jumpBtn{right:calc(136px + ${sa}-right));bottom:calc(76px + ${sa}-bottom));width:62px;height:62px}
+      #reloadBtn{right:calc(40px + ${sa}-right));bottom:calc(184px + ${sa}-bottom));width:54px;height:54px;font-size:14px;color:#4ad7e8}
+      #abilityBtn{right:calc(210px + ${sa}-right));bottom:calc(96px + ${sa}-bottom));width:66px;height:66px;border-color:#8fe3ff88;color:#8fe3ff}
+      #useBtn{right:calc(210px + ${sa}-right));bottom:calc(176px + ${sa}-bottom));width:66px;height:66px;border-color:#ffb03a88;color:#ffb03a}
+      #shopBtn{right:calc(40px + ${sa}-right));top:calc(72px + ${sa}-top));width:52px;height:52px;font-size:18px}
+      #rotate{position:fixed;inset:0;z-index:60;display:none;flex-direction:column;align-items:center;justify-content:center;
+        background:#0d1016;color:#e8e4da;text-align:center;padding:24px;gap:12px}
+      #rotate.show{display:flex}
+      #rotate .ic{font-size:56px;animation:rotpulse 1.5s ease-in-out infinite}
+      #rotate b{font-size:19px;letter-spacing:.08em} #rotate span{opacity:.6;font-size:13px}
+      @keyframes rotpulse{0%,100%{transform:rotate(-14deg)}50%{transform:rotate(76deg)}}`;
+    document.head.appendChild(st);
+  }
+  let tui = document.getElementById("touchUI");
+  if (!tui) { tui = document.createElement("div"); tui.id = "touchUI"; document.body.appendChild(tui); }
+  if (!document.getElementById("stick")) {
+    const s = document.createElement("div"); s.id = "stick";
+    const k = document.createElement("div"); k.id = "knob"; s.appendChild(k); tui.appendChild(s);
+  }
+  const T = STR.touch;
+  const mkbtn = (id, label) => {
+    let b = document.getElementById(id);
+    if (!b) { b = document.createElement("div"); b.className = "tbtn"; b.id = id; tui.appendChild(b); }
+    if (label != null) b.textContent = label;
+  };
+  mkbtn("fireBtn", T.fire); mkbtn("zoomBtn", T.aim); mkbtn("jumpBtn", T.jump);
+  mkbtn("reloadBtn", T.reloadBtn); mkbtn("abilityBtn", T.ability);
+  mkbtn("useBtn", T.use); mkbtn("shopBtn", "🛒");
+  let r = document.getElementById("rotate");
+  if (!r) { r = document.createElement("div"); r.id = "rotate"; document.body.appendChild(r); }
+  r.innerHTML = `<div class="ic">📱</div><b>${T.rotate}</b><span>${T.rotateSub}</span>`;
 }
 
 function setupMenus() {

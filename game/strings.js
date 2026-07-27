@@ -100,9 +100,10 @@ export const STR = {
   },
   bots: ["Vex", "Rook", "Slag", "Piper", "Duke", "Mara"],
   you: "You",
-  touch: { fire: "FIRE", jump: "JUMP", reloadBtn: "R", ability: "ABILITY", shop: "BUY" },
+  touch: { fire: "FIRE", jump: "JUMP", reloadBtn: "R", ability: "SKILL", shop: "BUY", aim: "ADS", use: "USE",
+    rotate: "Rotate your device", rotateSub: "Play in landscape for the full HUD" },
   help: {
     desktop: "WASD move · Mouse aim · Click fire · R reload · Q ability · B buy · F plant/defuse · RMB scope",
-    touch: "Left: move · Right: aim · Buttons: fire / jump / reload / ability / buy / use",
+    touch: "Left stick: move · Right side: aim · Tap FIRE / ADS / JUMP / R / SKILL / USE · 🛒 buy",
   },
 };

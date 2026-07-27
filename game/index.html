@@ -6,7 +6,7 @@
 <title>Gun Game Arena</title>
 <style>
   html,body{margin:0;height:100%;overflow:hidden;background:#11141a;font-family:'Segoe UI',system-ui,sans-serif;
-    -webkit-user-select:none;user-select:none;touch-action:none;color:#e8e4da}
+    -webkit-user-select:none;user-select:none;touch-action:none;overscroll-behavior:none;color:#e8e4da}
   canvas{display:block}
   #dev{position:fixed;top:4px;left:4px;color:#0f0;font:12px monospace;display:none;z-index:40;white-space:pre}
   .overlay{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -110,9 +110,14 @@
 <div id="touchUI">
   <div id="stick"><div id="knob"></div></div>
   <div class="tbtn" id="fireBtn"></div>
+  <div class="tbtn" id="zoomBtn"></div>
   <div class="tbtn" id="jumpBtn"></div>
   <div class="tbtn" id="reloadBtn"></div>
+  <div class="tbtn" id="abilityBtn"></div>
+  <div class="tbtn" id="useBtn"></div>
+  <div class="tbtn" id="shopBtn"></div>
 </div>
+<div id="rotate"><div class="ic">📱</div><b></b><span></span></div>
 
 <div id="menu" class="overlay">
   <h1 id="mTitle"></h1>
