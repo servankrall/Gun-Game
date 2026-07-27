@@ -1,7 +1,7 @@
 // All player-visible text. Switching language = swapping this data.
 export const STR = {
   title: "GUN GAME ARENA",
-  subtitle: "Buy-menu deathmatch. Grab a weapon, pick an agent, first to 30 kills wins.",
+  subtitle: "Online: 5v5 Search & Destroy (plant the spike). Solo: buy-menu deathmatch vs bots.",
   start: "SOLO VS BOTS",
   resume: "RESUME",
   paused: "PAUSED",
@@ -10,6 +10,7 @@ export const STR = {
     dust: { name: "DUST YARD", desc: "Sun-bleached desert depot" },
     neon: { name: "NEON DISTRICT", desc: "Cold asphalt under cyan light" },
     frost: { name: "FROST DEPOT", desc: "Packed snow between containers" },
+    haven: { name: "HAVEN", desc: "Three bomb sites — A, B, C — and a wide mid" },
   },
   weapons: {
     classic: "CLASSIC", shorty: "SHORTY", frenzy: "FRENZY", ghost: "GHOST", sheriff: "SHERIFF",
@@ -59,8 +60,30 @@ export const STR = {
     again: "PLAY AGAIN",
     menu: "MENU",
   },
+  sd: {
+    round: "ROUND", attack: "ATTACK", defend: "DEFEND",
+    buyPhase: "Buy phase — press B to buy",
+    carrySpike: "You carry the SPIKE — take it to a site (A / B / C)",
+    holdPlant: "Hold F to PLANT the spike",
+    grabSpike: "Walk over the dropped spike to grab it",
+    holdDefuse: "Hold F to DEFUSE",
+    spikeUp: "Spike is down — stop the defuse!",
+    defuseIt: "Defuse the spike before it blows!",
+    planted: "SPIKE PLANTED — {s}",
+    defused: "SPIKE DEFUSED",
+    detonated: "SPIKE DETONATED",
+    youDied: "You died — spectate until next round",
+    spectating: "Spectating — next round soon",
+    roundWin: "ROUND WON",
+    roundLoss: "ROUND LOST",
+    reasons: { elim: "elimination", time: "time out", defuse: "spike defused", detonate: "spike detonated" },
+    draw: "DRAW",
+    finalScore: "Final score  {a} — {b}",
+    modeNote: "Online = Search & Destroy · plant the spike at A/B/C · first to 13",
+  },
   online: {
-    play: "PLAY ONLINE",
+    play: "ONLINE",
+    friends: "PLAY WITH FRIENDS",
     join: "JOIN THIS ROOM",
     name: "CALLSIGN",
     randomMap: "Every match drops into a random arena — you don't pick",
@@ -79,7 +102,7 @@ export const STR = {
   you: "You",
   touch: { fire: "FIRE", jump: "JUMP", reloadBtn: "R", ability: "ABILITY", shop: "BUY" },
   help: {
-    desktop: "WASD move · Mouse aim · Click fire · R reload · Space jump · Q ability · B buy menu · RMB/Shift scope",
-    touch: "Left: move · Right: aim · Buttons: fire / jump / reload / ability / buy",
+    desktop: "WASD move · Mouse aim · Click fire · R reload · Q ability · B buy · F plant/defuse · RMB scope",
+    touch: "Left: move · Right: aim · Buttons: fire / jump / reload / ability / buy / use",
   },
 };
