@@ -18,7 +18,25 @@ const CFG = {
   player: { speed: 5.5, accel: 14, airAccel: 3.2, jumpV: 7.2, gravity: 20, radius: 0.42, eye: 1.62, hp: 100,
             regenDelay: 4, regenRate: 30, respawn: 3 },
   bot: { speed: 4.4, hp: 100, respawn: 3.5, reactMin: 0.28, reactMax: 0.55,
-         spreadMul: 2.4, engageRange: 46, repath: 2.8, dmgMul: 0.7 },
+         spreadMul: 2.4, engageRange: 46, repath: 2.8, dmgMul: 0.7,
+         // AI difficulty presets — harder = faster reaction + tighter tracking + more
+         // tactics, NOT perfect aim. aimErr is radians of residual aim jitter.
+         difficulty: "normal",
+         levels: {
+           beginner: { react: [0.60, 1.00], aimErr: 0.115, aimSpeed: 2.6, spreadMul: 3.4, dmgMul: 0.50, aggression: 0.30, awareness: 0.55, fov: 1.30, burst: [3, 5] },
+           easy:     { react: [0.45, 0.80], aimErr: 0.075, aimSpeed: 3.3, spreadMul: 3.0, dmgMul: 0.60, aggression: 0.45, awareness: 0.70, fov: 1.45, burst: [4, 7] },
+           normal:   { react: [0.30, 0.55], aimErr: 0.045, aimSpeed: 4.2, spreadMul: 2.4, dmgMul: 0.70, aggression: 0.60, awareness: 0.85, fov: 1.55, burst: [5, 9] },
+           hard:     { react: [0.20, 0.38], aimErr: 0.026, aimSpeed: 5.4, spreadMul: 2.0, dmgMul: 0.85, aggression: 0.75, awareness: 1.00, fov: 1.70, burst: [7, 12] },
+           expert:   { react: [0.13, 0.26], aimErr: 0.015, aimSpeed: 6.8, spreadMul: 1.7, dmgMul: 1.00, aggression: 0.90, awareness: 1.15, fov: 1.85, burst: [9, 16] },
+         },
+         // personalities bias tactics without changing raw skill
+         personas: {
+           aggressive: { push: 0.85, hold: 0.35, retreatHp: 20, strafe: 0.5 },
+           defensive:  { push: 0.25, hold: 0.78, retreatHp: 46, strafe: 0.95 },
+           balanced:   { push: 0.55, hold: 0.55, retreatHp: 32, strafe: 0.72 },
+           recon:      { push: 0.45, hold: 0.70, retreatHp: 36, strafe: 1.0 },
+           support:    { push: 0.40, hold: 0.62, retreatHp: 40, strafe: 0.82 },
+         } },
   arena: { size: 64, wallH: 4.5 },
 };
 
@@ -710,10 +728,19 @@ function makeEntity(name, isPlayer, accent) {
     respawnT: 0, lastHurtT: -99, walkPhase: 0, moving: false, speed2d: 0,
     // abilities
     abilityCd: 0, healT: 0, speedT: 0, speedFactor: 1, invulnT: 0, flashedT: 0,
-    // bot brain
+    // bot brain (modular AI framework — see docs/AI_FRAMEWORK.md)
     target: null, wp: null, repathT: 0, reactT: 0, strafeDir: 1, strafeT: 0,
+    aiState: "roam", persona: "balanced",     // finite-state + personality
+    lastSeen: null, searchT: 0,               // memory of last enemy position
+    stuckT: 0, prevX: 0, prevZ: 0,            // anti-stuck
+    aimJx: 0, aimJz: 0, aimSettle: 0, burstLeft: 0,   // human-like aiming model
+    heardT: 0, heardX: 0, heardZ: 0,          // hearing (gunfire/damage direction)
     model: null, guns: null, muzzleSp: null,
   };
+  if (!isPlayer) {
+    const pk = Object.keys(CFG.bot.personas);
+    e.persona = pk[(Math.random() * pk.length) | 0];   // assign a personality
+  }
   if (!isPlayer) {
     e.model = makeSoldier(accent);
     e.guns = WEAPONS.map(w => {
@@ -757,7 +784,7 @@ function fireWeapon(sh) {
   const w = WEAPONS[sh.weapon];
   sh.fireCd = w.interval; if (!w.melee) sh.ammo--;
   const eye = sh.pos.y + (sh.isPlayer ? CFG.player.eye : 1.55);
-  const spreadBase = w.spread * (sh.isPlayer ? 1 : CFG.bot.spreadMul);
+  const spreadBase = w.spread * (sh.isPlayer ? 1 : (CFG.bot.levels[CFG.bot.difficulty] || CFG.bot.levels.normal).spreadMul);
   const dist0 = sh.isPlayer ? 0.2 : 0.6;
 
   // velocity-scaled accuracy: inaccuracy grows with speed, worst airborne
@@ -785,13 +812,16 @@ function fireWeapon(sh) {
     const hx = ox + dx * tHit, hy = oy + dy * tHit, hz = oz + dz * tHit;
     if (p === 0 || p % 3 === 0) spawnTracer(ox, oy - 0.12, oz, hx, hy, hz);
     if (hitEnt) {
-      let dmg = w.dmg * (sh.isPlayer ? 1 : CFG.bot.dmgMul);
+      let dmg = w.dmg * (sh.isPlayer ? 1 : (CFG.bot.levels[CFG.bot.difficulty] || CFG.bot.levels.normal).dmgMul);
       if (w.pellets > 1) {
         const falloff = Math.max(0.35, 1 - tHit / w.range);
         dmg *= falloff;
       }
       if (hitAcc && hitEnt.remote) hitAcc.set(hitEnt, (hitAcc.get(hitEnt) || 0) + dmg);
       else damage(hitEnt, dmg, sh);
+      if (hitEnt && !hitEnt.isPlayer && !hitEnt.remote && sh) {   // AI hearing: know where the shot came from
+        hitEnt.heardT = 1.4; hitEnt.heardX = sh.pos.x; hitEnt.heardZ = sh.pos.z;
+      }
       spawnPuff(hx, hy, hz, false);
     } else if (tHit < w.range) {
       spawnPuff(hx, hy, hz, false);
@@ -996,63 +1026,124 @@ function abilitiesUpdate(dt) {
   }
 }
 
-/* ---------------- bot AI ---------------- */
-function botThink(e, dt) {
-  const w = WEAPONS[e.weapon];
-  // acquire target: nearest visible enemy
-  e.repathT -= dt;
-  let best = null, bestD = CFG.bot.engageRange;
+/* ---------------- bot AI framework ----------------
+ * Modular pipeline per bot per tick:  perceive → decide (FSM) → aim → act.
+ * States: engage · retreat · search · roam.  Difficulty scales reaction,
+ * tracking speed and residual aim error (never perfect); personality biases
+ * tactics (push/hold/retreat). See docs/AI_FRAMEWORK.md.
+ */
+function aiCfg() { return CFG.bot.levels[CFG.bot.difficulty] || CFG.bot.levels.normal; }
+const angNorm = a => { while (a > Math.PI) a -= 2 * Math.PI; while (a < -Math.PI) a += 2 * Math.PI; return a; };
+
+// PERCEPTION — vision cone (awareness-scaled) + LOS, plus hearing (recent damage
+// / nearby movement) that widens acquisition to 360° toward the noise.
+function aiPerceive(e, cfg) {
+  const fwdX = -Math.sin(e.yaw), fwdZ = -Math.cos(e.yaw);
+  const halfFov = cfg.fov * (0.6 + 0.4 * (CFG.bot.personas[e.persona]?.hold ?? 0.55));
+  let nearest = null, nearestD = Infinity, curVisible = null, curD = Infinity;
   for (const o of ents) {
     if (o === e || !o.alive) continue;
-    const d = Math.hypot(o.pos.x - e.pos.x, o.pos.z - e.pos.z);
-    if (d < bestD && hasLOS(e, o)) { best = o; bestD = d; }
+    if (o.team != null && o.team === e.team) continue;         // ally
+    const dx = o.pos.x - e.pos.x, dz = o.pos.z - e.pos.z;
+    const d = Math.hypot(dx, dz);
+    if (d > CFG.bot.engageRange) continue;
+    const nx = dx / (d || 1), nz = dz / (d || 1);
+    const inCone = (nx * fwdX + nz * fwdZ) > Math.cos(halfFov);
+    const close = d < 16 * cfg.awareness;                      // close-quarters (footsteps)
+    const moving = o.moving && d < CFG.bot.engageRange * cfg.awareness; // movement catches the eye
+    const alerted = e.heardT > 0 || e.target === o;            // hearing / already engaged → 360°
+    if (!(inCone || alerted || close || moving)) continue;
+    if (!hasLOS(e, o)) continue;
+    if (d < nearestD) { nearest = o; nearestD = d; }
+    if (o === e.target) { curVisible = o; curD = d; }
   }
-  if (best && e.target !== best) { e.target = best; e.reactT = rr(CFG.bot.reactMin, CFG.bot.reactMax); }
-  if (!best) e.target = null;
-  if (e.flashedT > 0) e.target = null;              // blinded: can't fight, just drifts
+  // hysteresis: keep the current target while it's visible; switch only if a new
+  // enemy is decisively (40%) closer. Stops per-tick target flicker that freezes aim.
+  let pick = curVisible;
+  if (!pick || (nearest && nearestD < curD * 0.6)) pick = nearest;
+  if (pick) { e.lastSeen = { x: pick.pos.x, z: pick.pos.z }; e.searchT = 3.5; }
+  return pick;
+}
 
-  if (e.target) {
-    // face target
-    const dx = e.target.pos.x - e.pos.x, dz = e.target.pos.z - e.pos.z;
-    const d = Math.hypot(dx, dz);
-    const wantYaw = Math.atan2(-dx, -dz);
-    let dy = wantYaw - e.yaw;
-    while (dy > Math.PI) dy -= 2 * Math.PI; while (dy < -Math.PI) dy += 2 * Math.PI;
-    e.yaw += Math.max(-4 * dt, Math.min(4 * dt, dy));
-    const eyeH = 1.55, tH = e.target.pos.y + 1.1;
-    e.pitch = Math.atan2(tH - (e.pos.y + eyeH), d) * 0.9;
-    e.reactT -= dt;
-    // strafe + keep range
-    e.strafeT -= dt;
-    if (e.strafeT <= 0) { e.strafeDir = rng() < 0.5 ? -1 : 1; e.strafeT = rr(0.6, 1.6); }
-    const fwd = w.range * 0.55;
-    let mvx = 0, mvz = 0;
+// AIMING MODEL — reaction delay on acquisition, then track at aimSpeed with a
+// residual jitter that settles over ~0.4s; fire discipline via bursts.
+function aiAim(e, tgt, cfg, dt) {
+  const dx = tgt.pos.x - e.pos.x, dz = tgt.pos.z - e.pos.z, d = Math.hypot(dx, dz);
+  // lead a moving target a touch
+  const lead = 0.06 * (cfg.aimSpeed / 5);
+  const wantYaw = Math.atan2(-(dx + (tgt.vel?.x || 0) * lead), -(dz + (tgt.vel?.z || 0) * lead));
+  const dy = angNorm(wantYaw + e.aimJx - e.yaw);
+  const turn = cfg.aimSpeed * dt;
+  e.yaw += Math.max(-turn, Math.min(turn, dy));
+  const eyeH = 1.55, tH = tgt.pos.y + 1.1;
+  const wantPitch = Math.atan2(tH - (e.pos.y + eyeH), d) * 0.9 + e.aimJz;
+  e.pitch += (wantPitch - e.pitch) * Math.min(1, cfg.aimSpeed * dt * 0.4);
+  // jitter decays as the shot settles (settle grows while on target)
+  e.aimSettle = Math.min(1, e.aimSettle + dt * 2.2);
+  const err = cfg.aimErr * (1 - 0.6 * e.aimSettle);
+  if ((e.strafeT % 0.15) < dt) { e.aimJx = rr(-err, err); e.aimJz = rr(-err, err) * 0.5; }
+  return Math.abs(dy);
+}
+
+function botThink(e, dt) {
+  e.repathT -= dt; e.reactT -= dt; e.heardT = Math.max(0, e.heardT - dt);
+  if (e.flashedT > 0) { e.aiState = "search"; e.target = null; botMove(e, 0, 0, dt); return; } // blinded
+
+  const cfg = aiCfg(), P = CFG.bot.personas[e.persona] || CFG.bot.personas.balanced;
+  const w = WEAPONS[e.weapon];
+  const hadTarget = !!e.target;
+  const seen = aiPerceive(e, cfg);
+  if (seen && seen !== e.target) {                 // target changed
+    e.target = seen;
+    if (!hadTarget) { e.reactT = rr(cfg.react[0], cfg.react[1]); e.aimSettle = 0; e.burstLeft = 0; }  // fresh sighting: full reaction
+    else { e.reactT = Math.max(e.reactT, rr(0.08, 0.18)); e.aimSettle *= 0.5; }                        // switch: small re-settle
+  } else if (!seen) e.target = null;
+
+  // ---- decide state ----
+  const lowHp = e.hp <= P.retreatHp;
+  if (e.target) e.aiState = lowHp ? "retreat" : "engage";
+  else if (e.searchT > 0 && e.lastSeen) e.aiState = "search";
+  else e.aiState = "roam";
+
+  if (e.aiState === "engage" || e.aiState === "retreat") {
+    const tgt = e.target;
+    const dx = tgt.pos.x - e.pos.x, dz = tgt.pos.z - e.pos.z, d = Math.hypot(dx, dz) || 1;
     const nx = dx / d, nz = dz / d;
-    if (d > fwd) { mvx += nx; mvz += nz; } else if (d < fwd * 0.5) { mvx -= nx; mvz -= nz; }
-    mvx += -nz * e.strafeDir * 0.7; mvz += nx * e.strafeDir * 0.7;
+    const aimOff = aiAim(e, tgt, cfg, dt);
+    // movement: hold band scaled by persona; strafe; push if aggressive, back off if low HP / defensive
+    e.strafeT -= dt; if (e.strafeT <= 0) { e.strafeDir = rng() < 0.5 ? -1 : 1; e.strafeT = rr(0.5, 1.5); }
+    const band = w.range * (0.35 + P.hold * 0.4);
+    let mvx = -nz * e.strafeDir * P.strafe, mvz = nx * e.strafeDir * P.strafe;
+    if (e.aiState === "retreat" || d < band * 0.5) { mvx -= nx; mvz -= nz; }
+    else if (d > band && cfg.aggression > 0.4 && P.push > 0.4) { mvx += nx * P.push; mvz += nz * P.push; }
     botMove(e, mvx, mvz, dt);
-    // fire
-    if (e.reactT <= 0 && Math.abs(dy) < 0.25 && e.reloadT <= 0 && e.fireCd <= 0 && d < w.range) {
-      if (e.ammo > 0) fireWeapon(e); else startReload(e);
+    // fire discipline — bursts, only when settled + in range + aiming close
+    if (e.reactT <= 0 && aimOff < 0.16 && e.reloadT <= 0 && d < w.range) {
+      if (e.ammo <= 0) startReload(e);
+      else if (e.fireCd <= 0) {
+        if (e.burstLeft <= 0) e.burstLeft = (cfg.burst[0] + (rng() * (cfg.burst[1] - cfg.burst[0])) | 0) + 1;
+        fireWeapon(e); e.burstLeft--;
+        if (e.burstLeft <= 0) e.reactT = rr(0.12, 0.3);   // inter-burst pause
+      }
     }
+  } else if (e.aiState === "search") {
+    // move to last-seen, scan; give up after searchT
+    e.searchT -= dt;
+    const gx = e.heardT > 0 ? e.heardX : e.lastSeen.x, gz = e.heardT > 0 ? e.heardZ : e.lastSeen.z;
+    const dx = gx - e.pos.x, dz = gz - e.pos.z, d = Math.hypot(dx, dz);
+    if (d > 1.5) { e.yaw += Math.max(-cfg.aimSpeed * dt, Math.min(cfg.aimSpeed * dt, angNorm(Math.atan2(-dx, -dz) - e.yaw))); botMove(e, dx / d, dz / d, dt); }
+    else { e.yaw += dt * 1.8; botMove(e, 0, 0, dt); e.searchT -= dt; }   // scan in place
+    e.pitch *= 0.9;
+    if (e.reloadT <= 0 && e.ammo < w.mag * 0.5) startReload(e);
+    if (e.searchT <= 0) e.lastSeen = null;
   } else {
-    // roam waypoints
-    if (!e.wp || e.repathT <= 0 ||
-        Math.hypot(e.wp.x - e.pos.x, e.wp.z - e.pos.z) < 1.5) {
-      e.wp = world.waypoints[(rng() * world.waypoints.length) | 0];
-      e.repathT = CFG.bot.repath;
+    // ROAM — patrol waypoints
+    if (!e.wp || e.repathT <= 0 || Math.hypot(e.wp.x - e.pos.x, e.wp.z - e.pos.z) < 1.5) {
+      e.wp = world.waypoints[(rng() * world.waypoints.length) | 0]; e.repathT = CFG.bot.repath;
     }
-    const dx = e.wp.x - e.pos.x, dz = e.wp.z - e.pos.z;
-    const d = Math.hypot(dx, dz);
-    if (d > 0.5) {
-      const wantYaw = Math.atan2(-dx, -dz);
-      let dy = wantYaw - e.yaw;
-      while (dy > Math.PI) dy -= 2 * Math.PI; while (dy < -Math.PI) dy += 2 * Math.PI;
-      e.yaw += Math.max(-3 * dt, Math.min(3 * dt, dy));
-      e.pitch *= 0.9;
-      botMove(e, dx / d, dz / d, dt);
-    }
-    if (e.reloadT <= 0 && e.ammo < WEAPONS[e.weapon].mag) startReload(e);
+    const dx = e.wp.x - e.pos.x, dz = e.wp.z - e.pos.z, d = Math.hypot(dx, dz);
+    if (d > 0.5) { e.yaw += Math.max(-3 * dt, Math.min(3 * dt, angNorm(Math.atan2(-dx, -dz) - e.yaw))); e.pitch *= 0.9; botMove(e, dx / d, dz / d, dt); }
+    if (e.reloadT <= 0 && e.ammo < w.mag) startReload(e);
   }
 }
 
@@ -1068,8 +1159,17 @@ function botMove(e, mvx, mvz, dt) {
   collide(e.pos, CFG.player.radius);
   e.moving = Math.hypot(e.pos.x - oldX, e.pos.z - oldZ) > 0.001;
   if (e.moving) e.walkPhase += dt * 9;
-  // stuck → new waypoint
-  if (m > 1e-6 && !e.moving && !e.target) e.repathT = 0;
+  // anti-stuck: intending to move but barely displaced for >0.6s → break out
+  if (m > 1e-6 && Math.hypot(e.pos.x - e.prevX, e.pos.z - e.prevZ) < 0.05) {
+    e.stuckT += dt;
+    if (e.stuckT > 0.6) {
+      e.repathT = 0; e.wp = null;                       // pick a new route
+      e.strafeDir = -e.strafeDir; e.strafeT = 0.4;      // and change strafe
+      e.yaw += (rng() < 0.5 ? -1 : 1) * 0.8;            // nudge heading off the wall
+      e.stuckT = 0;
+    }
+  } else e.stuckT = 0;
+  e.prevX = e.pos.x; e.prevZ = e.pos.z;
 }
 
 /* ---------------- player sim ---------------- */

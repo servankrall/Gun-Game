@@ -150,7 +150,7 @@ class Dev {
       this._frames++;
       if (now - this._at >= 500) { this.frame.fps = Math.round(this._frames * 1000 / (now - this._at)); this._frames = 0; this._at = now; }
       if (this.overlayOn) this.drawOverlay();
-      if (this._helpers && (this.dbg.hitbox || this.dbg.spawns)) this.updateHelpers();
+      if (this.dbg.hitbox || this.dbg.spawns || this.dbg.ai) this.updateHelpers();
     };
     requestAnimationFrame(step);
   }
@@ -197,6 +197,34 @@ class Dev {
       const m = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.1, 12),
         new THREE.MeshBasicMaterial({ color: 0x4ad7e8, wireframe: true }));
       m.position.set(s.x, 0.05, s.z); g.add(m);
+    }
+    if (this.dbg.ai) {
+      const COL = { engage: 0xff4b4b, retreat: 0xff9a3a, search: 0xffd23b, roam: 0x2ec5c0 };
+      for (const e of (this.ctx.ents || [])) {
+        if (!e || e.isPlayer || e.remote || !e.alive || !e.pos) continue;
+        const c = COL[e.aiState] ?? 0x8fe3ff;
+        // state marker above the head
+        const mk = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.35, 0.35), new THREE.MeshBasicMaterial({ color: c }));
+        mk.position.set(e.pos.x, e.pos.y + 2.3, e.pos.z); g.add(mk);
+        // facing ray (vision direction)
+        const fx = -Math.sin(e.yaw), fz = -Math.cos(e.yaw);
+        const fl = new THREE.Line(new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(e.pos.x, e.pos.y + 1.5, e.pos.z),
+          new THREE.Vector3(e.pos.x + fx * 4, e.pos.y + 1.5, e.pos.z + fz * 4)]),
+          new THREE.LineBasicMaterial({ color: c })); g.add(fl);
+        // line to current target
+        if (e.target?.pos) {
+          const tl = new THREE.Line(new THREE.BufferGeometry().setFromPoints([
+            new THREE.Vector3(e.pos.x, e.pos.y + 1.5, e.pos.z),
+            new THREE.Vector3(e.target.pos.x, e.target.pos.y + 1.5, e.target.pos.z)]),
+            new THREE.LineBasicMaterial({ color: 0xff4b4b })); g.add(tl);
+        }
+        // last-seen memory marker
+        if (!e.target && e.lastSeen) {
+          const ls = new THREE.Mesh(new THREE.SphereGeometry(0.3, 8, 6), new THREE.MeshBasicMaterial({ color: 0xffd23b, wireframe: true }));
+          ls.position.set(e.lastSeen.x, 1, e.lastSeen.z); g.add(ls);
+        }
+      }
     }
   }
 
@@ -317,6 +345,19 @@ class Dev {
     this.cmd("overlay", "debug", "toggle the perf overlay", () => { this.overlayOn = !this.overlayOn; this.ovl.classList.toggle("on", this.overlayOn); });
     this.cmd("hitbox", "debug", "toggle entity hitbox wireframes", a => { this.dbg.hitbox = onoff(a[0], !this.dbg.hitbox); if (!this.dbg.hitbox && this._helpers) this._helpers.clear(); this.echo("hitbox " + (this.dbg.hitbox ? "on" : "off")); });
     this.cmd("spawns", "debug", "toggle spawn markers", a => { this.dbg.spawns = onoff(a[0], !this.dbg.spawns); if (!this.dbg.spawns && this._helpers) this._helpers.clear(); this.echo("spawns " + (this.dbg.spawns ? "on" : "off")); });
+
+    // --- AI ---
+    this.cmd("ai", "ai", "list bots: state / persona / hp / target", () => {
+      const bots = (C.ents || []).filter(e => e && !e.isPlayer && !e.remote);
+      if (!bots.length) return this.echo("no bots active (start a solo match)", "l-warn");
+      bots.forEach(b => this.echo(`  ${(b.name || "bot").padEnd(8)} <span class="cat">${(b.aiState || "?").padEnd(8)} ${(b.persona || "?").padEnd(11)} hp:${r2(b.hp)} tgt:${b.target ? (b.target.name || "player") : "—"}</span>`));
+      this.echo(`  difficulty = ${C.CFG.bot.difficulty}`, "cat");
+    });
+    this.cmd("aidiff", "ai", "set AI difficulty: beginner|easy|normal|hard|expert", a => {
+      if (C.CFG.bot.levels[a[0]]) { C.CFG.bot.difficulty = a[0]; this.log("info", "ai", "difficulty =", a[0]); }
+      else this.echo("levels: " + Object.keys(C.CFG.bot.levels).join(", "), "l-warn");
+    });
+    this.cmd("aidebug", "ai", "toggle AI state/vision/target overlay", a => { this.dbg.ai = onoff(a[0], !this.dbg.ai); if (!this.dbg.ai && this._helpers) this._helpers.clear(); this.echo("aidebug " + (this.dbg.ai ? "on" : "off")); });
 
     // --- game state ---
     this.cmd("state", "game", "dump game state", () => this.echo(JSON.stringify(this.state(), null, 1)));
