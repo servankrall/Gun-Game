@@ -1,0 +1,777 @@
+<title>VANTAGE UI — Tactical FPS Design System</title>
+<style>
+  /* ============================ TOKENS ============================ */
+  :root{
+    /* cool-biased tactical neutrals (chosen, not default grey) */
+    --ink:#14161a; --graphite:#1a1d22; --panel:#212429; --panel-2:#282c32;
+    --line:#343941; --slate:#5a616b; --ash:#9aa1ab; --fog:#e7e9ee;
+    --bg:var(--ink); --surface:var(--panel); --surface-2:var(--panel-2);
+    --border:var(--line); --text:#e2e5ea; --muted:#9aa1ab; --faint:#6c727c;
+    /* one bold accent */
+    --accent:#ff7a1a; --accent-press:#e56c12; --on-accent:#160c04;
+    /* semantic (separate from accent) */
+    --attacker:#ff7a1a; --defender:#2ec5c0; --success:#49e07a;
+    --warn:#ffd23b; --danger:#e5484d; --info:#59a6ff;
+    --shadow:0 8px 30px rgba(0,0,0,.45); --shadow-sm:0 2px 10px rgba(0,0,0,.35);
+    /* 8-pt spacing */
+    --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px;
+    --r-s:4px; --r-m:6px; --r-l:8px; --r-pill:999px;
+    --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono","Cascadia Code",Menlo,Consolas,monospace;
+    --maxw:1180px;
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --ink:#eceef2; --graphite:#f3f5f8; --panel:#ffffff; --panel-2:#f5f7fa;
+      --line:#d9dde4; --slate:#aab1bb; --ash:#5c636d; --fog:#14161a;
+      --bg:#eceef2; --surface:#ffffff; --surface-2:#f5f7fa; --border:#dce0e7;
+      --text:#1b1e24; --muted:#5c636d; --faint:#8a919c;
+      --on-accent:#160c04; --shadow:0 8px 30px rgba(20,30,50,.12); --shadow-sm:0 2px 10px rgba(20,30,50,.08);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ink:#14161a; --graphite:#1a1d22; --panel:#212429; --panel-2:#282c32;
+    --line:#343941; --slate:#5a616b; --ash:#9aa1ab; --fog:#e7e9ee;
+    --bg:#14161a; --surface:#212429; --surface-2:#282c32; --border:#343941;
+    --text:#e2e5ea; --muted:#9aa1ab; --faint:#6c727c;
+    --shadow:0 8px 30px rgba(0,0,0,.45); --shadow-sm:0 2px 10px rgba(0,0,0,.35);
+  }
+  :root[data-theme="light"]{
+    --ink:#eceef2; --graphite:#f3f5f8; --panel:#ffffff; --panel-2:#f5f7fa;
+    --line:#d9dde4; --slate:#aab1bb; --ash:#5c636d; --fog:#14161a;
+    --bg:#eceef2; --surface:#ffffff; --surface-2:#f5f7fa; --border:#dce0e7;
+    --text:#1b1e24; --muted:#5c636d; --faint:#8a919c;
+    --shadow:0 8px 30px rgba(20,30,50,.12); --shadow-sm:0 2px 10px rgba(20,30,50,.08);
+  }
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);
+    line-height:1.55;-webkit-font-smoothing:antialiased;font-size:16px}
+  h1,h2,h3,h4{margin:0;text-wrap:balance;letter-spacing:-.01em}
+  a{color:inherit}
+  .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+  .eyebrow{font-size:.6875rem;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .num{font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:600}
+
+  /* ============================ SHELL ============================ */
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 var(--s5)}
+  .layout{display:grid;grid-template-columns:210px 1fr;gap:var(--s7);align-items:start;
+    max-width:var(--maxw);margin:0 auto;padding:0 var(--s5)}
+  nav.rail{position:sticky;top:var(--s4);align-self:start;padding:var(--s4) 0;
+    max-height:calc(100vh - var(--s6));overflow:auto}
+  .rail .brand{display:flex;align-items:center;gap:var(--s2);margin-bottom:var(--s5)}
+  .rail .brand .mark{width:28px;height:28px;border-radius:6px;background:var(--accent);
+    display:grid;place-items:center;color:var(--on-accent);flex:none}
+  .rail .brand b{font-size:.95rem;letter-spacing:.14em;text-transform:uppercase}
+  .rail ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px;
+    counter-reset:sec}
+  .rail a{display:flex;gap:var(--s3);align-items:baseline;text-decoration:none;color:var(--muted);
+    font-size:.85rem;padding:6px var(--s3);border-radius:var(--r-m);border-left:2px solid transparent}
+  .rail a .k{font-family:var(--mono);font-size:.7rem;color:var(--faint)}
+  .rail a:hover{color:var(--text);background:var(--surface)}
+  .rail a.active{color:var(--text);border-left-color:var(--accent);background:var(--surface)}
+  main{min-width:0;padding-bottom:var(--s8)}
+
+  /* ============================ HERO ============================ */
+  header.hero{padding:var(--s8) 0 var(--s6)}
+  .hero h1{font-size:clamp(2.1rem,5vw,3.4rem);line-height:1.02;font-weight:800;letter-spacing:-.02em}
+  .hero h1 .fx{color:var(--accent)}
+  .hero p.lede{max-width:60ch;color:var(--muted);font-size:1.05rem;margin:var(--s4) 0 0}
+  .hero .meta{display:flex;flex-wrap:wrap;gap:var(--s2);margin-top:var(--s5)}
+  .tag{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700;
+    padding:5px 10px;border-radius:var(--r-pill);border:1px solid var(--border);color:var(--muted);
+    background:var(--surface)}
+  .tag.on{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 45%,var(--border))}
+
+  section{padding:var(--s7) 0;border-top:1px solid var(--border)}
+  .sec-head{display:flex;align-items:baseline;gap:var(--s3);margin-bottom:var(--s5);flex-wrap:wrap}
+  .sec-head h2{font-size:1.5rem;font-weight:800;letter-spacing:-.01em}
+  .sec-head .idx{font-family:var(--mono);color:var(--accent);font-size:.8rem;font-weight:700}
+  .sec-head p{margin:0;color:var(--muted);font-size:.9rem;flex-basis:100%;max-width:70ch}
+
+  .grid{display:grid;gap:var(--s3)}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-l);padding:var(--s4)}
+
+  /* ============================ COLOR ============================ */
+  .swatches{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+  .sw{border:1px solid var(--border);border-radius:var(--r-l);overflow:hidden;background:var(--surface)}
+  .sw .chip{height:64px}
+  .sw .meta{padding:var(--s3)}
+  .sw .name{font-size:.82rem;font-weight:700}
+  .sw .hex{font-family:var(--mono);font-size:.72rem;color:var(--muted);text-transform:uppercase}
+  .sw .role{font-size:.7rem;color:var(--faint);margin-top:2px}
+
+  /* ============================ TYPE ============================ */
+  .typerow{display:flex;align-items:baseline;gap:var(--s4);padding:var(--s3) 0;border-bottom:1px dashed var(--border);flex-wrap:wrap}
+  .typerow:last-child{border-bottom:0}
+  .typerow .lbl{width:130px;flex:none;color:var(--muted);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase}
+  .typerow .spec{margin-left:auto;font-family:var(--mono);font-size:.72rem;color:var(--faint)}
+  .telem{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:var(--s3)}
+  .telem .t{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-m);padding:var(--s3);text-align:center}
+  .telem .t .v{font-family:var(--mono);font-weight:700;font-size:1.5rem;font-variant-numeric:tabular-nums;letter-spacing:.02em}
+  .telem .t .n{font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:2px}
+
+  /* ============================ SPACING ============================ */
+  .scale{display:flex;align-items:flex-end;gap:var(--s3);flex-wrap:wrap}
+  .scale .u{text-align:center}
+  .scale .bar{background:color-mix(in srgb,var(--accent) 70%,transparent);border-radius:2px;width:26px}
+  .scale .u span{display:block;font-family:var(--mono);font-size:.68rem;color:var(--muted);margin-top:6px}
+  .radii{display:flex;gap:var(--s3);flex-wrap:wrap}
+  .radii .b{width:72px;height:72px;background:var(--surface-2);border:1px solid var(--border);display:grid;place-items:end center;padding:6px;font-family:var(--mono);font-size:.68rem;color:var(--muted)}
+
+  /* ============================ ICONS ============================ */
+  .icons{grid-template-columns:repeat(auto-fill,minmax(96px,1fr))}
+  .ico{display:flex;flex-direction:column;align-items:center;gap:var(--s2);padding:var(--s3);
+    border:1px solid var(--border);border-radius:var(--r-m);background:var(--surface);text-align:center}
+  .ico svg{width:26px;height:26px;stroke:var(--text);stroke-width:1.6;fill:none;
+    stroke-linecap:round;stroke-linejoin:round}
+  .ico .cap{font-size:.66rem;color:var(--muted);letter-spacing:.02em}
+  .ico:hover{border-color:color-mix(in srgb,var(--accent) 40%,var(--border))}
+  .ico:hover svg{stroke:var(--accent)}
+
+  /* ============================ COMPONENTS ============================ */
+  .btnrow{display:flex;gap:var(--s3);flex-wrap:wrap;align-items:center}
+  .btn{position:relative;overflow:hidden;font-family:var(--sans);font-weight:700;font-size:.85rem;
+    letter-spacing:.06em;text-transform:uppercase;border:0;border-radius:var(--r-m);padding:11px 22px;
+    cursor:pointer;background:var(--accent);color:var(--on-accent);transition:filter .12s,transform .06s}
+  .btn:hover{filter:brightness(1.08)} .btn:active{transform:translateY(1px)}
+  .btn.ghost{background:transparent;color:var(--text);border:1px solid var(--border)}
+  .btn.ghost:hover{border-color:var(--accent);color:var(--accent);filter:none}
+  .btn.quiet{background:var(--surface-2);color:var(--text)}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .btn:focus-visible,.chip-btn:focus-visible,.tab:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .ripple{position:absolute;border-radius:50%;transform:scale(0);background:rgba(255,255,255,.5);
+    animation:rip .5s ease-out;pointer-events:none}
+  @keyframes rip{to{transform:scale(2.4);opacity:0}}
+
+  .pills{display:flex;gap:var(--s2);flex-wrap:wrap}
+  .pill{font-size:.72rem;font-weight:700;letter-spacing:.04em;padding:4px 10px;border-radius:var(--r-pill);
+    border:1px solid var(--border);display:inline-flex;align-items:center;gap:6px}
+  .pill .dot{width:7px;height:7px;border-radius:50%}
+  .pill.good{color:var(--success);border-color:color-mix(in srgb,var(--success) 40%,var(--border))} .pill.good .dot{background:var(--success)}
+  .pill.warn{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 40%,var(--border))} .pill.warn .dot{background:var(--warn)}
+  .pill.crit{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 40%,var(--border))} .pill.crit .dot{background:var(--danger)}
+  .pill.info{color:var(--info);border-color:color-mix(in srgb,var(--info) 40%,var(--border))} .pill.info .dot{background:var(--info)}
+
+  .tabs{display:flex;gap:2px;background:var(--surface-2);padding:4px;border-radius:var(--r-m);width:max-content}
+  .tab{border:0;background:transparent;color:var(--muted);font-weight:700;font-size:.78rem;letter-spacing:.05em;
+    text-transform:uppercase;padding:8px 16px;border-radius:var(--r-s);cursor:pointer}
+  .tab.active{background:var(--surface);color:var(--text);box-shadow:var(--shadow-sm)}
+
+  .toggle{width:44px;height:24px;border-radius:var(--r-pill);background:var(--surface-2);border:1px solid var(--border);
+    position:relative;cursor:pointer;flex:none;transition:background .15s}
+  .toggle::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;
+    background:var(--ash);transition:transform .15s,background .15s}
+  .toggle[aria-pressed="true"]{background:color-mix(in srgb,var(--accent) 55%,var(--surface-2))}
+  .toggle[aria-pressed="true"]::after{transform:translateX(20px);background:var(--accent)}
+
+  input[type=range]{-webkit-appearance:none;appearance:none;height:4px;border-radius:2px;background:var(--surface-2);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--bg)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--bg)}
+
+  .bar{height:8px;border-radius:var(--r-pill);background:var(--surface-2);overflow:hidden}
+  .bar > i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--warn));width:0;border-radius:inherit}
+  .tooltip-demo{position:relative;display:inline-block}
+  .tooltip{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-m);padding:8px 12px;
+    font-size:.78rem;box-shadow:var(--shadow);max-width:240px}
+  .tooltip .k{font-family:var(--mono);color:var(--accent)}
+
+  .toast{display:flex;gap:var(--s3);align-items:center;background:var(--surface-2);border:1px solid var(--border);
+    border-left:3px solid var(--accent);border-radius:var(--r-m);padding:12px 16px;box-shadow:var(--shadow);max-width:340px}
+  .toast .body b{display:block;font-size:.85rem} .toast .body span{font-size:.75rem;color:var(--muted)}
+
+  /* ============================ HUD MOCKUP ============================ */
+  .hud{position:relative;aspect-ratio:16/9;width:100%;border-radius:var(--r-l);overflow:hidden;
+    border:1px solid var(--border);
+    background:
+      radial-gradient(120% 90% at 50% 8%, #2a3038 0%, #191c21 55%, #111317 100%);
+    box-shadow:var(--shadow)}
+  .hud .scan{position:absolute;inset:0;opacity:.5;pointer-events:none;
+    background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(255,255,255,.012) 3px 4px)}
+  .hud .horizon{position:absolute;left:0;right:0;top:62%;height:1px;background:linear-gradient(90deg,transparent,#3a424c,transparent)}
+  .hud .el{position:absolute;color:#e7e9ee}
+  /* top: round timer + team score */
+  .hud .topbar{top:14px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:16px}
+  .hud .score{font-family:var(--mono);font-weight:800;font-size:1.5rem;font-variant-numeric:tabular-nums;line-height:1}
+  .hud .score.us{color:var(--defender)} .hud .score.them{color:var(--danger)}
+  .hud .timer{font-family:var(--mono);font-weight:800;font-size:1.15rem;letter-spacing:.06em;
+    background:#0d0f13aa;border:1px solid #ffffff1c;padding:4px 12px;border-radius:var(--r-m)}
+  .hud .roundtag{position:absolute;top:52px;left:50%;transform:translateX(-50%);font-size:.62rem;letter-spacing:.28em;
+    text-transform:uppercase;color:#9aa1ab}
+  /* compass */
+  .hud .compass{top:14px;left:50%;transform:translateX(-50%) translateY(76px);width:220px;height:16px;
+    -webkit-mask:linear-gradient(90deg,transparent,#000 18%,#000 82%,transparent);mask:linear-gradient(90deg,transparent,#000 18%,#000 82%,transparent)}
+  .hud .compass .strip{display:flex;gap:22px;font-family:var(--mono);font-size:.6rem;color:#c7ccd3;justify-content:center;transform:translateX(-12px)}
+  .hud .compass .n{color:var(--accent)}
+  /* crosshair */
+  .hud .xhair{top:calc(50% - 2px);left:50%;transform:translate(-50%,-50%)}
+  .hud .xhair i{position:absolute;background:#e7fbff;box-shadow:0 0 3px #000}
+  /* killfeed */
+  .hud .feed{top:64px;right:16px;text-align:right;font-size:.66rem;line-height:1.9;font-family:var(--mono)}
+  .hud .feed .row{color:#c7ccd3} .hud .feed .me{color:var(--accent)}
+  .hud .feed .k{color:var(--danger)}
+  /* bottom-left: health + armor */
+  .hud .vitals{left:20px;bottom:20px}
+  .hud .vitals .hp{display:flex;align-items:baseline;gap:8px}
+  .hud .vitals .hp .n{font-family:var(--mono);font-weight:800;font-size:1.8rem;font-variant-numeric:tabular-nums}
+  .hud .vitals .hp .u{font-size:.62rem;letter-spacing:.2em;color:#9aa1ab;text-transform:uppercase}
+  .hud .vitals .hpbar{width:190px;height:6px;border-radius:3px;background:#0d0f13aa;border:1px solid #ffffff14;margin-top:6px;overflow:hidden}
+  .hud .vitals .hpbar i{display:block;height:100%;width:78%;background:linear-gradient(90deg,#ff7a1a,#ffd23b)}
+  .hud .vitals .armor{width:190px;height:4px;border-radius:2px;background:#0d0f13aa;border:1px solid #ffffff14;margin-top:4px;overflow:hidden}
+  .hud .vitals .armor i{display:block;height:100%;width:55%;background:var(--info)}
+  /* bottom-right: ammo + weapon */
+  .hud .ammo{right:20px;bottom:18px;text-align:right}
+  .hud .ammo .mag{font-family:var(--mono);font-weight:800;font-size:2.2rem;font-variant-numeric:tabular-nums;line-height:1}
+  .hud .ammo .mag small{font-size:1rem;color:#9aa1ab}
+  .hud .ammo .wn{font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:#c7ccd3;margin-top:2px}
+  /* abilities (bottom center) */
+  .hud .abils{left:50%;bottom:18px;transform:translateX(-50%);display:flex;gap:8px;align-items:flex-end}
+  .hud .slot{width:38px;height:38px;border-radius:var(--r-m);background:#0d0f13aa;border:1px solid #ffffff1f;
+    display:grid;place-items:center;position:relative;color:#c7ccd3}
+  .hud .slot svg{width:18px;height:18px;stroke:currentColor;stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .hud .slot .key{position:absolute;top:-8px;left:-6px;font-family:var(--mono);font-size:.56rem;color:#9aa1ab;
+    background:#0d0f13;border:1px solid #ffffff1f;border-radius:3px;padding:0 3px}
+  .hud .slot.ult{width:48px;height:48px;border-color:color-mix(in srgb,var(--accent) 55%,#ffffff1f);color:var(--accent)}
+  .hud .slot .cool{position:absolute;inset:0;border-radius:inherit;background:conic-gradient(#000000cc var(--c,0deg),transparent 0)}
+  /* interaction prompt */
+  .hud .prompt{left:50%;top:58%;transform:translateX(-50%);display:flex;align-items:center;gap:8px;
+    background:#0d0f13cc;border:1px solid #ffffff1f;border-radius:var(--r-pill);padding:6px 14px;font-size:.72rem}
+  .hud .prompt .key{font-family:var(--mono);font-weight:700;background:#e7e9ee;color:#14161a;border-radius:4px;padding:1px 7px;font-size:.7rem}
+  .hud .prompt .cap{width:120px;height:4px;border-radius:2px;background:#ffffff22;overflow:hidden}
+  .hud .prompt .cap i{display:block;height:100%;width:0;background:var(--accent)}
+  /* damage direction arc */
+  .hud .dmg{left:50%;top:50%;width:220px;height:220px;transform:translate(-50%,-50%);pointer-events:none}
+  .hud .dmg::before{content:"";position:absolute;left:50%;top:0;width:60px;height:14px;transform:translateX(-50%);
+    border-radius:0 0 40px 40px;background:radial-gradient(closest-side,var(--danger),transparent);opacity:.85}
+  /* telemetry chips */
+  .hud .net{top:14px;left:16px;display:flex;gap:6px;font-family:var(--mono);font-size:.58rem}
+  .hud .net .c{background:#0d0f13aa;border:1px solid #ffffff14;border-radius:4px;padding:2px 6px;color:#c7ccd3}
+  .hud .net .c b{color:var(--success)}
+  .legendrow{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:var(--s2);margin-top:var(--s4)}
+  .legendrow .lg{display:flex;gap:8px;align-items:center;font-size:.76rem;color:var(--muted)}
+  .legendrow .lg b{color:var(--text);font-weight:600}
+  .legendrow .lg .m{width:18px;height:18px;border-radius:4px;background:var(--surface-2);border:1px solid var(--border);flex:none}
+
+  /* ============================ SCOREBOARD ============================ */
+  .board{width:100%;border-collapse:separate;border-spacing:0;font-size:.82rem}
+  .board th{text-align:right;font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);
+    padding:0 10px 8px;font-weight:700}
+  .board th:first-child{text-align:left}
+  .board td{padding:9px 10px;border-top:1px solid var(--border);text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono)}
+  .board td:first-child{text-align:left;font-family:var(--sans)}
+  .board tbody tr:hover{background:var(--surface-2)}
+  .board .who{display:flex;align-items:center;gap:10px}
+  .board .av{width:26px;height:26px;border-radius:6px;flex:none;display:grid;place-items:center;font-weight:800;font-size:.72rem;color:#160c04}
+  .board .nm b{font-weight:700} .board .nm span{display:block;font-size:.64rem;color:var(--muted);font-family:var(--mono)}
+  .board .conn{display:inline-block;width:7px;height:7px;border-radius:50%}
+  .board caption{caption-side:top;text-align:left;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--muted);padding-bottom:10px;font-weight:700}
+  .board tr.mvp td{color:var(--warn)}
+
+  /* ============================ ANIMATION TABLE ============================ */
+  .anim{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
+  .anim .a{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-l);padding:var(--s4)}
+  .anim .a h4{font-size:.9rem;margin-bottom:2px}
+  .anim .a .d{font-size:.72rem;color:var(--muted)}
+  .anim .a .spec{font-family:var(--mono);font-size:.66rem;color:var(--faint);margin-top:10px}
+
+  /* ============================ CROSSHAIR EDITOR ============================ */
+  .xh-lab{display:grid;grid-template-columns:1fr 200px;gap:var(--s5);align-items:center}
+  .xh-stage{aspect-ratio:1;border-radius:var(--r-l);border:1px solid var(--border);position:relative;
+    background:radial-gradient(120% 120% at 50% 40%,#2a3038,#16191e);display:grid;place-items:center}
+  #xh i{position:absolute;background:#7dff9e;box-shadow:0 0 4px #000}
+  .xh-ctl{display:flex;flex-direction:column;gap:var(--s3)}
+  .xh-ctl label{font-size:.72rem;color:var(--muted);display:flex;justify-content:space-between;letter-spacing:.04em}
+  .xh-ctl label .v{font-family:var(--mono);color:var(--text)}
+  .swatchrow{display:flex;gap:6px}
+  .swatchrow button{width:22px;height:22px;border-radius:5px;border:2px solid transparent;cursor:pointer}
+  .swatchrow button[aria-pressed="true"]{border-color:var(--text)}
+
+  /* ============================ MISC ============================ */
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:var(--s5)}
+  .stackcards{display:flex;flex-direction:column;gap:var(--s3)}
+  .kvs{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:.82rem}
+  .kvs dt{color:var(--muted)} .kvs dd{margin:0;font-family:var(--mono);font-variant-numeric:tabular-nums}
+  .aspects{display:flex;gap:var(--s3);flex-wrap:wrap;align-items:center}
+  .aspects .ar{border:1px dashed var(--border);border-radius:var(--r-s);display:grid;place-items:center;
+    color:var(--muted);font-family:var(--mono);font-size:.6rem;background:var(--surface)}
+  .note{font-size:.78rem;color:var(--muted);border-left:2px solid var(--accent);padding-left:12px}
+  footer{border-top:1px solid var(--border);padding:var(--s6) 0 var(--s8);color:var(--muted);font-size:.8rem}
+  footer b{color:var(--text)}
+
+  @media (max-width:860px){
+    .layout{grid-template-columns:1fr;gap:var(--s4)}
+    nav.rail{position:static;max-height:none;overflow:visible;padding-bottom:0}
+    .rail ol{flex-direction:row;flex-wrap:wrap;gap:6px}
+    .rail a{border-left:0;border:1px solid var(--border)}
+    .rail a.active{border-color:var(--accent)}
+    .two,.xh-lab{grid-template-columns:1fr}
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001ms!important;transition-duration:.001ms!important}
+  }
+</style>
+
+<div class="layout">
+  <nav class="rail" aria-label="Sections">
+    <div class="brand"><span class="mark" aria-hidden="true">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 4v5c0 4-3 7-7 9-4-2-7-5-7-9V7z"/><path d="M12 8v8M8 12h8"/></svg>
+    </span><b>Vantage&nbsp;UI</b></div>
+    <ol id="nav"></ol>
+  </nav>
+
+  <main>
+    <header class="hero" id="top">
+      <div class="eyebrow">Design system · Competitive tactical FPS</div>
+      <h1>The interface that gets <span class="fx">out of the fight.</span></h1>
+      <p class="lede">VANTAGE UI is an original, esports-ready interface language: minimal, fast, and
+      readable under pressure. Every color carries meaning, every readout is tabular, and every
+      pixel is spent on the information a player needs mid-duel — nothing else.</p>
+      <div class="meta">
+        <span class="tag on">Readability-first</span>
+        <span class="tag">8-pt grid · 4–8px radii</span>
+        <span class="tag">Theme-aware</span>
+        <span class="tag">16:9 → 32:9 · Steam Deck → 8K</span>
+        <span class="tag">Accessibility built-in</span>
+      </div>
+    </header>
+
+    <!-- HUD (hero / thesis) -->
+    <section id="hud">
+      <div class="sec-head"><span class="idx">01</span><h2>The HUD</h2>
+        <p>The most characteristic surface in the game — a live tactical readout. Combat cues sit in
+        the periphery; the center stays clear for the enemy. This is a real, composed layout using the
+        system's own tokens and telemetry type.</p>
+      </div>
+      <div class="hud" role="img" aria-label="Composed tactical HUD mockup">
+        <div class="scan"></div><div class="horizon"></div>
+        <div class="el net"><span class="c">FPS <b>144</b></span><span class="c">PING <b>18</b></span><span class="c">LOSS <b>0.0%</b></span></div>
+        <div class="el topbar">
+          <span class="score us">08</span>
+          <span class="timer" id="hudTimer">1:24</span>
+          <span class="score them">06</span>
+        </div>
+        <div class="el roundtag">Round 15 · Defend</div>
+        <div class="el compass"><div class="strip"><span>W</span><span class="n">N</span><span>E</span><span>S</span><span>W</span></div></div>
+        <div class="el dmg" aria-hidden="true"></div>
+        <div class="el xhair" id="hudXhair" aria-hidden="true"></div>
+        <div class="el feed">
+          <div class="row"><span class="me">You</span> ▸ <span class="k">Raider_09</span></div>
+          <div class="row">Vex ▸ <span>Piper</span></div>
+          <div class="row">Duke ▸ <span class="me">You</span> assist</div>
+        </div>
+        <div class="el prompt"><span class="key">F</span><span class="cap"><i id="capFill"></i></span><span>Defuse spike</span></div>
+        <div class="el vitals">
+          <div class="hp"><span class="n">78</span><span class="u">Health</span></div>
+          <div class="hpbar"><i></i></div><div class="armor"><i></i></div>
+        </div>
+        <div class="el abils">
+          <div class="slot" data-cool><span class="key">C</span><span class="cool"></span>
+            <svg viewBox="0 0 24 24"><path d="M4 16c3-1 5-4 5-7M20 8c-3 1-5 4-5 7"/><circle cx="12" cy="12" r="2"/></svg></div>
+          <div class="slot" data-cool><span class="key">Q</span><span class="cool"></span>
+            <svg viewBox="0 0 24 24"><path d="M12 3v6M12 15v6M3 12h6M15 12h6"/></svg></div>
+          <div class="slot ult" data-cool><span class="key">X</span><span class="cool"></span>
+            <svg viewBox="0 0 24 24"><path d="M12 2l3 7 7 .5-5.5 4.5 2 7L12 17l-6.5 4 2-7L2 9.5 9 9z"/></svg></div>
+        </div>
+        <div class="el ammo"><div class="mag">24<small>/72</small></div><div class="wn">Vandal · Rifle</div></div>
+      </div>
+      <div class="legendrow">
+        <div class="lg"><span class="m" style="border-color:color-mix(in srgb,#2ec5c0 60%,var(--border))"></span><b>Teal</b>=your team</div>
+        <div class="lg"><span class="m" style="border-color:color-mix(in srgb,#e5484d 60%,var(--border))"></span><b>Red</b>=enemy / objective</div>
+        <div class="lg"><span class="m" style="border-color:color-mix(in srgb,#ff7a1a 60%,var(--border))"></span><b>Orange</b>=your action / ult</div>
+        <div class="lg"><span class="m"></span>Telemetry in <b>tabular mono</b></div>
+      </div>
+    </section>
+
+    <!-- COLOR -->
+    <section id="color">
+      <div class="sec-head"><span class="idx">02</span><h2>Color system</h2>
+        <p>Neutrals with a cool bias do the quiet work; a single warm accent owns "your action".
+        Semantic colors are kept separate from the accent so state never has to fight the brand.</p>
+      </div>
+      <div class="eyebrow" style="margin-bottom:var(--s3)">Neutrals — surfaces &amp; text</div>
+      <div class="grid swatches" id="swNeutral"></div>
+      <div class="eyebrow" style="margin:var(--s5) 0 var(--s3)">Accent &amp; semantic — every hue has one job</div>
+      <div class="grid swatches" id="swSemantic"></div>
+    </section>
+
+    <!-- TYPE -->
+    <section id="type">
+      <div class="sec-head"><span class="idx">03</span><h2>Typography</h2>
+        <p>A grotesque UI face for structure, uppercase tracked eyebrows for labels, and a tabular
+        monospace for every number that a player reads under fire — the telemetry voice of the game.</p>
+      </div>
+      <div class="two">
+        <div class="card">
+          <div class="typerow"><span class="lbl">Display</span><span style="font-size:2rem;font-weight:800;letter-spacing:-.02em">Defend the spike</span><span class="spec">800 · −2% tr</span></div>
+          <div class="typerow"><span class="lbl">Header</span><span style="font-size:1.4rem;font-weight:800">Loadout &amp; agents</span><span class="spec">800</span></div>
+          <div class="typerow"><span class="lbl">Body</span><span style="font-size:1rem">Buy phase — pick your rifle, then hold an angle.</span><span class="spec">400 · 1rem/1.55</span></div>
+          <div class="typerow"><span class="lbl">Small</span><span style="font-size:.8125rem;color:var(--muted)">Reserve ammo carries across respawns.</span><span class="spec">.8125rem</span></div>
+          <div class="typerow"><span class="lbl">Eyebrow</span><span class="eyebrow">Round 15 · Match point</span><span class="spec">.68rem · .22em</span></div>
+          <div class="typerow"><span class="lbl">Tiny meta</span><span class="mono" style="font-size:.66rem;color:var(--faint)">build 2.4.1 · net ok</span><span class="spec">.66rem mono</span></div>
+        </div>
+        <div class="card">
+          <div class="eyebrow" style="margin-bottom:var(--s3)">Telemetry — tabular mono</div>
+          <div class="telem">
+            <div class="t"><div class="v">1:24</div><div class="n">Timer</div></div>
+            <div class="t"><div class="v">24/72</div><div class="n">Ammo</div></div>
+            <div class="t"><div class="v">78</div><div class="n">Health</div></div>
+            <div class="t"><div class="v">18</div><div class="n">Ping ms</div></div>
+            <div class="t"><div class="v">144</div><div class="n">FPS</div></div>
+            <div class="t"><div class="v">0.0%</div><div class="n">Loss</div></div>
+          </div>
+          <p class="note" style="margin-top:var(--s4)">Numbers use <code>tabular-nums</code> so columns
+          never jitter as values change — the difference between a HUD that feels tight and one that feels cheap.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- GRID -->
+    <section id="grid">
+      <div class="sec-head"><span class="idx">04</span><h2>Grid, spacing &amp; radius</h2>
+        <p>One 8-point rhythm everywhere. Corners stay between 4 and 8px — soft enough to feel modern,
+        tight enough to feel engineered.</p>
+      </div>
+      <div class="two">
+        <div class="card"><div class="eyebrow" style="margin-bottom:var(--s4)">Spacing scale · base 8</div>
+          <div class="scale" id="scale"></div>
+        </div>
+        <div class="card"><div class="eyebrow" style="margin-bottom:var(--s4)">Corner radii</div>
+          <div class="radii">
+            <div class="b" style="border-radius:4px">4</div>
+            <div class="b" style="border-radius:6px">6</div>
+            <div class="b" style="border-radius:8px">8</div>
+            <div class="b" style="border-radius:999px">pill</div>
+          </div>
+          <p class="note" style="margin-top:var(--s4)">4px for chips &amp; keys · 6px for buttons &amp; inputs ·
+          8px for panels &amp; cards · pill for status &amp; toggles.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ICONS -->
+    <section id="icons">
+      <div class="sec-head"><span class="idx">05</span><h2>Icon library</h2>
+        <p>Original single-weight geometric glyphs on a 24px grid — one stroke, rounded joins, no fill.
+        Built to read at 18px in the HUD and 26px in menus.</p>
+      </div>
+      <div class="grid icons" id="iconGrid"></div>
+    </section>
+
+    <!-- COMPONENTS -->
+    <section id="components">
+      <div class="sec-head"><span class="idx">06</span><h2>Components</h2>
+        <p>The operable kit. Everything interactive looks interactive; every state is distinct;
+        feedback is immediate. Click around — it's live.</p>
+      </div>
+      <div class="two">
+        <div class="stackcards">
+          <div class="card"><div class="eyebrow" style="margin-bottom:var(--s3)">Buttons · states + ripple</div>
+            <div class="btnrow">
+              <button class="btn" data-ripple>Play</button>
+              <button class="btn ghost" data-ripple>Practice</button>
+              <button class="btn quiet" data-ripple>Settings</button>
+              <button class="btn" disabled>Queued</button>
+            </div>
+          </div>
+          <div class="card"><div class="eyebrow" style="margin-bottom:var(--s3)">Status pills · connection &amp; health</div>
+            <div class="pills">
+              <span class="pill good"><span class="dot"></span>Connected</span>
+              <span class="pill info"><span class="dot"></span>In queue</span>
+              <span class="pill warn"><span class="dot"></span>High ping</span>
+              <span class="pill crit"><span class="dot"></span>Packet loss</span>
+            </div>
+          </div>
+          <div class="card"><div class="eyebrow" style="margin-bottom:var(--s3)">Tabs</div>
+            <div class="tabs" id="tabs"><button class="tab active">Competitive</button><button class="tab">Casual</button><button class="tab">Training</button></div>
+          </div>
+          <div class="card"><div class="eyebrow" style="margin-bottom:var(--s3)">Toggle · slider</div>
+            <div class="btnrow" style="gap:var(--s5)">
+              <div class="btnrow"><button class="toggle" id="tg1" aria-pressed="true" aria-label="Motion reduction"></button><span style="font-size:.82rem">Reduce motion</span></div>
+              <div style="flex:1;min-width:160px"><input type="range" min="60" max="110" value="90" style="width:100%" aria-label="Field of view"></div>
+            </div>
+          </div>
+        </div>
+        <div class="stackcards">
+          <div class="card"><div class="eyebrow" style="margin-bottom:var(--s3)">Capture / plant progress</div>
+            <div class="bar"><i id="capBar"></i></div>
+            <div class="btnrow" style="margin-top:var(--s3)"><button class="btn quiet" id="capBtn" data-ripple>Hold to plant</button>
+              <span class="mono" id="capPct" style="font-size:.8rem;color:var(--muted)">0%</span></div>
+          </div>
+          <div class="card"><div class="eyebrow" style="margin-bottom:var(--s3)">Tooltip</div>
+            <span class="tooltip-demo"><span class="tooltip">Ability recharges on <span class="k">2 kills</span> or <span class="k">90s</span>.</span></span>
+          </div>
+          <div class="card"><div class="eyebrow" style="margin-bottom:var(--s3)">Toast · notification</div>
+            <div class="toast"><span class="pill good" style="padding:0;border:0"><span class="dot" style="width:9px;height:9px"></span></span>
+              <div class="body"><b>Match found</b><span>Haven · 5v5 · joining lobby…</span></div></div>
+          </div>
+          <div class="card"><div class="eyebrow" style="margin-bottom:var(--s3)">Player card</div>
+            <div class="board" style="display:block">
+              <div class="who"><span class="av" style="background:var(--accent)">RS</span>
+                <span class="nm"><b>Servan “Reyna”</b><span>Diamond II · 1,842 RR</span></span>
+                <span style="margin-left:auto" class="pill good"><span class="dot"></span>Online</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCOREBOARD -->
+    <section id="scoreboard">
+      <div class="sec-head"><span class="idx">07</span><h2>Scoreboard</h2>
+        <p>Dense but scannable. The player's own row is anchored, MVP is tinted, and connection quality
+        is a color as well as a number — you read the table at a glance, not a squint.</p>
+      </div>
+      <div class="card" style="overflow-x:auto">
+        <table class="board">
+          <caption>Defenders — Round 15</caption>
+          <thead><tr><th>Agent</th><th>K</th><th>D</th><th>A</th><th>DMG</th><th>Obj</th><th>Econ</th><th>Ping</th><th>Conn</th></tr></thead>
+          <tbody id="boardBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ANIMATION -->
+    <section id="motion">
+      <div class="sec-head"><span class="idx">08</span><h2>Animation language</h2>
+        <p>Motion communicates, never decorates. Everything is fast (≤200ms), purposeful, and fully
+        disabled under <code>prefers-reduced-motion</code>.</p>
+      </div>
+      <div class="grid anim" id="animGrid"></div>
+    </section>
+
+    <!-- ACCESSIBILITY -->
+    <section id="a11y">
+      <div class="sec-head"><span class="idx">09</span><h2>Accessibility framework</h2>
+        <p>Not a settings tab bolted on at the end — a foundation. State is never carried by color alone,
+        motion is opt-out, and the crosshair is fully player-authored. Try the editor.</p>
+      </div>
+      <div class="card">
+        <div class="eyebrow" style="margin-bottom:var(--s4)">Crosshair editor · live</div>
+        <div class="xh-lab">
+          <div class="xh-stage"><div id="xh" aria-hidden="true"></div></div>
+          <div class="xh-ctl">
+            <label>Gap <span class="v" id="vGap">4</span></label><input type="range" id="cGap" min="0" max="14" value="4">
+            <label>Length <span class="v" id="vLen">7</span></label><input type="range" id="cLen" min="2" max="18" value="7">
+            <label>Thickness <span class="v" id="vThk">2</span></label><input type="range" id="cThk" min="1" max="5" value="2">
+            <label>Center dot <span class="v" id="vDot">on</span></label><input type="range" id="cDot" min="0" max="1" value="1">
+            <label style="margin-top:4px">Color</label>
+            <div class="swatchrow" id="xhColors">
+              <button data-c="#7dff9e" style="background:#7dff9e" aria-pressed="true"></button>
+              <button data-c="#e7fbff" style="background:#e7fbff"></button>
+              <button data-c="#ffd23b" style="background:#ffd23b"></button>
+              <button data-c="#ff7a1a" style="background:#ff7a1a"></button>
+              <button data-c="#59a6ff" style="background:#59a6ff"></button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr));margin-top:var(--s4)" id="a11yGrid"></div>
+    </section>
+
+    <!-- MENU / SCREENS -->
+    <section id="screens">
+      <div class="sec-head"><span class="idx">10</span><h2>Screen architecture</h2>
+        <p>How the surfaces connect — from front door to post-match — and the aspect ratios each one must
+        hold without reflow or clutter.</p>
+      </div>
+      <div class="two">
+        <div class="card"><div class="eyebrow" style="margin-bottom:var(--s3)">Flow</div>
+          <dl class="kvs">
+            <dt>Main menu</dt><dd>Play · Career · Store · Social · Settings</dd>
+            <dt>Play</dt><dd>Competitive · Casual · Training · Range · Custom</dd>
+            <dt>Lobby</dt><dd>Party · Ready · Region · Queue · train-while-queue</dd>
+            <dt>In-match</dt><dd>Buy → HUD → Scoreboard(hold)</dd>
+            <dt>Post-match</dt><dd>XP · Rank · Timeline · Commends · Rewards</dd>
+            <dt>Store</dt><dd>Preview · rotate/zoom · bundles · confirm</dd>
+          </dl>
+        </div>
+        <div class="card"><div class="eyebrow" style="margin-bottom:var(--s3)">Aspect &amp; device coverage</div>
+          <div class="aspects">
+            <div class="ar" style="width:120px;height:67px">16:9</div>
+            <div class="ar" style="width:120px;height:75px">16:10</div>
+            <div class="ar" style="width:150px;height:64px">21:9</div>
+            <div class="ar" style="width:180px;height:56px">32:9</div>
+          </div>
+          <p class="note" style="margin-top:var(--s4)">HUD anchors to safe-area corners and never the
+          extreme edges of ultrawide; menus center in a max-width column. Verified from Steam Deck (1280×800)
+          through 8K. Same tokens, same 8-pt rhythm, adaptive scale.</p>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <b>VANTAGE UI</b> — original design system for a competitive tactical FPS. Cohesive with the VANTAGE
+      material &amp; art direction. Every color, glyph, and interaction here is original and built to keep the
+      player's eyes on the fight. <span class="mono" style="color:var(--faint)">v1 · design-system</span>
+    </footer>
+  </main>
+</div>
+
+<script>
+(function(){
+  var RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // -------- nav --------
+  var secs=[['hud','The HUD'],['color','Color'],['type','Typography'],['grid','Grid & spacing'],
+    ['icons','Icons'],['components','Components'],['scoreboard','Scoreboard'],['motion','Animation'],
+    ['a11y','Accessibility'],['screens','Screens']];
+  var nav=document.getElementById('nav');
+  secs.forEach(function(s,i){var li=document.createElement('li');
+    li.innerHTML='<a href="#'+s[0]+'"><span class="k">'+String(i+1).padStart(2,'0')+'</span>'+s[1]+'</a>';nav.appendChild(li);});
+  var links=[].slice.call(nav.querySelectorAll('a'));
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){
+    if(e.isIntersecting){links.forEach(function(l){l.classList.toggle('active',l.getAttribute('href')==='#'+e.target.id);});}
+  });},{rootMargin:'-40% 0px -55% 0px'});
+  secs.forEach(function(s){var el=document.getElementById(s[0]);if(el)io.observe(el);});
+
+  // -------- color swatches --------
+  var neutrals=[['Ink','#14161a','page ground'],['Graphite','#1a1d22','recessed'],['Panel','#212429','surface'],
+    ['Panel-2','#282c32','raised'],['Line','#343941','borders'],['Slate','#5a616b','disabled'],
+    ['Ash','#9aa1ab','muted text'],['Fog','#e7e9ee','primary text']];
+  var semantic=[['Accent · Orange','#ff7a1a','your action / attacker'],['Defender · Teal','#2ec5c0','your team'],
+    ['Success','#49e07a','confirm / ready'],['Warning','#ffd23b','caution / low'],
+    ['Danger','#e5484d','enemy / objective'],['Info','#59a6ff','neutral notice']];
+  function sw(list,host){var h=document.getElementById(host);list.forEach(function(c){
+    var d=document.createElement('div');d.className='sw';
+    d.innerHTML='<div class="chip" style="background:'+c[1]+'"></div><div class="meta"><div class="name">'+c[0]+
+      '</div><div class="hex">'+c[1]+'</div><div class="role">'+c[2]+'</div></div>';h.appendChild(d);});}
+  sw(neutrals,'swNeutral');sw(semantic,'swSemantic');
+
+  // -------- spacing scale --------
+  var sc=document.getElementById('scale');[4,8,12,16,24,32,48,64].forEach(function(v){
+    var u=document.createElement('div');u.className='u';
+    u.innerHTML='<div class="bar" style="height:'+v+'px"></div><span>'+v+'</span>';sc.appendChild(u);});
+
+  // -------- icons (original geometric glyphs) --------
+  var P={
+    weapon:'M3 14h11l3-3h4M6 14v2M9 11l2-2', ammo:'M9 3h6v7l-3 3-3-3zM10 14h4v7h-4z',
+    armor:'M12 3l7 3v6c0 4-3 6-7 8-4-2-7-4-7-8V6z', health:'M12 5v14M5 12h14',
+    shield:'M12 3l7 3v6c0 4-3 6-7 8-4-2-7-4-7-8V6z', helmet:'M4 14a8 8 0 0116 0v2H4zM4 16h16',
+    grenade:'M9 4h6M12 4v3M8 9a5 5 0 108 0z', smoke:'M6 15a3 3 0 010-6 4 4 0 018-1 3 3 0 011 7z',
+    flash:'M13 2L4 14h6l-1 8 9-12h-6z', trap:'M4 12h4l2-3 2 6 2-3h4', drone:'M6 6l4 4M18 6l-4 4M9 12h6l-3 3zM4 5h3M17 5h3',
+    camera:'M4 8h4l2-2h4l2 2h4v10H4zM12 16a3 3 0 100-6 3 3 0 000 6', healing:'M12 6v12M6 12h12M9 9h6v6H9z',
+    radio:'M4 10h11l4-4M7 10v8m8-8v8M4 18h14', objective:'M12 3v18M4 6l8-3 8 3v6l-8 3-8-3z',
+    flag:'M6 3v18M6 4h11l-2 3 2 3H6', bomb:'M13 4l3 3M15 5l2-2M14 11a5 5 0 11-4-4', key:'M9 15a4 4 0 114-4l6 6-2 2-2-2-2 2',
+    door:'M6 3h9v18H6zM12 12h.5', computer:'M4 5h16v10H4zM9 19h6M12 15v4', power:'M12 4v7M7 7a7 7 0 1010 0',
+    generator:'M5 8h14v9H5zM8 8V5h8v3M9 12l2 3 1-4 2 3', electric:'M13 3l-7 9h5l-1 9 7-11h-5z',
+    medical:'M5 7h14v12H5zM12 10v6M9 13h6', warning:'M12 4l9 16H3zM12 10v4M12 17h.01',
+    fire:'M12 3c3 4 5 6 5 9a5 5 0 11-10 0c0-2 1-3 2-4 1 2 3 1 3-5', explosion:'M12 3l2 4 4-2-1 5 4 1-4 2 2 4-5-2-2 4-2-4-5 2 2-4-4-2 4-1-1-5 4 2z',
+    water:'M12 4c3 4 6 7 6 10a6 6 0 11-12 0c0-3 3-6 6-10', snow:'M12 3v18M4 8l16 8M20 8L4 16',
+    wind:'M3 9h10a2 2 0 100-4M3 14h14a2 2 0 110 4M3 12h7', metal:'M4 7h16v10H4zM4 12h16M9 7v10M15 7v10',
+    wood:'M4 6h16v12H4zM7 6v12M11 6v12M15 6v12', concrete:'M4 6h16v12H4zM4 12h16M10 6v6M15 12v6',
+    glass:'M6 4h12l-1 14a5 5 0 01-10 0zM6 9h12', plastic:'M8 3h8l-1 4H9zM7 7h10v14H7z',
+    ping:'M12 4v16M8 8l4-4 4 4M8 16l4 4 4-4'
+  };
+  var names={weapon:'Weapon',ammo:'Ammo',armor:'Armor',health:'Health',shield:'Shield',helmet:'Helmet',
+    grenade:'Grenade',smoke:'Smoke',flash:'Flash',trap:'Trap',drone:'Drone',camera:'Camera',healing:'Healing',
+    radio:'Radio',objective:'Objective',flag:'Flag',bomb:'Spike',key:'Key',door:'Door',computer:'Computer',
+    power:'Power',generator:'Generator',electric:'Electric',medical:'Medical',warning:'Warning',fire:'Fire',
+    explosion:'Explosion',water:'Water',snow:'Snow',wind:'Wind',metal:'Metal',wood:'Wood',concrete:'Concrete',
+    glass:'Glass',plastic:'Plastic',ping:'Ping'};
+  var ig=document.getElementById('iconGrid');
+  Object.keys(P).forEach(function(k){var d=document.createElement('div');d.className='ico';
+    d.innerHTML='<svg viewBox="0 0 24 24"><path d="'+P[k]+'"/></svg><span class="cap">'+names[k]+'</span>';ig.appendChild(d);});
+
+  // -------- ripple --------
+  document.addEventListener('click',function(e){
+    var b=e.target.closest('[data-ripple]');if(!b||RM)return;
+    var r=b.getBoundingClientRect(),s=Math.max(r.width,r.height),el=document.createElement('span');
+    el.className='ripple';el.style.width=el.style.height=s+'px';
+    el.style.left=(e.clientX-r.left-s/2)+'px';el.style.top=(e.clientY-r.top-s/2)+'px';
+    b.appendChild(el);setTimeout(function(){el.remove();},500);
+  });
+
+  // -------- tabs --------
+  var tabs=document.getElementById('tabs');
+  tabs.addEventListener('click',function(e){var t=e.target.closest('.tab');if(!t)return;
+    tabs.querySelectorAll('.tab').forEach(function(x){x.classList.toggle('active',x===t);});});
+
+  // -------- toggle --------
+  document.getElementById('tg1').addEventListener('click',function(){
+    this.setAttribute('aria-pressed',this.getAttribute('aria-pressed')==='true'?'false':'true');});
+
+  // -------- capture bar demo --------
+  var cap=document.getElementById('capBar'),capPct=document.getElementById('capPct'),
+      capF=document.getElementById('capFill'),t=0,dir=0;
+  document.getElementById('capBtn').addEventListener('pointerdown',function(){dir=1;});
+  window.addEventListener('pointerup',function(){dir=-1;});
+  setInterval(function(){t=Math.max(0,Math.min(100,t+dir*4));cap.style.width=t+'%';
+    if(capF)capF.style.width=t+'%';capPct.textContent=Math.round(t)+'%';
+    if(t>=100)capPct.textContent='PLANTED';},40);
+
+  // -------- ability cooldown sweep --------
+  document.querySelectorAll('.hud .slot[data-cool]').forEach(function(s){
+    s.addEventListener('click',function(){if(RM)return;var c=s.querySelector('.cool'),a=360;
+      c.style.setProperty('--c',a+'deg');var id=setInterval(function(){a-=8;c.style.setProperty('--c',Math.max(0,a)+'deg');
+        if(a<=0)clearInterval(id);},40);});
+  });
+
+  // -------- scoreboard --------
+  var rows=[['RS','Reyna','#ff7a1a','Servan',24,11,6,4120,3,3900,18,'#49e07a',1],
+    ['VX','Jett','#2ec5c0','Vex',19,14,4,3510,1,3200,22,'#49e07a',0],
+    ['DK','Sage','#59a6ff','Duke',12,13,11,2280,5,2600,35,'#ffd23b',0],
+    ['PP','Omen','#b06cff','Piper',15,15,7,3010,2,2400,19,'#49e07a',0],
+    ['MR','Raze','#e5484d','Mara',9,16,5,1980,0,1800,88,'#e5484d',0]];
+  var bb=document.getElementById('boardBody');
+  rows.forEach(function(r){var tr=document.createElement('tr');if(r[12])tr.className='mvp';
+    tr.innerHTML='<td><div class="who"><span class="av" style="background:'+r[2]+'">'+r[0]+
+      '</span><span class="nm"><b>'+r[3]+(r[12]?' · MVP':'')+'</b><span>'+r[1]+'</span></span></div></td>'+
+      '<td>'+r[4]+'</td><td>'+r[5]+'</td><td>'+r[6]+'</td><td>'+r[7].toLocaleString()+'</td><td>'+r[8]+
+      '</td><td>'+r[9].toLocaleString()+'</td><td>'+r[10]+'</td><td><span class="conn" style="background:'+r[11]+'"></span></td>';
+    bb.appendChild(tr);});
+
+  // -------- animation cards --------
+  var anims=[['Hover','State telegraph','80ms · ease-out · brightness+opacity'],
+    ['Click','Ripple + 1px press','500ms ripple · 60ms depress'],
+    ['Open / close','Panel reveal','160ms · scale .98→1 + fade'],
+    ['Notification','Attention pulse','1 pulse · 220ms · no loop'],
+    ['Round win / lose','Banner sweep','300ms in · 200ms out'],
+    ['Health change','Bar tween + tick','150ms width · number roll'],
+    ['Reload / cooldown','Radial sweep','matches real timing'],
+    ['Interaction','Hold-to-fill','linear to action threshold']];
+  var ag=document.getElementById('animGrid');
+  anims.forEach(function(a){var d=document.createElement('div');d.className='a';
+    d.innerHTML='<h4>'+a[0]+'</h4><div class="d">'+a[1]+'</div><div class="spec">'+a[2]+'</div>';ag.appendChild(d);});
+
+  // -------- a11y feature cards --------
+  var a11y=[['Colorblind presets','Protan · Deutan · Tritan + custom team colors, plus shape/label backups'],
+    ['Text & HUD scaling','75–150%, independent, safe-area aware'],
+    ['Motion & flashing','Reduce-motion honored globally; screen-shake + flash toggles'],
+    ['Full remapping','Keyboard, mouse, controller — plus hold/tap per action'],
+    ['Audio visualization','On-screen footstep & shot direction for the deaf/HoH'],
+    ['Subtitle customization','Size, background opacity, speaker labels']];
+  var a11g=document.getElementById('a11yGrid');
+  a11y.forEach(function(a){var d=document.createElement('div');d.className='card';
+    d.innerHTML='<h4 style="font-size:.9rem;margin-bottom:4px">'+a[0]+'</h4><div style="font-size:.76rem;color:var(--muted)">'+a[1]+'</div>';a11g.appendChild(d);});
+
+  // -------- crosshair editor --------
+  var xh=document.getElementById('xh'),color='#7dff9e';
+  function drawXh(){
+    var gap=+cGap.value,len=+cLen.value,thk=+cThk.value,dot=+cDot.value;
+    vGap.textContent=gap;vLen.textContent=len;vThk.textContent=thk;vDot.textContent=dot?'on':'off';
+    xh.innerHTML='';
+    function seg(w,h,x,y){var i=document.createElement('i');i.style.width=w+'px';i.style.height=h+'px';
+      i.style.background=color;i.style.left='calc(50% + '+x+'px)';i.style.top='calc(50% + '+y+'px)';
+      i.style.transform='translate(-50%,-50%)';xh.appendChild(i);}
+    seg(thk,len,0,-(gap+len/2)); seg(thk,len,0,(gap+len/2));
+    seg(len,thk,-(gap+len/2),0); seg(len,thk,(gap+len/2),0);
+    if(dot)seg(thk+1,thk+1,0,0);
+  }
+  ['cGap','cLen','cThk','cDot'].forEach(function(id){document.getElementById(id).addEventListener('input',drawXh);});
+  document.getElementById('xhColors').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
+    this.querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false');});
+    color=b.dataset.c;drawXh();});
+  drawXh();
+
+  // -------- HUD crosshair (static, matches editor default) --------
+  var hx=document.getElementById('hudXhair');
+  function seg2(w,h,x,y){var i=document.createElement('i');i.style.width=w+'px';i.style.height=h+'px';
+    i.style.left=x+'px';i.style.top=y+'px';hx.appendChild(i);}
+  seg2(2,7,-1,-13);seg2(2,7,-1,6);seg2(7,2,-13,-1);seg2(7,2,6,-1);
+
+  // -------- HUD timer tick --------
+  if(!RM){var s=84;setInterval(function(){s=s<=0?99:s-1;var m=Math.floor(s/60),ss=String(s%60).padStart(2,'0');
+    var el=document.getElementById('hudTimer');if(el)el.textContent=m+':'+ss;},1000);}
+})();
+</script>
