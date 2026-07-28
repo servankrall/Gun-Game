@@ -2219,7 +2219,18 @@ function setupMenus() {
 /* ---------------- main loop ---------------- */
 const devEl = $("dev");
 const dev = new URLSearchParams(location.search).has("dev");
-if (dev) devEl.style.display = "block";
+if (dev) {
+  devEl.style.display = "block";
+  // developer framework: console (~), overlay (F1), logging, telemetry, crash export.
+  // dynamically imported so production (no ?dev) never fetches or runs it.
+  const devCtx = {
+    renderer, camera, THREE, CFG, STR, NET, AudioMan,
+    get scene() { return scene; }, get ents() { return ents; },
+    get player() { return player; }, get match() { return match; },
+  };
+  import("./devtools.js").then(m => { window.__devtools = m.init(devCtx); })
+    .catch(e => console.error("devtools load failed", e));
+}
 let acc = 0, last = performance.now(), paused = false, frames = 0, fpsAt = last, fps = 0;
 addEventListener("blur", () => paused = true);
 addEventListener("focus", () => { paused = false; last = performance.now(); });
