@@ -88,6 +88,9 @@ let chosenAgent = 0;
 const ABILITY = {}; AGENTS.forEach(a => ABILITY[a.ability.kind] = a.ability);   // lookup by kind
 const BOT_POOL = ["sheriff", "spectre", "stinger", "bulldog", "guardian", "phantom", "vandal", "marshal", "ares"]
   .map(wIndex);
+// GUN GAME ladder: kill to advance to the next weapon; finish the ladder (knife) to win.
+const GG_LADDER = ["sheriff", "ghost", "frenzy", "stinger", "spectre", "bulldog",
+                   "guardian", "phantom", "vandal", "outlaw", "operator", "ares", "knife"].map(wIndex);
 
 // STYLE FORMULA palette roles: environment muted, gunmetal+amber for weapons,
 // signal orange for enemies/effects, cyan glow accents.
@@ -769,7 +772,7 @@ function makeEntity(name, isPlayer, accent) {
   return e;
 }
 
-function progress(e) { return e.totalKills; }        // deathmatch standing = kills
+function progress(e) { return match.mode === "gg" ? (e.ggLevel || 0) : e.totalKills; }   // gg standing = ladder level
 
 function spawnEntity(e) {
   // farthest spawn from living enemies
@@ -887,12 +890,18 @@ function kill(victim, attacker) {
   if (attacker && attacker !== victim) {
     attacker.totalKills++;
     attacker.credits = Math.min(CFG.maxCredits, attacker.credits + CFG.killReward);
+    if (match.mode === "gg") {                       // gun game: advance the killer's weapon
+      attacker.ggLevel = (attacker.ggLevel || 0) + 1;
+      if (attacker.ggLevel >= GG_LADDER.length) { endMatch(attacker); return; }   // finished the ladder → win
+      equipWeapon(attacker, GG_LADDER[attacker.ggLevel]);
+      if (attacker.isPlayer) hud.center(STR.hud.ggUp.replace("{n}", attacker.ggLevel + 1), 1.2);
+    }
   }
   hud.feed(STR.feed.killed.replace("{a}", attacker ? attacker.name : "—").replace("{b}", victim.name),
            attacker?.isPlayer || victim.isPlayer);
   if (attacker?.isPlayer) hud.killBanner(victim.name);
   if (victim.isPlayer) hud.center(STR.hud.killedBy.replace("{name}", attacker ? attacker.name : "—"), 2);
-  if (attacker && attacker.totalKills >= CFG.killTarget) endMatch(attacker);
+  if (match.mode !== "gg" && attacker && attacker.totalKills >= CFG.killTarget) endMatch(attacker);
 }
 
 /* ---------------- weapon equip / buy ---------------- */
@@ -905,13 +914,34 @@ function equipWeapon(e, idx) {
 function buyWeapon(idx) {
   const w = WEAPONS[idx];
   if (!player || match?.over) return false;
-  if (idx === player.weapon) return false;
+  if (idx === player.weapon) { sellWeapon(); return true; }   // clicking the equipped weapon sells it
   if (player.credits < w.price) { AudioMan.play("hit", { vol: 0.12, rate: 0.7 }); return false; }
   player.credits -= w.price;
+  player.weaponPaid = w.price;
   equipWeapon(player, idx);
   AudioMan.play("reload", { vol: 0.3 });
   shop.refresh();
   return true;
+}
+// sell the current weapon → refund what you paid, drop back to the free Classic (0)
+function sellWeapon() {
+  if (!player || match?.over || player.weapon === 0) return false;
+  const refund = player.weaponPaid || 0;
+  player.credits = Math.min(CFG.maxCredits, player.credits + refund);
+  player.weaponPaid = 0;
+  equipWeapon(player, 0);
+  AudioMan.play("reload", { vol: 0.25, rate: 0.85 });
+  shop.refresh();
+  return true;
+}
+// eco quick-buy: the best affordable pistol up to a cheap budget (single sidearm)
+function ecoBuy() {
+  if (!player || match?.over) return false;
+  const budget = Math.min(player.credits, 800);
+  let best = -1, bestPrice = -1;
+  WEAPONS.forEach((w, i) => { if (w.cat === "sidearm" && w.mesh === "pistol" && w.price > 0 && w.price <= budget && w.price > bestPrice) { best = i; bestPrice = w.price; } });
+  if (best < 0) { AudioMan.play("hit", { vol: 0.12, rate: 0.7 }); return false; }
+  return buyWeapon(best);
 }
 
 /* ---------------- abilities (self buffs + enemy utility) ---------------- */
@@ -1361,7 +1391,9 @@ const hud = {
     $("timer").textContent = m + ":" + String(s).padStart(2, "0");
     if (match.mode === "sd") { this.sd(); }
     else {
-      $("kills").textContent = player.totalKills + " / " + CFG.killTarget;
+      const gg = match.mode === "gg";
+      $("kills").textContent = gg ? (STR.hud.ggLevel.replace("{n}", (player.ggLevel || 0) + 1).replace("{t}", GG_LADDER.length))
+                                  : player.totalKills + " / " + CFG.killTarget;
       let lead = player, lp = progress(player);
       for (const e of ents) if (progress(e) > lp) { lead = e; lp = progress(e); }
       $("lead").textContent = lead.isPlayer ? STR.hud.youLead : STR.hud.leader.replace("{name}", lead.name);
@@ -1469,6 +1501,12 @@ const shop = {
     $("shopClose").textContent = STR.shop.close;
     $("shopHint").textContent = STR.shop.hint;
     $("shopClose").onclick = () => this.close();
+    // sell + eco quick actions (created idempotently, works on cached shells too)
+    const head = $("shopHead");
+    if (head && !$("shopEco")) { const b = document.createElement("button"); b.id = "shopEco"; b.className = "shopAct eco"; head.insertBefore(b, $("shopClose")); }
+    if (head && !$("shopSell")) { const b = document.createElement("button"); b.id = "shopSell"; b.className = "shopAct sell"; head.insertBefore(b, $("shopClose")); }
+    if ($("shopEco")) { $("shopEco").textContent = STR.shop.eco; $("shopEco").onclick = () => ecoBuy(); }
+    if ($("shopSell")) { $("shopSell").textContent = STR.shop.sell; $("shopSell").onclick = () => sellWeapon(); }
     this.built = true;
   },
   refresh() {
@@ -1482,7 +1520,7 @@ const shop = {
   },
   toggle() { this.open ? this.close() : this.openShop(); },
   openShop() {
-    if (!match || match.over) return;
+    if (!match || match.over || match.mode === "gg") return;   // gun game has no economy
     if (!this.built) this.build();
     this.open = true; shopOpen = true;
     $("shop").classList.remove("hidden");
@@ -1933,7 +1971,7 @@ const SD = {
 let running = false, inMenu = true;
 
 function startMatch(mapId, opts = {}) {
-  const online = !!opts.online, sd = !!opts.sd;
+  const online = !!opts.online, sd = !!opts.sd, gg = !!opts.gunGame;
   rng = mulberry32(0xC0FFEE ^ mapId.length * 7919 ^ [...mapId].reduce((a, c) => a + c.charCodeAt(0), 0));
   buildWorld(mapId);
   initFx();
@@ -1944,7 +1982,7 @@ function startMatch(mapId, opts = {}) {
   player = makeEntity(online ? NET.name : STR.you, true, AGENTS[chosenAgent].color);
   player.nid = online ? NET.id : null;
   player.agent = chosenAgent; player.credits = sd ? CFG.sdStartCredits : CFG.startCredits;
-  player.weapon = 0; player.abilityCd = 0; player.team = sd ? (opts.welcome.team ?? 0) : null;
+  player.weapon = 0; player.weaponPaid = 0; player.abilityCd = 0; player.team = sd ? (opts.welcome.team ?? 0) : null;
   if (sd) SD.team = player.team;                 // set before addRemote so ally/enemy colours are right
   ents.push(player);
   if (online) for (const rp of opts.players || opts.welcome?.players || []) addRemote(rp);
@@ -1955,10 +1993,11 @@ function startMatch(mapId, opts = {}) {
     ents.push(b);
   }
   match = { t: 0, timeLeft: online ? (opts.timeLeft ?? CFG.matchTime) : CFG.matchTime,
-            over: false, winner: null, online, mode: sd ? "sd" : "dm" };
+            over: false, winner: null, online, mode: sd ? "sd" : gg ? "gg" : "dm" };
   vm.init();                          // viewmodel must exist before any equipWeapon (SD.begin equips)
   if (sd) { SD.begin(opts.welcome); }
   else for (const e of ents) if (!e.remote) spawnEntity(e);
+  if (gg) for (const e of ents) if (!e.remote) { e.ggLevel = 0; equipWeapon(e, GG_LADDER[0]); }   // everyone starts on the first ladder weapon
   hud.init();
   $("hud").classList.remove("hidden");
   $("menu").classList.add("hidden");
@@ -2170,6 +2209,9 @@ function ensureBattleDom() {
       #shopHead{display:flex;align-items:center;gap:20px;margin-bottom:14px;flex-wrap:wrap;justify-content:center}
       #shopTitle{font-size:20px;letter-spacing:.2em;font-weight:800} #shopCredits{font-size:20px;font-weight:800;color:#ffd479}
       #shopClose{background:#2a2f3a;color:#e8e4da;border:0;border-radius:6px;padding:8px 18px;cursor:pointer;font-weight:700;font-family:inherit}
+      .shopAct{border:0;border-radius:6px;padding:8px 16px;cursor:pointer;font-weight:800;font-family:inherit;letter-spacing:.05em}
+      .shopAct.eco{background:#3a4150;color:#cfe0ff} .shopAct.sell{background:#5a2f2f;color:#ffc9c0}
+      .shopAct:hover{filter:brightness(1.15)}
       #shopGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;max-width:920px;width:100%}
       .shopCat{background:#12151c;border-radius:8px;padding:8px}
       .shopCatH{font-size:10px;letter-spacing:.16em;color:#8aa0b8;margin-bottom:6px}
@@ -2292,17 +2334,33 @@ function setupMenus() {
   $("mapCards")?.remove();
   if ($("abilityBtn")) $("abilityBtn").textContent = STR.touch.ability;
 
-  // callsign
+  // callsign — asked ONCE, then remembered (greeting + "change" instead of re-typing every time)
   const nameInp = $("nameInp");
   const defName = localStorage.getItem("gga-name") ||
     STR.bots[(Math.random() * STR.bots.length) | 0] + ((Math.random() * 90 + 10) | 0);
   nameInp.value = defName;
   nameInp.placeholder = STR.online.name;
+  let greet = $("nameGreet");
+  if (!greet) { greet = document.createElement("div"); greet.id = "nameGreet";
+    greet.style.cssText = "margin-bottom:16px;font-size:15px;letter-spacing:.06em;color:#e8e4da"; nameInp.before(greet); }
+  const renderName = () => {
+    const saved = localStorage.getItem("gga-name");
+    if (saved) {
+      greet.style.display = "block"; nameInp.style.display = "none";
+      greet.innerHTML = STR.online.hello.replace("{name}", `<b style="color:#ffb03a">${saved}</b>`) +
+        ` <span id="nameChange" style="color:#4ad7e8;cursor:pointer;font-size:12px;margin-left:8px">${STR.online.change} ✎</span>`;
+      $("nameChange").onclick = () => { nameInp.style.display = ""; greet.style.display = "none"; nameInp.value = saved; nameInp.focus(); };
+    } else { greet.style.display = "none"; nameInp.style.display = ""; }
+  };
+  renderName();
   const saveName = () => {
     const v = nameInp.value.replace(/[^\w .\-]/g, "").trim().slice(0, 14);
-    if (v) localStorage.setItem("gga-name", v);
+    if (v) { localStorage.setItem("gga-name", v); renderName(); }
     return v || defName;
   };
+  // GUN GAME mode button (idempotent — survives cached shells)
+  if (!$("ggBtn") && $("startBtn")) { const g = document.createElement("button"); g.id = "ggBtn"; g.className = "btn ghost"; $("startBtn").after(g); }
+  if ($("ggBtn")) $("ggBtn").textContent = STR.online.gunGame;
 
   const hasRoom = !!new URLSearchParams(location.search).get("room");
   $("onlineBtn").textContent = STR.online.play;                              // public match
@@ -2328,18 +2386,20 @@ function setupMenus() {
   $("onlineBtn").onclick = goOnline(true);      // ONLINE → public shared match
   $("friendsBtn").onclick = goOnline(false);    // PLAY WITH FRIENDS → private room + invite link
 
-  const begin = async () => {
+  const begin = (opts = {}) => async () => {
     await AudioMan.init(); AudioMan.resume();
+    saveName();                       // lock in the callsign the first time you play
     NET.stop();
     $("mStatus").textContent = "";
     const map = randomMap();          // solo: reveal a random arena, pick an agent, then play
     showMapReveal(map, () => showAgentSelect(() => {
-      startMatch(map, {});
+      startMatch(map, opts);
       if (!isTouch) canvas.requestPointerLock?.();
     }));
   };
-  $("startBtn").onclick = begin;
-  $("againBtn").onclick = begin;
+  $("startBtn").onclick = begin({});                 // PRACTICE — deathmatch vs bots
+  if ($("ggBtn")) $("ggBtn").onclick = begin({ gunGame: true });   // GUN GAME — progressive weapons
+  $("againBtn").onclick = begin({});
   $("eMenuBtn").onclick = () => { NET.stop(); backToMenu(""); };
   $("pMenuBtn").onclick = () => { NET.stop(); backToMenu(""); };
   $("resumeBtn").onclick = () => {
