@@ -37,7 +37,7 @@ const CFG = {
            recon:      { push: 0.45, hold: 0.70, retreatHp: 36, strafe: 1.0 },
            support:    { push: 0.40, hold: 0.62, retreatHp: 40, strafe: 0.82 },
          } },
-  arena: { size: 64, wallH: 4.5 },
+  arena: { size: 72, wallH: 4.5 },
 };
 
 // Full arsenal, grouped by category, priced like a buy menu. `mesh` picks the
@@ -133,7 +133,7 @@ const MAPS = {
   // Search & Destroy arena — bigger, with three bomb sites (A/B/C) and a mid.
   // Attackers spawn south (+z), defenders north (-z).
   haven: {
-    size: 92, wallH: 5,
+    size: 104, wallH: 5,
     sky: 0xc9dce8, fog: 0xd8cdb4, fogNear: 45, fogFar: 170,
     sun: 0xfff2dc, sunI: 1.25, amb: 0x9fb2c4, ambI: 0.9,
     floor: "sand", wall: "concrete", crate: "crate",
@@ -252,19 +252,28 @@ function setupTouch() {
   const stick = document.getElementById("stick"), knob = document.getElementById("knob");
   let stickId = null, lookId = null, lookLast = null;
   const sRect = () => stick.getBoundingClientRect();
+  // A touch is "on the UI" (menu / agent-select / shop / map-reveal / end / pause /
+  // any button) whenever we must let it become a real click. Only game-world touches
+  // (joystick / look) get preventDefault — otherwise preventDefault swallows the click
+  // and every menu button dies on mobile.
+  const UI_SEL = "button,input,.btn,.agentCard,.shopItem,.mapCard,#mapReveal,#agentSelect,#shop,#end,#pause,#roomBar,#menu,.overlay";
+  const uiTouch = e => inMenu || shopOpen || (match && match.over) || !!(e.target && e.target.closest && e.target.closest(UI_SEL));
   addEventListener("touchstart", e => {
+    if (uiTouch(e)) return;                       // let menu/UI taps turn into clicks
+    let claimed = false;
     for (const t of e.changedTouches) {
       const r = sRect();
       if (t.clientX >= r.left - 20 && t.clientX <= r.right + 20 && t.clientY >= r.top - 20 && t.clientY <= r.bottom + 20 && stickId === null) {
-        stickId = t.identifier;
+        stickId = t.identifier; claimed = true;
       } else if (t.clientX > innerWidth * 0.45 && lookId === null &&
                  !e.target.classList?.contains("tbtn")) {
-        lookId = t.identifier; lookLast = { x: t.clientX, y: t.clientY };
+        lookId = t.identifier; lookLast = { x: t.clientX, y: t.clientY }; claimed = true;
       }
     }
-    e.preventDefault();
+    if (claimed) e.preventDefault();              // only block default for game-world touches
   }, { passive: false });
   addEventListener("touchmove", e => {
+    let active = false;
     for (const t of e.changedTouches) {
       if (t.identifier === stickId) {
         const r = sRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
@@ -272,12 +281,14 @@ function setupTouch() {
         const m = Math.hypot(dx, dy); if (m > 1) { dx /= m; dy /= m; }
         touchState.mx = dx; touchState.my = dy;
         knob.style.left = 38 + dx * 34 + "px"; knob.style.top = 38 + dy * 34 + "px";
+        active = true;
       } else if (t.identifier === lookId) {
         lookDX += (t.clientX - lookLast.x) * 2.2; lookDY += (t.clientY - lookLast.y) * 2.2;
         lookLast = { x: t.clientX, y: t.clientY };
+        active = true;
       }
     }
-    e.preventDefault();
+    if (active) e.preventDefault();
   }, { passive: false });
   const endT = e => {
     for (const t of e.changedTouches) {
@@ -1847,11 +1858,27 @@ const SD = {
     sp = sp || { state: "none" };
     this.spike = { state: sp.state, carrier: sp.carrier ?? null, x: sp.x ?? 0, z: sp.z ?? 0, site: sp.site ?? null, left: sp.left ?? 0 };
     const show = sp.state === "dropped" || sp.state === "planted";
-    if (show && !this.mesh) { this.mesh = new THREE.Mesh(boxGeo, new THREE.MeshBasicMaterial({ color: 0xff5a2a })); this.mesh.scale.set(0.5, 0.36, 0.5); }
+    if (show && !this.mesh) {                              // proper red spike: body + base + pulsing beacon
+      const g = new THREE.Group();
+      const base = new THREE.Mesh(boxGeo, new THREE.MeshBasicMaterial({ color: 0x2a0d0b }));
+      base.scale.set(0.78, 0.14, 0.78); base.position.y = 0.07; g.add(base);
+      const body = new THREE.Mesh(boxGeo, new THREE.MeshBasicMaterial({ color: 0xe5322a }));
+      body.scale.set(0.5, 0.66, 0.5); body.position.y = 0.44; body.rotation.y = Math.PI / 4; g.add(body);
+      const core = new THREE.Mesh(boxGeo, new THREE.MeshBasicMaterial({ color: 0x1a0705 }));
+      core.scale.set(0.2, 0.5, 0.2); core.position.y = 0.5; g.add(core);
+      const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.13, 10, 8), new THREE.MeshBasicMaterial({ color: 0xff6a5a }));
+      beacon.position.y = 0.86; g.add(beacon);
+      this.mesh = g; this.beacon = beacon; this.spikeBody = body;
+    }
     if (this.mesh) {
       if (show && !this.mesh.parent) scene.add(this.mesh);
       this.mesh.visible = show;
-      if (show) { this.mesh.position.set(sp.x, 0.3, sp.z); this.mesh.material.color.setHex(sp.state === "planted" ? 0xff2a2a : 0xff9a3a); }
+      if (show) {
+        this.mesh.position.set(sp.x, 0, sp.z);
+        const planted = sp.state === "planted";
+        this.spikeBody.material.color.setHex(planted ? 0xff2a20 : 0xd23a2e);
+        this.beacon.material.color.setHex(planted ? 0xff3a2a : 0xff8a5a);
+      }
     }
   },
   siteAt(x, z) {
@@ -1862,7 +1889,13 @@ const SD = {
   update(dt, cmds) {
     if (!match.online || match.mode !== "sd" || match.over) return;
     this.grabCd = Math.max(0, this.grabCd - dt);
-    if (this.mesh && this.mesh.visible && this.spike.state === "planted") this.mesh.material.color.setHex((match.t * 6 | 0) % 2 ? 0xff2a2a : 0xffd0a0);
+    if (this.beacon && this.mesh && this.mesh.visible) {          // pulsing beacon (fast when planted)
+      const planted = this.spike.state === "planted";
+      const sp = planted ? 0.02 : 0.006;
+      const p = 0.7 + 0.5 * Math.sin(performance.now() * sp);
+      this.beacon.scale.setScalar(p);
+      this.beacon.material.color.setHex(planted && (match.t * 6 | 0) % 2 ? 0xffe0d0 : (planted ? 0xff3a2a : 0xff8a5a));
+    }
     const live = this.phase === "live";
     // auto-grab a dropped spike as an alive attacker standing on it
     if (this.spike.state === "dropped" && player.alive && this.role() === "atk" && this.grabCd <= 0
@@ -2123,6 +2156,16 @@ function ensureBattleDom() {
       .agName{font-weight:800;letter-spacing:.06em} .agRole{font-size:10px;letter-spacing:.16em;color:var(--acc);margin-bottom:6px}
       .agSkill b{display:block;font-size:12px} .agSkill span{font-size:10px;opacity:.6;line-height:1.2;display:block;margin-top:2px}
       #lockBtn{margin-top:20px}
+      @media (max-height:560px){
+        #agentSelect{padding:8px}#agentTitle{margin-bottom:6px;font-size:11px}
+        #agentGrid{gap:6px;grid-template-columns:repeat(3,minmax(92px,150px))}
+        .agentCard{padding:6px}.agPortrait{height:42px;margin-bottom:4px}
+        .agSkill span{display:none}#lockBtn{margin-top:8px;padding:9px 30px}
+      }
+      @media (max-height:430px){
+        #agentGrid{grid-template-columns:repeat(6,minmax(78px,1fr))}
+        .agRole{display:none}.agSkill b{font-size:11px}.agPortrait{height:34px}
+      }
       #shop{position:fixed;inset:0;z-index:33;display:flex;flex-direction:column;align-items:center;padding:20px 12px;background:rgba(10,12,18,.92);overflow:auto}
       #shopHead{display:flex;align-items:center;gap:20px;margin-bottom:14px;flex-wrap:wrap;justify-content:center}
       #shopTitle{font-size:20px;letter-spacing:.2em;font-weight:800} #shopCredits{font-size:20px;font-weight:800;color:#ffd479}

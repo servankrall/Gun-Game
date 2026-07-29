@@ -1,8 +1,8 @@
 // All player-visible text. Switching language = swapping this data.
 export const STR = {
   title: "GUN GAME ARENA",
-  subtitle: "Online: 5v5 Search & Destroy (plant the spike). Solo: buy-menu deathmatch vs bots.",
-  start: "SOLO VS BOTS",
+  subtitle: "Online: 5v5 Search & Destroy (plant the spike). Practice: warm up vs bots.",
+  start: "PRACTICE",
   resume: "RESUME",
   paused: "PAUSED",
   clickToPlay: "Click to take aim",
