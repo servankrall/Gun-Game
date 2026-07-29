@@ -259,7 +259,7 @@ function setupTouch() {
   // any button) whenever we must let it become a real click. Only game-world touches
   // (joystick / look) get preventDefault — otherwise preventDefault swallows the click
   // and every menu button dies on mobile.
-  const UI_SEL = "button,input,.btn,.agentCard,.shopItem,.mapCard,#mapReveal,#agentSelect,#shop,#end,#pause,#roomBar,#menu,.overlay";
+  const UI_SEL = "button,input,.btn,.agentCard,.shopItem,.mapCard,#mapReveal,#agentSelect,#shop,#career,#end,#pause,#roomBar,#menu,.overlay";
   const uiTouch = e => inMenu || shopOpen || (match && match.over) || !!(e.target && e.target.closest && e.target.closest(UI_SEL));
   addEventListener("touchstart", e => {
     if (uiTouch(e)) return;                       // let menu/UI taps turn into clicks
@@ -1590,10 +1590,10 @@ function showAgentSelect(next) {
 const remotes = new Map();          // network id -> remote entity
 
 const NET = {
-  ws: null, active: false, joined: false, wantOnline: false, entered: false, public: false,
+  ws: null, active: false, joined: false, wantOnline: false, entered: false, public: false, ranked: false,
   room: null, id: null, name: "", tries: 0, sendAcc: 0,
   ensureRoom() {
-    if (this.public) { this.room = "pub-" + (1 + ((Math.random() * 4) | 0)); return; }   // public shard (pseudo-matchmaking)
+    if (this.public) { this.room = (this.ranked ? "rk-" : "pub-") + (1 + ((Math.random() * 4) | 0)); return; }   // ranked players group into rk- shards
     const params = new URLSearchParams(location.search);
     let room = params.get("room");
     if (!room) {
@@ -1962,7 +1962,16 @@ const SD = {
     const win = m.winTeam === this.team;
     $("eTitle").textContent = m.winTeam < 0 ? STR.sd.draw : (win ? STR.end.win : STR.end.lose);
     $("eTitle").style.color = win ? "#ffb03a" : "#ff4a3a";
-    $("eDesc").textContent = STR.sd.finalScore.replace("{a}", m.score[this.team]).replace("{b}", m.score[1 - this.team]);
+    let desc = STR.sd.finalScore.replace("{a}", m.score[this.team]).replace("{b}", m.score[1 - this.team]);
+    // progression: XP + rank from ONLINE matches only (never vs bots)
+    if (m.winTeam >= 0) {
+      const before = Profile.levelProg().l;
+      Profile.awardMatch({ kills: player.totalKills || 0, win, ranked: !!NET.ranked });
+      const after = Profile.levelProg().l;
+      desc += `  ·  +${player.totalKills * 15 + (win ? 220 : 70)} XP` +
+        (NET.ranked ? `  ·  ${win ? "+25" : "-18"} RP` : "") + (after > before ? `  ·  LEVEL UP → ${after}!` : "");
+    }
+    $("eDesc").textContent = desc;
     $("hud").classList.add("hidden"); $("end").classList.remove("hidden"); $("againBtn").classList.add("hidden");
   },
 };
@@ -2220,6 +2229,33 @@ function ensureBattleDom() {
       .shopItem.owned{border-color:#4ad7e8;box-shadow:inset 0 0 0 1px #4ad7e8} .shopItem.owned .wp{color:#4ad7e8}
       .shopItem.cant{opacity:.45} .shopItem.cant .wp{color:#e06c75}
       #shopHint{margin-top:14px;font-size:11px;opacity:.5;text-align:center}
+      #career{position:fixed;inset:0;z-index:35;display:flex;align-items:center;justify-content:center;background:rgba(8,10,14,.92);padding:14px}
+      #careerCard{width:min(460px,94vw);max-height:92vh;overflow:auto;background:linear-gradient(180deg,#1b1f27,#141821);border:1px solid #2a3040;border-radius:14px;padding:18px;box-shadow:0 20px 60px #000a}
+      #careerHead{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+      #careerName{font-size:20px;font-weight:800;letter-spacing:.04em}
+      #careerName b{color:#ffb03a}
+      #careerClose{background:#242a34;color:#e8e4da;border:0;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:14px}
+      #careerBadges{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+      .cbadge{flex:1;min-width:120px;background:#0f131a;border:1px solid #2a3040;border-radius:10px;padding:10px 12px}
+      .cbadge .k{font-size:10px;letter-spacing:.18em;color:#7f8896;text-transform:uppercase}
+      .cbadge .v{font-size:20px;font-weight:800;margin-top:2px}
+      .cbadge.lvl .v{color:#8fe3ff} .cbadge.rank .v{color:#ffd479}
+      #xpWrap{margin-bottom:14px}
+      #xpBar{height:10px;border-radius:6px;background:#0f131a;border:1px solid #2a3040;overflow:hidden}
+      #xpFill{display:block;height:100%;width:0;background:linear-gradient(90deg,#4ad7e8,#8fe3ff);transition:width .4s}
+      #xpTxt{font-size:11px;color:#9aa4b2;margin-top:4px}
+      #careerStats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:6px}
+      #careerStats .s{background:#0f131a;border:1px solid #2a3040;border-radius:8px;padding:8px;text-align:center}
+      #careerStats .s .v{font-size:17px;font-weight:800} #careerStats .s .k{font-size:9px;letter-spacing:.1em;color:#7f8896;text-transform:uppercase}
+      .careerSecT{font-size:11px;letter-spacing:.2em;color:#7f8896;margin:16px 0 8px;font-weight:700}
+      #friendAdd{display:flex;gap:8px}
+      #friendInp{flex:1;background:#0f131a;border:1px solid #2a3040;color:#e8e4da;border-radius:8px;padding:9px 12px;font-size:13px;outline:none}
+      #friendBtn,#lbRefresh{background:#ff7a1a;color:#14100a;border:0;border-radius:8px;padding:9px 16px;font-weight:800;cursor:pointer}
+      #friendMsg{font-size:11px;min-height:14px;margin-top:6px}
+      #friendList .fr,#lbList .lb{display:flex;align-items:center;gap:10px;padding:8px 10px;background:#0f131a;border:1px solid #23293400;border-radius:8px;margin-bottom:5px;font-size:13px}
+      #friendList .fr .lv,#lbList .lb .lv{margin-left:auto;font-size:11px;color:#8fe3ff}
+      #lbList .lb .rk{margin-left:auto;font-size:11px;color:#ffd479} #lbList .lb .pos{color:#7f8896;width:20px}
+      #careerBtn .lock,#rankedBtn .lock{font-size:11px;opacity:.7}
       #abilityBtn{right:150px;bottom:150px;width:56px;height:56px;font-size:12px;border-color:#8fe3ff88;color:#8fe3ff}
       #shopBtn{right:34px;bottom:250px;width:50px;height:50px;font-size:18px}
       #useBtn{right:150px;bottom:64px;width:64px;height:64px;font-size:11px;border-color:#ffb03a88;color:#ffb03a}
@@ -2256,6 +2292,17 @@ function ensureBattleDom() {
   addTo(document.body, "shop", "hidden",
     `<div id="shopHead"><div id="shopTitle"></div><div id="shopCredits"></div><button id="shopClose"></button></div>` +
     `<div id="shopGrid"></div><div id="shopHint"></div>`);
+  addTo(document.body, "career", "hidden",
+    `<div id="careerCard">
+       <div id="careerHead"><div id="careerName"></div><button id="careerClose">✕</button></div>
+       <div id="careerBadges"></div>
+       <div id="xpWrap"><div id="xpBar"><i id="xpFill"></i></div><div id="xpTxt"></div></div>
+       <div id="careerStats"></div>
+       <div class="careerSecT">FRIENDS</div>
+       <div id="friendAdd"><input id="friendInp" maxlength="14" placeholder="add by name"><button id="friendBtn">ADD</button></div>
+       <div id="friendMsg"></div><div id="friendList"></div>
+       <div class="careerSecT">TOP PLAYERS</div><div id="lbList"></div>
+     </div>`);
   // second online button (Play with Friends) — created idempotently so it works
   // even when the cached shell already has the online menu (ensureOnlineDom skips)
   if (!$("friendsBtn") && $("onlineBtn")) {
@@ -2316,6 +2363,89 @@ function ensureTouchDom() {
   r.innerHTML = `<div class="ic">📱</div><b>${T.rotate}</b><span>${T.rotateSub}</span>`;
 }
 
+/* ---------------- persistent profile: level · XP · rank · friends ----------------
+ * Local-first (localStorage) so progression works instantly and offline; syncs
+ * best-effort to the server "_hub" Durable Object for cross-device persistence
+ * and friends-by-name. XP is earned in ONLINE matches only (never vs bots).
+ */
+const RANKS = ["Bronze", "Silver", "Gold", "Platinum", "Diamond", "Ascendant", "Immortal"];
+const Profile = {
+  data: null, hub: null, hubReady: false, _q: [], onProf: null, onFriend: null, onLb: null,
+  load() {
+    try { this.data = JSON.parse(localStorage.getItem("gga-profile") || "null"); } catch { this.data = null; }
+    if (!this.data || !this.data.id)
+      this.data = { id: "p-" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36),
+        name: "", level: 1, xp: 0, rankPoints: 0, wins: 0, losses: 0, kills: 0, matches: 0, friends: [] };
+    this.data.name = localStorage.getItem("gga-name") || this.data.name || "";
+    this.save(false);
+    return this.data;
+  },
+  save(sync = true) { try { localStorage.setItem("gga-profile", JSON.stringify(this.data)); } catch {} if (sync) this.syncUp(); },
+  xpToNext(l) { return 100 + (l - 1) * 45; },
+  totalTo(L) { let t = 0; for (let l = 1; l < L; l++) t += this.xpToNext(l); return t; },
+  level() { let l = 1; while (this.data.xp >= this.totalTo(l + 1)) l++; return l; },
+  levelProg() { const l = this.level(), base = this.totalTo(l), need = this.xpToNext(l); return { l, cur: this.data.xp - base, need, pct: Math.min(1, (this.data.xp - base) / need) }; },
+  rankName() { return RANKS[Math.min(RANKS.length - 1, Math.floor(this.data.rankPoints / 100))]; },
+  rankTier() { const r = this.data.rankPoints % 100; return r < 34 ? "I" : r < 67 ? "II" : "III"; },
+  rankedUnlocked() { return this.level() >= 20; },
+  awardMatch({ kills = 0, win = false, ranked = false }) {           // online only
+    this.data.kills += kills; this.data.matches++;
+    this.data.xp += kills * 15 + (win ? 220 : 70);
+    if (win) this.data.wins++; else this.data.losses++;
+    if (ranked) this.data.rankPoints = Math.max(0, this.data.rankPoints + (win ? 25 : -18));
+    this.data.level = this.level();
+    this.save();
+  },
+  connect() {
+    if (this.hub && this.hub.readyState <= 1) return;
+    const base = location.pathname.replace(/\/+$/, ""), proto = location.protocol === "https:" ? "wss" : "ws";
+    try { this.hub = new WebSocket(`${proto}://${location.host}${base}/ws/_hub`); } catch { return; }
+    this.hub.onopen = () => { this.hubReady = true; this.send({ t: "pget", id: this.data.id }); const q = this._q; this._q = []; q.forEach(o => this.send(o)); };
+    this.hub.onmessage = e => { let m; try { m = JSON.parse(e.data); } catch { return; } this.onHub(m); };
+    this.hub.onclose = () => { this.hubReady = false; };
+    this.hub.onerror = () => {};
+  },
+  send(o) { if (this.hub && this.hub.readyState === 1) this.hub.send(JSON.stringify(o)); else this._q.push(o); },
+  syncUp() { this.send({ t: "pput", profile: this.data }); },
+  onHub(m) {
+    if (m.t === "prof") {
+      const s = m.profile;
+      if (s) {   // merge: keep the better of each stat so no progress is ever lost
+        this.data.xp = Math.max(this.data.xp, s.xp || 0);
+        this.data.rankPoints = Math.max(this.data.rankPoints, s.rankPoints || 0);
+        this.data.wins = Math.max(this.data.wins, s.wins || 0); this.data.losses = Math.max(this.data.losses, s.losses || 0);
+        this.data.kills = Math.max(this.data.kills, s.kills || 0); this.data.matches = Math.max(this.data.matches, s.matches || 0);
+        if (s.friends) { const ids = new Set(this.data.friends.map(f => f.id)); s.friends.forEach(f => { if (!ids.has(f.id)) this.data.friends.push(f); }); }
+        this.data.level = this.level(); this.save();
+      }
+      this.onProf && this.onProf();
+    } else if (m.t === "friendres") this.onFriend && this.onFriend(m);
+    else if (m.t === "lbres") this.onLb && this.onLb(m.top || []);
+  },
+  addFriend(name) { this.send({ t: "fadd", id: this.data.id, name }); },
+  leaderboard() { this.send({ t: "lb" }); },
+};
+
+function openCareer() { const c = $("career"); if (!c) return; c.classList.remove("hidden"); renderCareer(); Profile.leaderboard(); }
+function renderCareer() {
+  const d = Profile.data, p = Profile.levelProg();
+  $("careerName").innerHTML = (d.name ? `<b>${d.name.replace(/</g, "")}</b>` : "Recruit") + (Profile.hubReady ? "" : ' <span style="font-size:11px;color:#7f8896">· offline</span>');
+  $("careerBadges").innerHTML =
+    `<div class="cbadge lvl"><div class="k">Level</div><div class="v">${p.l}</div></div>` +
+    `<div class="cbadge rank"><div class="k">Rank</div><div class="v">${d.rankPoints ? Profile.rankName() + " " + Profile.rankTier() : "—"}</div></div>`;
+  $("xpFill").style.width = (p.pct * 100) + "%";
+  $("xpTxt").textContent = `${p.cur} / ${p.need} XP to level ${p.l + 1}`;
+  const wr = d.matches ? Math.round(d.wins / d.matches * 100) : 0;
+  $("careerStats").innerHTML =
+    `<div class="s"><div class="v">${d.wins}</div><div class="k">Wins</div></div>` +
+    `<div class="s"><div class="v">${d.losses}</div><div class="k">Losses</div></div>` +
+    `<div class="s"><div class="v">${d.kills}</div><div class="k">Kills</div></div>` +
+    `<div class="s"><div class="v">${wr}%</div><div class="k">Win Rate</div></div>`;
+  $("friendList").innerHTML = d.friends.length
+    ? d.friends.map(f => `<div class="fr">${(f.name || "?").replace(/</g, "")}<span class="lv">Lv ${f.level || 1}</span></div>`).join("")
+    : `<div style="font-size:12px;color:#7f8896">No friends yet — add someone by their callsign.</div>`;
+}
+
 function setupMenus() {
   ensureOnlineDom();
   ensureBattleDom();
@@ -2355,12 +2485,40 @@ function setupMenus() {
   renderName();
   const saveName = () => {
     const v = nameInp.value.replace(/[^\w .\-]/g, "").trim().slice(0, 14);
-    if (v) { localStorage.setItem("gga-name", v); renderName(); }
+    if (v) { localStorage.setItem("gga-name", v); renderName();
+      if (Profile.data) { Profile.data.name = v; Profile.save(); } }
     return v || defName;
   };
   // GUN GAME mode button (idempotent — survives cached shells)
   if (!$("ggBtn") && $("startBtn")) { const g = document.createElement("button"); g.id = "ggBtn"; g.className = "btn ghost"; $("startBtn").after(g); }
   if ($("ggBtn")) $("ggBtn").textContent = STR.online.gunGame;
+
+  // ---- persistent profile: level / rank chip, CAREER + RANKED, friends ----
+  Profile.load(); Profile.connect();
+  if (!$("profChip") && greet) { const c = document.createElement("div"); c.id = "profChip";
+    c.style.cssText = "margin:-8px 0 16px;font-size:12px;letter-spacing:.08em;color:#8fe3ff;cursor:pointer"; greet.after(c); }
+  if (!$("careerBtn") && $("ggBtn")) { const b = document.createElement("button"); b.id = "careerBtn"; b.className = "btn ghost"; $("ggBtn").after(b); }
+  if (!$("rankedBtn") && $("onlineBtn")) { const b = document.createElement("button"); b.id = "rankedBtn"; b.className = "btn ghost"; $("onlineBtn").after(b); }
+  const renderChip = () => { if (!$("profChip")) return; const p = Profile.levelProg();
+    $("profChip").innerHTML = `LVL ${p.l} · ${Profile.data.rankPoints ? Profile.rankName() + " " + Profile.rankTier() : "Unranked"} · <span style="color:#4ad7e8">CAREER ▸</span>`;
+    $("profChip").onclick = openCareer; };
+  const renderRanked = () => { if (!$("rankedBtn")) return; const ok = Profile.rankedUnlocked();
+    $("rankedBtn").innerHTML = ok ? STR.online.ranked : `${STR.online.ranked} <span class="lock">🔒 Lv20</span>`;
+    $("rankedBtn").disabled = !ok; $("rankedBtn").title = ok ? "" : STR.online.rankedLocked; };
+  renderChip(); renderRanked();
+  if ($("careerBtn")) { $("careerBtn").textContent = STR.online.career; $("careerBtn").onclick = openCareer; }
+  Profile.onProf = () => { renderChip(); renderRanked(); if ($("career") && !$("career").classList.contains("hidden")) renderCareer(); };
+  // career overlay controls
+  if ($("careerClose")) $("careerClose").onclick = () => $("career").classList.add("hidden");
+  if ($("friendBtn")) $("friendBtn").onclick = () => { const n = $("friendInp").value.trim(); if (n) { Profile.addFriend(n); $("friendMsg").textContent = "…"; } };
+  Profile.onFriend = m => {
+    if (m.ok) { if (!Profile.data.friends.some(f => f.id === m.friend.id)) { Profile.data.friends.push(m.friend); Profile.save(); }
+      $("friendMsg").style.color = "#49e07a"; $("friendMsg").textContent = STR.online.friendAdded.replace("{name}", m.friend.name); $("friendInp").value = ""; renderCareer(); }
+    else { $("friendMsg").style.color = "#ff6a6a"; $("friendMsg").textContent = m.err === "self" ? STR.online.friendSelf : STR.online.friendNotFound; }
+  };
+  Profile.onLb = top => { const el = $("lbList"); if (!el) return;
+    el.innerHTML = top.length ? top.map((e, i) => `<div class="lb"><span class="pos">${i + 1}</span>${(e.name || "?").replace(/</g, "")}<span class="rk">Lv ${e.level}${e.rankPoints ? " · " + e.rankPoints + "rp" : ""}</span></div>`).join("")
+      : `<div style="font-size:12px;color:#7f8896">Be the first — play an online match!</div>`; };
 
   const hasRoom = !!new URLSearchParams(location.search).get("room");
   $("onlineBtn").textContent = STR.online.play;                              // public match
@@ -2375,15 +2533,17 @@ function setupMenus() {
     setTimeout(() => $("rbCopy").textContent = STR.online.copy, 1200);
   };
 
-  const goOnline = isPublic => async () => {
+  const goOnline = (isPublic, ranked = false) => async () => {
     await AudioMan.init(); AudioMan.resume();
     NET.stop();
+    NET.ranked = ranked;
     NET.name = saveName();
     $("mStatus").textContent = STR.online.connecting;
     NET.tries = 0;
     NET.connect(isPublic);
   };
-  $("onlineBtn").onclick = goOnline(true);      // ONLINE → public shared match
+  if ($("rankedBtn") && Profile.rankedUnlocked()) $("rankedBtn").onclick = goOnline(true, true);   // RANKED → rank-affecting S&D
+  $("onlineBtn").onclick = goOnline(true);      // ONLINE → public shared match (unranked)
   $("friendsBtn").onclick = goOnline(false);    // PLAY WITH FRIENDS → private room + invite link
 
   const begin = (opts = {}) => async () => {

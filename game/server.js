@@ -49,6 +49,11 @@ export class GameServer extends DurableObject {
 
   onMessage(ws, conn, m) {
     if (m.t === "join") return this.onJoin(ws, conn, m);
+    // ---- persistent profile hub (clients hit the shared "_hub" room) ----
+    if (m.t === "pget")  return void this.hubGet(ws, m).catch(() => {});
+    if (m.t === "pput")  return void this.hubPut(ws, m).catch(() => {});
+    if (m.t === "fadd")  return void this.hubFriendAdd(ws, m).catch(() => {});
+    if (m.t === "lb")    return void this.hubLeaderboard(ws).catch(() => {});
     const p = conn.id && this.players.get(conn.id);
     if (!p || p.ws !== ws) return;
     switch (m.t) {
@@ -61,6 +66,55 @@ export class GameServer extends DurableObject {
       case "plant": return this.onPlant(p, m);
       case "defuse": return this.onDefuse(p);
     }
+  }
+
+  // ---- profile hub (persistent player accounts: level / xp / rank / friends) ----
+  // Storage keys: "p:<id>" -> profile · "name:<lower>" -> id · "lb" -> leaderboard[]
+  async hubGet(ws, m) {
+    const id = String(m.id || "").slice(0, 40);
+    if (!id) return;
+    const prof = await this.ctx.storage.get("p:" + id);
+    this.send(ws, { t: "prof", profile: prof || null });
+  }
+  async hubPut(ws, m) {
+    const pr = m.profile; if (!pr || !pr.id) return;
+    const clean = {
+      id: String(pr.id).slice(0, 40),
+      name: String(pr.name || "").replace(/[^\w .\-]/g, "").trim().slice(0, 14) || "Recruit",
+      level: Math.max(1, Math.min(999, pr.level | 0)),
+      xp: Math.max(0, Math.min(1e9, pr.xp | 0)),
+      rankPoints: Math.max(0, Math.min(1e6, pr.rankPoints | 0)),
+      wins: Math.max(0, pr.wins | 0), losses: Math.max(0, pr.losses | 0),
+      kills: Math.max(0, pr.kills | 0), matches: Math.max(0, pr.matches | 0),
+      friends: Array.isArray(pr.friends) ? pr.friends.slice(0, 100).map(f => ({ id: String(f.id).slice(0, 40), name: String(f.name || "").slice(0, 14) })) : [],
+      updatedAt: Date.now(),
+    };
+    await this.ctx.storage.put("p:" + clean.id, clean);
+    await this.ctx.storage.put("name:" + clean.name.toLowerCase(), clean.id);
+    await this.hubIndex(clean);
+    this.send(ws, { t: "profok", id: clean.id });
+  }
+  async hubFriendAdd(ws, m) {
+    const myId = String(m.id || "").slice(0, 40);
+    const wanted = String(m.name || "").replace(/[^\w .\-]/g, "").trim().slice(0, 14).toLowerCase();
+    if (!wanted) return this.send(ws, { t: "friendres", ok: false, err: "empty" });
+    const tid = await this.ctx.storage.get("name:" + wanted);
+    if (!tid) return this.send(ws, { t: "friendres", ok: false, err: "notfound" });
+    if (tid === myId) return this.send(ws, { t: "friendres", ok: false, err: "self" });
+    const tprof = await this.ctx.storage.get("p:" + tid);
+    this.send(ws, { t: "friendres", ok: true, friend: { id: tid, name: tprof?.name || m.name, level: tprof?.level || 1 } });
+  }
+  async hubIndex(pr) {                       // keep a small top-50 leaderboard by rankPoints then level
+    let lb = (await this.ctx.storage.get("lb")) || [];
+    lb = lb.filter(e => e.id !== pr.id);
+    lb.push({ id: pr.id, name: pr.name, level: pr.level, rankPoints: pr.rankPoints, wins: pr.wins });
+    lb.sort((a, b) => (b.rankPoints - a.rankPoints) || (b.level - a.level));
+    lb = lb.slice(0, 50);
+    await this.ctx.storage.put("lb", lb);
+  }
+  async hubLeaderboard(ws) {
+    const lb = (await this.ctx.storage.get("lb")) || [];
+    this.send(ws, { t: "lbres", top: lb.slice(0, 25) });
   }
 
   // ---- roster / teams ----
